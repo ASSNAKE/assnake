@@ -1,0 +1,190 @@
+#Exclude reads that mapped on multiple locations 'XA' and aligments with less than 95% ident and that are shorter than 150bp
+rule kumar_filter_sam:
+    input:
+        sam = 'data/mapped/bwa/assemb/{sample}-{method}_vs_{contig}-{method}-{tool}.sam'
+    output:
+        filtered_sam = 'data/snv/kumar/{contig}-{method}-{tool}/bwa_f/{sample}-{method}.sam'
+    params:
+        wd = 'data/snv/kumar/{contig}-{method}-{tool}/bwa_f/{sample}-{method}'
+    run:
+        shell('/home/fedorov/miniconda3/bin/python scripts/mgSNP_sam-filter.py -i {input.sam} -o {params.wd}filtered.sam -l 100 -m 93')
+        shell('grep -v "XA:" {params.wd}filtered.sam > {output.filtered_sam}')
+        shell('rm {params.wd}filtered.sam')
+
+#1p-2d   data/snv/kumar/DFM_002_F1_S9:TFM_001_F1-1_S1-nik-mh/gatk_st/TFM_001_F1-1_S1-nik-nik.realigned.bam
+# GATK best practices
+rule gatk_steps:
+    input:
+        sam = 'data/snv/kumar/{contig}-{method}-{tool}/bwa_f/{sample}-{method}.sam',
+        ref = 'data/ref/assemb/{contig}-{method}-{tool}.fa',
+        dictionary = 'data/ref/assemb/{contig}-{method}-{tool}.dict'
+    output:
+        realigned = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}.realigned.bam'
+    params:
+        tmp_dir = 'tmp/',
+        sorted_bam = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}sorted.bam',
+        dedup_bam = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}dedup.bam',
+        dedup_bai = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}dedup.bai',
+        metrics = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}dedup_metrics.txt',
+        intervals = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}int.intervals',
+        wd = 'data/snv/kumar/assemb/'
+    log: 'log/snv/kumar/gatk_st/{sample}-{method}_vs_{contig}-{method}-{tool}.log'
+    benchmark: 'time/snv/kumar/gatk_st/{sample}-{method}_vs_{contig}-{method}-{tool}.time.txt'
+    threads: 12
+    run:
+        #sort sam picard
+        shell('''echo -e "\n###########---STEP 1---###########" \n
+                echo -e "INFO: Sorting sam file and generating bam file" \n
+                {config[java.bin]} \
+                    -Xmx16g \
+                    -Djava.io.tmpdir={params.tmp_dir} \
+                    -jar {config[picard.jar]} SortSam \
+                        INPUT={input.sam} \
+                        OUTPUT={params.sorted_bam} \
+                        SORT_ORDER=coordinate \n
+                echo -e "\nINFO: Step Completed!"''')
+        #mark duplicates picard
+        shell('''echo -e "INFO: Marking duplicates using picard" \n
+                {config[java.bin]} \
+                    -Xmx16g \
+                    -Djava.io.tmpdir={params.tmp_dir} \
+                    -jar {config[picard.jar]} MarkDuplicates \
+                        VALIDATION_STRINGENCY=SILENT \
+                        CREATE_INDEX=True \
+                        TMP_DIR={params.tmp_dir} \
+                        INPUT={params.sorted_bam} \
+                        OUTPUT={params.dedup_bam} \
+                        METRICS_FILE={params.metrics} \
+                        MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000 \
+                        ASSUME_SORTED=True \n
+                echo -e "\nINFO: Step Completed!"''')
+        #index dedup picard
+        shell('''echo -e "INFO: Indexing bam file using picard" \n
+                {config[java.bin]} \
+                    -Xmx16g \
+                    -Djava.io.tmpdir={params.tmp_dir} \
+                    -jar {config[picard.jar]} BuildBamIndex \
+                        INPUT={params.dedup_bam} \n
+                echo -e "\nINFO: Step Completed!"''')
+        #generate targets for indel realigment GATK
+        shell('''echo -e "INFO: Generating targets for indel realignment" \n
+                {config[java.bin]} \
+                    -Xmx24g \
+                    -Djava.io.tmpdir={params.tmp_dir} \
+                    -jar {config[gatk.jar]} \
+                        -T RealignerTargetCreator \
+                        -nt {threads} \
+                        -R {input.ref} \
+                        -o {params.intervals} \
+                        -I {params.dedup_bam} \n
+                echo -e "\nINFO: Generating targets for indel realignment Completed!"''')
+        #indel realigment GATK
+        shell('''echo -e "INFO: Doing Indel realignment" \n
+                {config[java.bin]} \
+                    -Xmx8g \
+                    -Djava.io.tmpdir={params.tmp_dir} \
+                    -jar {config[gatk.jar]} \
+                        -T IndelRealigner \
+                        -R {input.ref} \
+                        -targetIntervals {params.intervals} \
+                        -I {params.dedup_bam} \
+                        -o {output.realigned} \n
+                 echo -e "\nINFO: Indel realignment Completed!"''')
+        shell('rm {params.sorted_bam} {params.dedup_bam} {params.dedup_bai} {params.metrics} {params.intervals}')
+
+
+        
+# Perform SNP calling
+rule snp:
+    input:
+        bam = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}.realigned.bam',
+        ref = 'data/ref/assemb/{contig}-{method}-{tool}.fa'
+    output:
+        snp = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_snp/{contig_name}/{sample}-{method}.g.vcf'
+    params:
+        line = '{contig_name}'
+    log:
+        'log/snv/kumar/gatk_snp/{contig_name}:{sample}.log'
+    run:
+        shell('''({config[java.bin]} \
+                    -Xmx10g \
+                    -jar {config[gatk.jar]} \
+                        -T HaplotypeCaller \
+                        -R {input.ref} \
+                        -L {params.line} \
+                        --sample_ploidy 1 \
+                        -I {input.bam} --emitRefConfidence BP_RESOLUTION \
+                        -o {output.snp} \
+                        ) >{log} 2>&1''')
+        shell('touch {output.snp}.idx')
+
+
+# //TODO sample:sample:sample... ? so during compare step we can know which 2 samples to take
+rule multi_snp:
+    input:
+        fold = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_snp/{contig_name}/',
+        ref = 'data/ref/assemb/{contig}-{method}-{tool}.fa'
+    output:
+        snp = 'data/snv/kumar/{contig}-{method}-{tool}/multi_snp/{contig_name}/{contig_name}.vcf'
+    params:
+        vcf_dir = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_snp/{contig_name}/',
+        vcf_list = 'data/snv/kumar/{contig}-{method}-{tool}/multi_snp/{contig_name}/allvcf.list'
+    log:
+        'log/kumar/snv/multi_snp/{contig_name}.log'
+    run:
+        shell('''ls {params.vcf_dir}*.g.vcf >> {params.vcf_list} \n
+                 ({config[java.bin]} \
+                    -Xmx30g \
+                    -jar {config[gatk.jar]} \
+                            -T GenotypeGVCFs \
+                            -R {input.ref} \
+                            --sample_ploidy 1 \
+                            --variant {params.vcf_list} \
+                            --includeNonVariantSites \
+                            -o {output.snp})  >{log} 2>&1 ''')
+
+              
+#############-------COMPARE-------#############
+rule compare:
+    input: 
+        multivcf = 'data/snv/kumar/{contig}-{method}-{tool}/multi_snp/{contig_name}/{contig_name}.vcf'
+    output: 
+        res = 'data/snv/kumar/{contig}-{method}-{tool}/compare/{contig_name}/{sample1}-vs-{sample2}.tsv'
+    params:
+        comp = 'data/snv/kumar/{contig}-{method}-{tool}/compare/{contig_name}/{sample1}-vs-{sample2}.win',
+        pair_vcf = 'data/snv/kumar/{contig}-{method}-{tool}/compare/{contig_name}/{sample1}-vs-{sample2}.vcf',
+        pair_ann = 'data/snv/kumar/{contig}-{method}-{tool}/compare/{contig_name}/{sample1}-vs-{sample2}.ann',
+        list_to_keep = 'data/snv/kumar/{contig}-{method}-{tool}/compare/{contig_name}/{sample1}-vs-{sample2}.list',
+        final = 'data/snv/kumar/{contig}-{method}-{tool}/final_comparison.tsv'
+    log:
+        'log/kumar/snv/{contig}-{method}-{tool}/compare/{contig_name}-{sample1}-vs-{sample2}.log'
+    run:
+        #provide sample_ids_to_keep file with two ids in two line
+        shell('printf "{wildcards.sample1}\n{wildcards.sample2}" > {params.list_to_keep}')
+        shell('vcftools --vcf {input.multivcf} --keep {params.list_to_keep} --remove-indels --recode -c > {params.pair_vcf}')
+        #used to annotate the genomic loci. The file is used for calclation in next step.
+        shell('python scripts/mgSNP_annotator.py -i {params.pair_vcf} -o {params.pair_ann}') 
+              # >{log} 2>&1'
+        #takes the annotated vcf file and calculate the WSS Score alognwith other information.
+        shell('''len=$(grep "ID={wildcards.contig_name}" {params.pair_vcf} | cut -d '=' -f 4 | tr -d '>') \n
+                 /home/fedorov/miniconda3/bin/python scripts/mgSNP_windowmaker.py -i {params.pair_ann} -o {params.comp} -w 40 -g $len -f {params.final} | tee {output.res}''')
+        
+        shell('rm {params.list_to_keep}')
+        
+rule coverage_kumar:
+    input:
+        bam = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}.realigned.bam',
+        ref = 'data/ref/assemb/{contig}-{method}-{tool}.fa'
+    output:
+        cov = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}.realigned.cov'
+    run:
+        shell('/srv/common/bin/genomeCoverageBed -bga -ibam {input.bam} > {output.cov}')
+        
+rule coverage_stats_kumar:
+    input:
+        bam = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}.realigned.bam',
+        ref = 'data/ref/assemb/{contig}-{method}-{tool}.fa'
+    output:
+        stats = 'data/snv/kumar/{contig}-{method}-{tool}/gatk_st/{sample}-{method}.realigned.bb_stats'
+    run:
+        shell('''/home/fedorov/tools/bbmap/pileup.sh ref={input.ref} in={input.bam} out={output.stats}''')

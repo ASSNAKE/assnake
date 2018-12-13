@@ -1,0 +1,38 @@
+PRODIGAL = config["prodigal"]
+HMMER = config["hmmer"]["folder"]
+PFAMDB = config["hmmer"]["pfam"]
+EVALUE_CUTOFF = "1e-10"
+
+rule prodigal_seq:
+    input: fa = "data/marker/{seq}.fa"
+    output: 
+        faa = "data/marker/{seq}.faa",
+        prod = "data/marker/{seq}.prod"
+    log: 'log/prodigal/{seq}.log'
+    run:
+        shell('''{PRODIGAL} -i {input.fa} -a {output.faa} -o {output.prod} -p meta > {log} 2>&1''')
+        
+rule hmmer_seq:
+    input: faa = "data/marker/{seq}.faa"
+    output: 
+        o = "data/marker/{seq}.hmm_o",
+        hmm = "data/marker/{seq}.hmm"
+    threads: 12
+    log: 'log/hmmer/{seq}.log'
+    run:
+        shell('''{HMMER}hmmscan -o {output.o} --tblout {output.hmm} --cpu {threads} -E {EVALUE_CUTOFF} {PFAMDB} {input.faa} > {log} 2>&1''')
+        
+        
+rule AMPHORA2:
+    input: fa = "data/marker/{seq}.fa"
+    output: 
+        done = "data/marker/AMPHORA/{seq}/amphora.done",
+        fa = 'data/marker/AMPHORA/{seq}/{seq}.fa'
+    params:
+        wd = 'data/marker/AMPHORA/{seq}/'
+    run:
+        shell('cp {input.fa} {output.fa}')
+        shell('''cd {params.wd} \n
+            perl /data5/bio/runs-fedorov/tools/AMPHORA2-master/Scripts/MarkerScanner.pl -DNA -Bacteria ./{wildcards.seq}.fa \
+        ''')
+        shell('touch {output.done}')
