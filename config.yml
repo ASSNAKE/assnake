@@ -1,6 +1,9 @@
 software:
     snakemake_folder: '/data6/bio/TFM/pipeline'
 
+java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
+
+
 bbmap.bin: '/home/fedorov/tools/bbmap/bbmap.sh'
 
 bowtie2.bin: /srv/common/bin/bowtie2
@@ -18,12 +21,47 @@ gatk.jar : '/data7a/bio/BacGenomeSoft/GenomeAnalysisTK.jar'
 
 picard.jar : '/data7a/bio/BacGenomeSoft/picard.jar'
 #java.bin : '/home/fedorov/tools/java/jre1.8.0_161/bin/java' 
-java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 
 centrifuge:
+    v1.0.4-beta: '/data6/bio/TFM/soft/bioinf/centrifuge-1.0.4-beta/'
     bin : '/data5/bio/runs-fedorov/tools/centrifuge/centrifuge/'
     index : '/data5/bio/runs-fedorov/tools/centrifuge/centrifuge-1.0.3-beta/p+h+v/p+h+v'
-    v1.0.4-beta: '/data6/bio/TFM/soft/bioinf/centrifuge-1.0.4-beta/'
+kraken:
+    v1.1: '/data6/bio/TFM/soft/bioinf/taxa/kraken-1.1/kraken'
+    db:
+        minikraken4GB: '/data6/bio/TFM/databases/kraken/minikraken_20171013_4GB'
+        FindFungi1: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_1'
+        FindFungi2: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_2'
+        FindFungi3: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_3'
+        FindFungi4: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_4'
+        FindFungi5: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_5'
+        FindFungi6: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_6'
+        FindFungi7: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_7'
+        FindFungi8: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_8'
+        FindFungi9: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_9'
+        FindFungi10: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_10'
+        FindFungi11: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_11'
+        FindFungi12: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_12'
+        FindFungi13: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_13'
+        FindFungi14: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_14'
+        FindFungi15: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_15'
+        FindFungi16: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_16'
+        FindFungi17: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_17'
+        FindFungi18: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_18'
+        FindFungi19: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_19'
+        FindFungi20: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_20'
+        FindFungi21: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_21'
+        FindFungi22: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_22'
+        FindFungi23: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_23'
+        FindFungi24: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_24'
+        FindFungi25: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_25'
+        FindFungi26: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_26'
+        FindFungi27: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_27'
+        FindFungi28: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_28'
+        FindFungi29: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_29'
+        FindFungi30: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_30'
+        FindFungi31: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_31'
+        FindFungi32: '/data5/bio/databases/FindFungi/Kraken_32DB/Kraken_32'
 
 kraken.bin: '/data7a/bio/runs-lutsenko/kraken/kraken'
 kraken.db.human: '/data7a/bio/BacGenomeSoft/tmp/metagenome/human_db'

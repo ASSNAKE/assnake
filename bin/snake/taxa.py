@@ -65,14 +65,23 @@ rule centr_krona:
         shell('tail -n +2 {input.classification} | cut -f 1,3 > {output.krona}')
         shell('''cd {params.wd} \n /data5/bio/runs-fedorov/tools/krona/bin/ktImportTaxonomy ./{wildcards.sample}_krona.tsv -o krona.html''')
         
-        
+
+
 rule kraken:
     input:
         r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
         r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz'
     output:
-        report = 'datasets/{df}/taxa/reads/{preproc}/kraken2_gg/{sample}/{sample}.tsv'
-    params: 
-        wd = 'datasets/{df}/taxa/reads/{preproc}/kraken2_gg/{sample}/'
-    run: 
-        shell ('''/data6/bio/BacGenomeSoft/kraken2/kraken2 -i1 {input.r1} -i2 {input.r2} -gg -o {params.wd}''')
+        report = 'datasets/{df}/taxa/reads/{preproc}/kraken-{version}-def/{db}/{sample}/report.tsv',
+        unclassified = 'datasets/{df}/taxa/reads/{preproc}/kraken-{version}-def/{db}/{sample}/unclassified.tsv',
+        classified = 'datasets/{df}/taxa/reads/{preproc}/kraken-{version}-def/{db}/{sample}/classified.tsv',
+    threads:  24
+    run:
+        DB = config['kraken']['db'][str(wildcards.db)]
+        KRAKEN = config["kraken"][str(wildcards.version)]
+        shell ('''{KRAKEN} --db {DB} --threads {threads} \
+         --quick --preload \
+         --output {output.report} \
+         --unclassified-out {output.unclassified} \
+         --classified-out {output.classified} \
+         --fastq-input --gzip-compressed {input.r1} {input.r2}''')

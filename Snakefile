@@ -36,3 +36,7 @@ include: snakefiles + "strain_finder.py"
 include: snakefiles + "download.py"
 
 
+rule all:
+    input: 'datasets/FHM/taxa/reads/imp/kraken-v1.1-def/minikraken4GB/D3T3_L1S1_B6_S106/report.tsv'
+
+
