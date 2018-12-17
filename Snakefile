@@ -34,9 +34,20 @@ include: snakefiles + "marker"
 include: snakefiles + "taxa.py"
 include: snakefiles + "strain_finder.py"
 include: snakefiles + "download.py"
+include: snakefiles + "find_fungi.py"
 
+
+
+#samples = [s.split('/')[-1] for s in glob('/data6/bio/TFM/pipeline/datasets/FHM/reads/imp__tmtic_def1/*')]
+#print(samples)
+
+samples = ['DFM_003_F1_S10']
 
 rule all:
-    input: 'datasets/FHM/taxa/reads/imp/kraken-v1.1-def/minikraken4GB/D3T3_L1S1_B6_S106/report.tsv'
+    input: expand('datasets/FHM/taxa/imp__tmtic_def1/FindFungi/{sample}/consensus.tsv', sample = samples)
+rule one:
+    input: 'datasets/FHM/taxa/imp__tmtic_def1/FindFungi/D3T3_L1S1_B6_S106/all_classified_sorted.tsv'
+rule all_wer:
+    input: 'datasets/Tutorial/taxa/imp/FindFungi/p136C/blast.done'
 
 

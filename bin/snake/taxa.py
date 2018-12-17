@@ -72,16 +72,16 @@ rule kraken:
         r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
         r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz'
     output:
-        report = 'datasets/{df}/taxa/reads/{preproc}/kraken-{version}-def/{db}/{sample}/report.tsv',
-        unclassified = 'datasets/{df}/taxa/reads/{preproc}/kraken-{version}-def/{db}/{sample}/unclassified.tsv',
-        classified = 'datasets/{df}/taxa/reads/{preproc}/kraken-{version}-def/{db}/{sample}/classified.tsv',
-    threads:  24
+        report = 'datasets/{df}/taxa/{preproc}/kraken-{version}-ff/{db}/{sample}/report.tsv', # ff param is for FinfFungi
+    params:
+        classified = 'datasets/{df}/taxa/{preproc}/kraken-{version}-ff/{db}/{sample}/classified.tsv',
+        unclassified = 'datasets/{df}/taxa/{preproc}/kraken-{version}-ff/{db}/{sample}/unclassified.tsv',
+    threads:  12
     run:
         DB = config['kraken']['db'][str(wildcards.db)]
         KRAKEN = config["kraken"][str(wildcards.version)]
         shell ('''{KRAKEN} --db {DB} --threads {threads} \
-         --quick --preload \
+         --preload \
          --output {output.report} \
-         --unclassified-out {output.unclassified} \
-         --classified-out {output.classified} \
+         --classified-out {params.classified} \
          --fastq-input --gzip-compressed {input.r1} {input.r2}''')

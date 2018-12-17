@@ -67,6 +67,11 @@ kraken.bin: '/data7a/bio/runs-lutsenko/kraken/kraken'
 kraken.db.human: '/data7a/bio/BacGenomeSoft/tmp/metagenome/human_db'
 kraken.db.gb: '/data5/bio/runs-jeniaole/kraken/kr.db'
 
+
+FindFungi:
+    v0.23.3:
+        consensus: '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/Kraken32-to-Consensus.py'
+        taxids: '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/Fungal-Taxids.txt'
 min_contig_size : 1000
 
 anvio.bin : '/data6/bio/TFM/soft/miniconda3/envs/anvio5/bin/'
