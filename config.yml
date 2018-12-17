@@ -77,15 +77,9 @@ min_contig_size : 1000
 anvio.bin : '/data6/bio/TFM/soft/miniconda3/envs/anvio5/bin/'
 cogs.dir : '/data5/bio/runs-fedorov/tools/anaconda3/envs/anvio4/cogs/'
 
-python.bin : '/home/fedorov/miniconda3/bin/python'
-
-samtools.bin: '/data5/bio/runs-fedorov/tools/anaconda3/envs/anvio4/bin/samtools'
 
 trimmomatic:
     bin: "/data6/bio/TFM/soft/Trimmomatic-0.36/trimmomatic-0.36.jar"
-    adapters: '/data5/bio/runs-fedorov/tools/Trimmomatic-0.36/adapters/TruSeq3-PE-2.fa'
-    params: "2:30:7:2 TRAILING:28 SLIDINGWINDOW:10:25 MAXINFO:90:0.3 AVGQUAL:25 MINLEN:65"
-    #params: "3:30:7:2 CROP:250 MAXINFO:160:0.3 MINLEN:50"
 
 fastqc.bin: '/data5/bio/runs-fedorov/tools/FastQC/fastqc'
 

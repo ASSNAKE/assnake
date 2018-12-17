@@ -1,0 +1,1 @@
+{"ILLUMINACLIP":{"fastaWithAdaptersEtc":"/data6/bio/TFM/pipeline/params/trimmomatic/adapters/TruSeq3-PE-2.fa","seedMismatches":2,"palindromeClipThreshold":3,"simpleClipThreshold":10},"SLIDINGWINDOW":{"windowSize":4,"requiredQuality":15},"MAXINFO":{},"LEADING":{"quality":25},"TRAILING":{"quality":25},"CROP":{},"HEADCROP":{},"MINLEN":{"length":50}}
