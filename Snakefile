@@ -41,13 +41,15 @@ include: snakefiles + "find_fungi.py"
 #samples = [s.split('/')[-1] for s in glob('/data6/bio/TFM/pipeline/datasets/FHM/reads/imp__tmtic_def1/*')]
 #print(samples)
 
-samples = ['DFM_003_F1_S10']
+samples = ['DFM_003_F1_S10', 'SFM-017-F1-1_S57', 'T22T5_L1S1_B6_S105']
 
 rule all:
-    input: expand('datasets/FHM/taxa/imp__tmtic_def1/FindFungi/{sample}/consensus.tsv', sample = samples)
+    input: expand('datasets/FHM/taxa/imp__tmtic_def1/FindFungi/{sample}/all_classified_sorted.tsv', sample = samples)
 rule one:
-    input: 'datasets/FHM/taxa/imp__tmtic_def1/FindFungi/D3T3_L1S1_B6_S106/all_classified_sorted.tsv'
+    input: 'datasets/FHM/taxa/imp__tmtic_def1/FindFungi/D3T3_L1S1_B6_S106/lca.csv'
 rule all_wer:
-    input: 'datasets/Tutorial/taxa/imp/FindFungi/p136C/blast.done'
+    input: 'datasets/Tutorial/taxa/imp/FindFungi/p136C/lca.csv'
 
+rule test:
+    input: 'datasets/Fungi/taxa/imp/FindFungi/ERR675624/lca.csv'
 

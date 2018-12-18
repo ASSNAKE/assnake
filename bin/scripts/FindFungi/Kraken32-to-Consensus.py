@@ -59,7 +59,8 @@ def find_consensus(next_n_lines, GuessList, ):
                     new_dict[taxid] = (int(kmer_number) + int(new_dict[taxid]))  # the value
                 else:  #
                     new_dict[taxid] = int(kmer_number)  #
-        if bool(new_dict) == False:  # If the dictionary is empty, don't do anything. This should never be the case
+        if bool(new_dict) == False:
+            print('this is the case')# If the dictionary is empty, don't do anything. This should never be the case
             pass
         else:
             TaxidPrediction = str(max(new_dict,

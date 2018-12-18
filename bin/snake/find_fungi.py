@@ -127,26 +127,58 @@ rule fungi_step2:
             fi \n
         done < {output.predictions}""")
 
+
+BLAST_DIR='/data5/bio/databases/FindFungi/FungalGenomeDatabases_EqualContigs/'
+skewness_calc = '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/Skewness-Calculator_V4.py'
 rule ff_single_blast:
     input:
         read_names = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/read_names.txt',
         reads_fasta_ref = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/unique_reads_reformatted.fa',
+        predictions =    'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/predictions.tsv',
     output:
         # blast = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/blast.tsv',
-        fasta = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/reads.fa'
-    run:
-        print('Gathering reads for taxid ' + wildcards.taxid)
-        shell('''awk -v reads="{input.read_names}" -F "\\t" 'BEGIN{{while((getline k < reads)>0)i[k]=1}}{{gsub("^>","",$0); if(i[$1]){{print ">"$1"\\n"$2}}}}' {input.reads_fasta_ref} > {output.fasta}''')
+        fasta = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/reads.fa',
+        blast = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/blast.tsv',
+        top_h = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/top_hits.txt',
+        hit_dist = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/hit_distribution.txt',
+        skewness = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/skewness.txt',
+    threads: 6
+    conda: "/data6/bio/TFM/pipeline/envs/FindFungi.yml"
+    shell: ('''awk -v reads="{input.read_names}" -F "\\t" 'BEGIN{{while((getline k < reads)>0)i[k]=1}}{{gsub("^>","",$0); if(i[$1]){{print ">"$1"\\n"$2}}}}' {input.reads_fasta_ref} > {output.fasta} \n 
+        blastn -task megablast -query {output.fasta} -db {BLAST_DIR}Taxid-{wildcards.taxid} -out {output.blast} -evalue 1E-20 -num_threads {threads} -outfmt 6 \n
+        awk '! a[$1]++' {output.blast} > {output.top_h} \n
+	    awk '{{print $2}}' {output.top_h} | sort | uniq -c > {output.hit_dist} \n
+	    python2.7 {skewness_calc} {output.hit_dist} {output.skewness} {wildcards.taxid}''')
+
 
 def get_taxids(wildcards):
     dir = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/*'
     dir = dir.format(df = wildcards.df, preproc=wildcards.preproc, sample=wildcards.sample)
-    taxids = [t+'/reads.fa' for t in glob(dir)]
+    taxids = [t+'/hit_distribution.txt' for t in glob(dir)]
     return taxids
 
+cons_cross_ref_skew_script = '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/Consensus-CrossRef-Skewness_V2.py'
+lowest_common_ancestor = '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/LowestCommonAncestor_V4.py'
 rule find_fungi_blastn:
-    input: get_taxids
-    output: 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/blast.done',
-    run:
-        for f in input:
-            print(f)
+    input:
+        taxid=get_taxids,
+        consensus = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/consensus.tsv',
+        all_class_sorted = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/all_classified_sorted.tsv'
+
+    output:
+        all_skew = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/all_skew.tsv',
+        final='datasets/{df}/taxa/{preproc}/FindFungi/{sample}/final.tsv',
+        final_all='datasets/{df}/taxa/{preproc}/FindFungi/{sample}/final.tsv_AllResults.tsv',
+        taxids='datasets/{df}/taxa/{preproc}/FindFungi/{sample}/final_taxids.txt',
+        taxids_clean='datasets/{df}/taxa/{preproc}/FindFungi/{sample}/final_taxids_clean.txt',
+        lca='datasets/{df}/taxa/{preproc}/FindFungi/{sample}/lca.csv',
+        lca_clean='datasets/{df}/taxa/{preproc}/FindFungi/{sample}/lca_clean.csv',
+
+    params: skewness_dir = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/*/skewness.txt'
+    conda: "/data6/bio/TFM/pipeline/envs/FindFungi.yml"
+    shell: ('''cat {params.skewness_dir} > {output.all_skew} \n
+        python2.7 {cons_cross_ref_skew_script} {input.consensus} {output.all_skew} {output.final} \n
+        awk '{{print $3}}' {output.final_all} | sort | uniq  > {output.taxids} \n
+        awk '{{print $3}}' {output.final} | sort | uniq  > {output.taxids_clean} \n
+        /data6/bio/TFM/soft/miniconda3/envs/bioinf_std/bin/python2.7 {lowest_common_ancestor} {output.final_all} {output.taxids} {output.lca} \n
+        /data6/bio/TFM/soft/miniconda3/envs/bioinf_std/bin/python2.7 {lowest_common_ancestor} {output.final} {output.taxids_clean} {output.lca_clean}''')

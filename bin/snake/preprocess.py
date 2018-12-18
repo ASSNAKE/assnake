@@ -8,9 +8,7 @@ JAVA = config['java.bin']
 FASTQC = config['fastqc.bin']
 
 TRIMMOMATIC = config['trimmomatic']['bin']
-ADAPTERS_FASTA = config['trimmomatic']['adapters']
-TRIMMOMATIC_PARAMS = config['trimmomatic']['params']
- 
+
 def multiple_exts(template, *extensions):
     def wrapped_input(wildcards):
         for ext in extensions:
