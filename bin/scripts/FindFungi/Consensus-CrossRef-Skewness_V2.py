@@ -30,10 +30,7 @@ OutputAll = open(str(sys.argv[3]) + "_AllResults.tsv", "w")
 SkewDict = dict()
 
 for line in Skewness:
-	print line
 	k,v = (line[0].strip()), (str(line[1]) + "___" + str(line[2]))
-	print k
-	print v
 	SkewDict[(k)] = (v)
 
 for prediction in Consensus:
@@ -48,8 +45,8 @@ for prediction in Consensus:
 		except:
 			continue
 		if (type(HitDist) == float):
-			if int(HitDist) > 70: #If more than 70% of pseudo-chromosomes have a hit:
-				if -0.6 < float(PearsonSkewness) < 0.6: #If the Skewness is between -0.6 and 0.6
+			if int(HitDist) > 65: #If more than 70% of pseudo-chromosomes have a hit:
+				if -0.9 < float(PearsonSkewness) < 0.9: #If the Skewness is between -0.6 and 0.6
 					Output.write("\t".join(prediction) + "\t" + str(PearsonSkewness) + "\t" + str(HitDist) + "\n")
 
 OutputAll.close()

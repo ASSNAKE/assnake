@@ -46,7 +46,7 @@ samples = ['DFM_003_F1_S10', 'SFM-017-F1-1_S57', 'T22T5_L1S1_B6_S105']
 rule all:
     input: expand('datasets/FHM/taxa/imp__tmtic_def1/FindFungi/{sample}/all_classified_sorted.tsv', sample = samples)
 rule one:
-    input: 'datasets/FHM/taxa/imp__tmtic_def1/FindFungi/D3T3_L1S1_B6_S106/lca.csv'
+    input: 'datasets/FHM/taxa/imp__tmtic_def1/FindFungi/DFM_003_F1_S10/lca.csv'
 rule all_wer:
     input: 'datasets/Tutorial/taxa/imp/FindFungi/p136C/lca.csv'
 

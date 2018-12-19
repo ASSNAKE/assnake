@@ -136,16 +136,15 @@ rule ff_single_blast:
         reads_fasta_ref = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/unique_reads_reformatted.fa',
         predictions =    'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/predictions.tsv',
     output:
-        # blast = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/blast.tsv',
-        fasta = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/reads.fa',
         blast = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/blast.tsv',
         top_h = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/top_hits.txt',
         hit_dist = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/hit_distribution.txt',
         skewness = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/skewness.txt',
     threads: 6
+    params: fasta = 'datasets/{df}/taxa/{preproc}/FindFungi/{sample}/processing/{taxid}/reads.fa',
     conda: "/data6/bio/TFM/pipeline/envs/FindFungi.yml"
-    shell: ('''awk -v reads="{input.read_names}" -F "\\t" 'BEGIN{{while((getline k < reads)>0)i[k]=1}}{{gsub("^>","",$0); if(i[$1]){{print ">"$1"\\n"$2}}}}' {input.reads_fasta_ref} > {output.fasta} \n 
-        blastn -task megablast -query {output.fasta} -db {BLAST_DIR}Taxid-{wildcards.taxid} -out {output.blast} -evalue 1E-20 -num_threads {threads} -outfmt 6 \n
+    shell: ('''awk -v reads="{input.read_names}" -F "\\t" 'BEGIN{{while((getline k < reads)>0)i[k]=1}}{{gsub("^>","",$0); if(i[$1]){{print ">"$1"\\n"$2}}}}' {input.reads_fasta_ref} > {params.fasta} \n 
+        blastn -task megablast -query {params.fasta} -db {BLAST_DIR}Taxid-{wildcards.taxid} -out {output.blast} -evalue 1E-20 -num_threads {threads} -outfmt 6 \n
         awk '! a[$1]++' {output.blast} > {output.top_h} \n
 	    awk '{{print $2}}' {output.top_h} | sort | uniq -c > {output.hit_dist} \n
 	    python2.7 {skewness_calc} {output.hit_dist} {output.skewness} {wildcards.taxid}''')

@@ -39,7 +39,7 @@ rule centrifuge_contigs:
         shell('''cd {params.wd} \n
              /data5/bio/runs-fedorov/tools/krona/bin/ktImportTaxonomy ./centr_krona.tsv -o krona_centr.html''')
         
-rule centrifuge_reads:
+rule centrifuge:
     input: 
         r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
         r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
@@ -64,7 +64,8 @@ rule centr_krona:
     run:
         shell('tail -n +2 {input.classification} | cut -f 1,3 > {output.krona}')
         shell('''cd {params.wd} \n /data5/bio/runs-fedorov/tools/krona/bin/ktImportTaxonomy ./{wildcards.sample}_krona.tsv -o krona.html''')
-        
+
+
 
 
 rule kraken:

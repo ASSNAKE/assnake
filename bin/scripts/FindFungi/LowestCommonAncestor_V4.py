@@ -37,8 +37,6 @@ TaxidPearsonDict = dict()
 for line in ResultsTuple:
     ResultTaxid = line[2]
     Pearson = line[5] + "___" + line[6]
-    print(Pearson)
-    print(ResultTaxid)
     ResultTaxids.append(ResultTaxid)
     if ResultTaxid in AllTaxidDict:
         OldValue = int(AllTaxidDict[ResultTaxid])

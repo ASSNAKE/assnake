@@ -93,7 +93,8 @@ with open(sys.argv[1]) as f:
                     next_read = ''
             current = next_line
             Output.write(find_consensus(next_n_lines, GuessList))
-
+        else:
+            break
 
     print "Done"
 

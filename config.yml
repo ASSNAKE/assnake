@@ -1,6 +1,8 @@
 software:
     snakemake_folder: '/data6/bio/TFM/pipeline'
 
+nucleotide_db_dir: '/data5/bio/databases/genome/nucleotide/'
+
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 
 
