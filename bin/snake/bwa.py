@@ -1,13 +1,17 @@
-#Creates contig index for bwa
+nucl_dir= config['na_db_dir']
+
+# {type}/{category}/{seq_object}/{seq_set_id}.fa
+# type = handplaced | imported | ??
+# category = anything
 rule create_seq_set_index_bwa:
     input:
-        ref = "data/ref/{type}/{contig}.fa"
+        ref = nucl_dir+'{type}/{category}/{seq_object}/{seq_set_id}.fa'
     output:
-        ref_fasta = 'data/ref/index/bwa/{type}/{contig}/index.sa'
+        ref_index = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index.sa'
     params:
-        prefix = 'data/ref/index/bwa/{type}/{contig}/index'
-    log: 'log/bwa/index/{type}/{contig}.log'
-    benchmark: 'time/bwa/index/{type}/{contig}.time.txt'
+        prefix = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index'
+    log: nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/log.txt'
+    benchmark: nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/time.txt'
     run:
         shell('echo -e "INFO: Creating BWA index for {input.ref}\n"')
         shell('{config[bwa.bin]} index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1')
@@ -100,21 +104,29 @@ def get_ref(wildcards):
         samples=samples [0:-1]
         
         return wc_str.format(tool_param=tool_param, dfs=dfs, preprocs=preprocs, samples=samples)
+    else:
+        wc_str = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index.sa'
+        return wc_str.format(type=wildcards.type,
+                             category=wildcards.category,
+                             seq_object=wildcards.seq_object,
+                             seq_set_id=wildcards.seq_set_id)
         
         
 rule map_on_ref_bwa:
     input:
-        reads = get_samples_for_bwa,
+        r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
+        r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
         ref_fasta = get_ref
         #'data/ref/index/bwa/{type}/{id_seq_set}/index.sa'
     output:
-        sam = 'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}/{id_seq_set}/mapped/{sample}.sam'
-    log:      'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}/{id_seq_set}/mapped/{sample}.log'
+        sam = 'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}__{category}__{seq_object}/{seq_set_id}/mapped/{sample}.sam'
+    log:      'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}__{category}__{seq_object}/{seq_set_id}/mapped/{sample}.log'
     #benchmark: 'datasets/{df}/mapped/{preproc}/bwa/{type}/{id_seq_set}/mapped/{sample}.time'
     threads: 6
     run:
         ind_prefix = input.ref_fasta[0:-3]
-        shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.reads} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
+        shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.r1} {input.r2} > {output.sam}) >{log} 2>&1')
+        # shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.reads} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
 
 rule leave_aligned_bwa:
     input: 

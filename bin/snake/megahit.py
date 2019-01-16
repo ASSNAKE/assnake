@@ -2,6 +2,11 @@ import shutil
 import os
 
 def megahit_input(wildcards):
+    """
+    Generates input files for megahit
+    :param wildcards:
+    :return:
+    """
     r_wc_str = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
     # Reconstruct dict
     dfs = wildcards.dfs.split('+')

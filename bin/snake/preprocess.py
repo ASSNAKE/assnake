@@ -91,7 +91,20 @@ rule tmtic:
          ''')
         if 'task_id' in config.keys():
             save_to_db(config['task_id'], 'tmtic', str(input), str(log), 'RUN SUCCESSFUL')
-        
+
+BBDUK = config['bbduk']
+rule bbduk_rm_aaa:
+    input:
+        f="datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz",
+        r="datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz",
+        rem = 'params/bbduk/aaaaa.fa'
+    output:
+        f="datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}_R1.fastq.gz",
+        r="datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}_R2.fastq.gz",
+        stats="datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/stats.txt",
+    log: "datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}.done"
+    shell: ("""{BBDUK} -Xmx1g in1={input.f} in2={input.r} out1={output.f} out2={output.r} ref={input.rem} k=31 hdist=1 stats={output.stats} >{log} 2>&1""")
+
 
 rule trim_to_len_r2_after_trimmomatic:
     input: 

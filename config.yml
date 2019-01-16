@@ -1,10 +1,11 @@
 software:
     snakemake_folder: '/data6/bio/TFM/pipeline'
 
-nucleotide_db_dir: '/data5/bio/databases/genome/nucleotide/'
+na_db_dir: '/data5/bio/databases/fna/'
 
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 
+bbduk: '/data6/bio/TFM/soft/bioinf/mapping/bbmap-38.34/bbduk.sh'
 
 bbmap.bin: '/home/fedorov/tools/bbmap/bbmap.sh'
 
@@ -94,3 +95,7 @@ hmmer:
 METAPHLAN2: '/data3/bio/biouser/tools/metaphlan2/metaphlan2.py'
 MPA_PKL: '/data3/bio/biouser/tools/metaphlan2/db_v20/mpa_v20_m200.pkl'
 BOWTIE2DB: '/data3/bio/biouser/tools/metaphlan2/db_v20/mpa_v20_m200'
+
+MetaPhlAn2:
+    mpa_v20_m200: '/data5/bio/databases/MetaPhlAn2/mpa_v20_m200/mpa_v20_m200.pkl'
+    BOWTIE2DB: '/data5/bio/databases/MetaPhlAn2/mpa_v20_m200'
