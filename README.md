@@ -23,6 +23,18 @@ Analysis of metagenomics data consists of 2 steps: quality control and preproces
     2. BWA
 * Assembly
     1. Megahit
+* Antibiotic resistance annotation.
+    1. Megares
+
+## Configuration
+
+You need to configure the following parameters in your `config.yml`
+
+```
+assembly_dir: 'absolute path to direcrory for storing assemblies'
+assnake_db: 'absolute path to directory for storing meta-information'
+fna_db_dir: 'absolute path to your fasta database'
+```
 
 ## How it works
 
