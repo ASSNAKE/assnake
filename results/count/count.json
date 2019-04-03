@@ -1,0 +1,20 @@
+{
+  "id": "efd390aa-d4d3-46e4-8fa0-d53d37c2a978",
+  "result_type": "0bc990f0-3fd2-4edc-9d9d-a67c3640d61a",  
+  "result_name": "Count number of reads and bps",
+  "short_name": "count",
+  "description": "Counts number of reads and base pairs in fastq file",  
+  "data_type": "mg",
+  "out_str_wc": "{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.count",
+  "json_in_to_loc_out_func": "simple",
+  "params_schema": "{}",
+  "tool": null,
+  "input_schema": {
+      "type": "object",
+      "properties": {
+          "MgSampleFile": {
+              "$ref": "./objects/MgSampleFile.json"
+          }
+      }
+  }
+}

@@ -66,13 +66,12 @@ rule tmtic:
     output:
         r1="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1.fastq.gz", 
         r2="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R2.fastq.gz", 
-        u="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_S.fastq.gz"
-        #                       raw__tmtic_def1__cutadpt
+        u ="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_S.fastq.gz"
     params:
         u1="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1_unpaired.fastq", 
         u2="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R2_unpaired.fastq",
     log: "datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}.done"
-    threads: 24
+    threads: 8
     run:
         param_str = tmtic_params(input.params)
         
@@ -129,7 +128,7 @@ rule fastqc:
         out="datasets/{df}/reads/{preproc}/{sample}/profile/",
         zip_out="datasets/{df}/reads/{preproc}/{sample}/profile/"
     log: "datasets/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.log"
-    threads: 6
+    threads: 8
     run:
         shell("{FASTQC} -t {threads} -o {params.out} {input} >{log} 2>&1")
         shell('unzip {output.zipped} -d {params.zip_out}')
@@ -137,9 +136,11 @@ rule fastqc:
 
 rule count:
     input: 
-        r1 = "datasets/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz",
+        r1 = "{fs_prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz",
     output: 
-        r1 = "datasets/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.count"
+        r1 = "{fs_prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.count"
+    wildcard_constraints:    
+        df="[\w\d_-]+"
     run:
         shell('''bin/scripts/count_bp.sh {input.r1} > {output.r1}''')
         #save_to_db(config['task_id'], rule, str(input), str(output.r1), 'RUN SUCCESSFUL')

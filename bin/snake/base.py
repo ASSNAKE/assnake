@@ -16,26 +16,39 @@ task_id=task_id, rule_name=rule_name, in_list=in_list, out_list=out_list, status
     
     conn = sqlite3.connect(db_loc)
     c = conn.cursor()
-    try:
-        c.execute(save_str)
-        conn.commit()
-    except:
-        print('error')
+    c.execute(save_str)
+    conn.commit()
     conn.close()
-
-configfile: 'config.yml'
     
-snakefiles = os.path.join(config["software"]["snakemake_folder"], "bin/snake/")
+
+from pathlib import Path
+
+mypath = Path(__file__).parent
+print(mypath)
+
+#configfile: '../../config.yml'
+    
+snakefiles = './'
+
+include: '../../results/metaphlan2/metaphlan2.py'
+include: '../../results/megahit/megahit.py'
+include: '../../results/megahit/megahit_cross.py'
+include: '../../results/bwa/bwa.py'
+
 include: snakefiles + "bowtie2.py"
+include: snakefiles + "megares.py"
+include: snakefiles + "humann2.py"
+
+include: snakefiles + "ariba.py"
 include: snakefiles + "anvio.py"
 include: snakefiles + "prokka.py"
-include: snakefiles + "bwa.py"
-include: snakefiles + "megahit.py"
+# include: snakefiles + "bwa.py"
+#include: snakefiles + "megahit.py"
 include: snakefiles + "general.py"
 include: snakefiles + "preprocess.py"
-include: snakefiles + "marker"
 include: snakefiles + "taxa.py"
 include: snakefiles + "strain_finder.py"
 include: snakefiles + "download.py"
-include: snakefiles + "test.py"
+include: snakefiles + "find_fungi.py"
+include: snakefiles + "subread.py"
     

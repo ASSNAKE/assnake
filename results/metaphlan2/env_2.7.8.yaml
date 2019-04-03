@@ -1,0 +1,8 @@
+name: MetaPhlAn2
+channels:
+  - ursky
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - metaphlan2=2.7.8

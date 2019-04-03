@@ -1,0 +1,4 @@
+name: "metaphlan2"
+description: Marker based metagenomic profiling
+authors:
+  - Dmitry Fedorov

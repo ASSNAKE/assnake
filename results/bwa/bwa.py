@@ -17,20 +17,7 @@ rule create_seq_set_index_bwa:
         shell('{config[bwa.bin]} index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1')
         shell('echo -e "INFO: Finished creating BWA index for {input.ref}\n"')
         
-rule create_assemb_index_bwa:
-    input:
-        ref = 'processing/assemb/mh__{params}/{dfs}/{preprocs}/{samples}/final.contigs.fa'
-    output:
-        ind = 'processing/assemb/mh__{params}/{dfs}/{preprocs}/{samples}/index/bwa/index.sa'
-    params:
-        prefix = 'processing/assemb/mh__{params}/{dfs}/{preprocs}/{samples}/index/bwa/index'
-    log: 'processing/assemb/mh__{params}/{dfs}/{preprocs}/{samples}/index/bwa/log.txt'
-    
-    #benchmark: 'time/bwa/index/{type}/{contig}.time.txt'
-    run:
-        shell('echo -e "INFO: Creating BWA index for {input.ref}\n"')
-        shell('{config[bwa.bin]} index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1')
-        shell('echo -e "INFO: Finished creating BWA index for {input.ref}\n"')
+
 
 def before(value, a):
     # Find first part and return slice before it.
@@ -78,8 +65,8 @@ def get_samples_for_bwa(wildcards):
 
 def get_ref(wildcards):
     wc_str = 'data/ref/index/bwa/{type}/{id_seq_set}/index.sa'
+    
     if wildcards.type == 'assembRaw':
-        dfs = ''
         preprocs = ''
         samples = ''
         wc_str = 'processing/assemb/{tool_param}/{dfs}/{preprocs}/{samples}/index/bwa/index.sa'
@@ -150,33 +137,32 @@ rule filter_mapping:
         
 
 #maps reads from sample on provided contig and adds read groups.        
+rule create_assemb_index_bwa:
+    input:
+        ref = '{prefix}/{df}/assemb/mh__{params}/{preprocs}/{samples}/final.contigs.fa'
+    output:
+        ind = '{prefix}/{df}/assemb/mh__{params}/{preprocs}/{samples}/index/bwa/index.sa'
+    params:
+        prefix = '{prefix}/{df}/assemb/mh__{params}/{preprocs}/{samples}/index/bwa/index'
+    log: '{prefix}/{df}/assemb/mh__{params}/{preprocs}/{samples}/index/bwa/log.txt'
+    run:
+        shell('echo -e "INFO: Creating BWA index for {input.ref}\n"')
+        shell('{config[bwa.bin]} index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1')
+        shell('echo -e "INFO: Finished creating BWA index for {input.ref}\n"')
+        
 rule map_on_contig_bwa:
     input:
-        reads1 = 'data/reads/{method}/{sample}_R1.trim.nohum.fastq.gz',
-        reads2 = 'data/reads/{method}/{sample}_R2.trim.nohum.fastq.gz',
-        ref_fasta = 'data/ref/index/bwa/assemb/{contig}-{method}-{tool}/index.sa'
+        r1 = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
+        r2 = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
+        ref_fasta = '{prefix}/{df}/assemb/mh__{params}/{preprocs}/{samples}/index/bwa/index.sa'
     output:
-        sam = 'data/mapped/bwa/assemb/{sample}-{method}_vs_{contig}-{method}-{tool}.sam'
-    params: 
-        ref_prefix = 'data/ref/index/bwa/assemb/{contig}-{method}-{tool}/index',
-        tmp_sam = 'data/mapped/bwa/assemb/{sample}-{method}_vs_{contig}-{method}-{tool}.tmp.sam'
-    log: 'log/bwa/map/{sample}-{method}_vs_{contig}-{method}-{tool}.log'
-    benchmark: 'time/bwa/map/{sample}-{method}_vs_{contig}-{method}-{tool}.time.txt'
-    threads: 20
+        sam = '{prefix}/{df}/mapped/{preproc}/bwa__{params}/assembRaw/{preprocs}__{samples}/mapped/{sample}.sam'
+    log:      '{prefix}/{df}/mapped/{preproc}/bwa__{params}/assembRaw/{preprocs}__{samples}/mapped/{sample}.log'
+
+    threads: 12
     run:
-        shell('({config[bwa.bin]} mem -M -t {threads} {params.ref_prefix} {input.reads1} {input.reads2} > {params.tmp_sam}) >{log} 2>&1')
-        shell('''echo -e "INFO: Adding read groups to SAM file: " \n
-               {config[java.bin]} \
-                   -jar {config[picard.jar]} AddOrReplaceReadGroups \
-                      I={params.tmp_sam} \
-                      O={output.sam} \
-                      RGID=R_{wildcards.sample} \
-                      RGLB=lib1 \
-                      RGPL=illumina \
-                      RGPU=unit1 \
-                      RGSM={wildcards.sample} \n
-                      echo -e "\nINFO: Read groups added."''')
-        shell('rm {params.tmp_sam}')
+        ind_prefix = input.ref_fasta[0:-3]
+        shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.r1} {input.r2} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
         
 rule compare_contigs:
     input: 

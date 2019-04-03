@@ -6,22 +6,6 @@ BOWTIE2 = config['bowtie2.bin']
 CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
 CENTRIFUGE_INDEX = config["centrifuge"]["index"]
 
-rule metaphlan2:
-    input: 
-        r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
-        r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
-        # params = "params/mp2/{params}.json"
-    output: 
-        o = 'datasets/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.mp2'
-    params:
-        b =  'datasets/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.b2'
-    threads: 24
-    log: 'datasets/{df}/taxa/{preproc}/mp2__def/{sample}/log.txt'
-    benchmark: 'datasets/{df}/taxa/{preproc}/mp2__def/{sample}/time.txt'
-    conda: "/data6/bio/TFM/pipeline/envs/MetaPhlAn2.yml"
-    shell: ('''metaphlan2.py --mpa_pkl {MPA_PKL} --bowtie2db {BOWTIE2DB} {input.r1},{input.r2} --nproc {threads} --input_type fastq --bowtie2out {params.b}  > {output.o}''')
-        # if 'task_id' in config.keys():
-        #     save_to_db(config['task_id'], 'mp2', str(input), str(output.o), 'RUN SUCCESSFUL')
                
 rule centrifuge_contigs:
     input: 

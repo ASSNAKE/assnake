@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "title": "MgSampleFileContainer",
+  "required": [
+    "prefix",  
+    "df",
+    "preproc",
+    "sample"
+  ],
+  "properties": {
+    "prefix": {
+      "type": "string",
+      "title": "Fs Prefix",
+      "default": ""
+    },  
+    "df": {
+      "type": "string",
+      "title": "Dataset",
+      "default": ""
+    },
+    "sample": {
+      "type": "string",
+      "title": "Sample name (on fs?)",
+      "default": "",
+      "shit": "is tasty"
+    },
+    "preproc": {
+      "type": "string",
+      "title": "Preprocessing",
+      "default": ""
+    }
+  }
+}
