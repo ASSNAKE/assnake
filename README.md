@@ -94,12 +94,32 @@ Meta-information is stored inside `assnake_db` directory of your choice. The str
 
 
 ### Reference data
-Reference data is stored inside the `database` directory. It includes various databases and fasta files. Fasta files are stored in `fna_db_dir` and inside that folder you can nest folders as deep as you like. For example: `handplaced/RNAbacteriophages/Escherichia_virus_Qbeta/Escherichia_virus_Qbeta_genomic.fa` When asking for output mapped file just replace `/` with `__` in path. 
+Reference data is stored inside the `database` directory. It includes various databases for tools and fasta files. Fasta files are stored in `fna_db_dir` and inside that folder you can nest folders as deep as you like. For example: `handplaced/RNAbacteriophages/Escherichia_virus_Qbeta/Escherichia_virus_Qbeta_genomic.fa` When asking for output mapped file just replace `/` with `__` in path. 
+
+### What can be done with Assnake
+
+#### Prepocessing
+
+* Trimmomatic
+    * Resulting file to request: `{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1.fastq.gz`
+* FastQC
+    * Resulting file to request: `{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}_fastqc.zip`
+* BBmap repair
+    * Resulting file to request: `{prefix}/{df}/reads/{preproc}__repair/{sample}/{sample}/_R1.fastq.gz`
+
+#### Taxonomic profiling
+
 
 ### Assembly
-You need to configure `assembly_dir`where assembles will be stored. Final contigs will be stored in `fna_db_dir`.
+You need to configure `assembly_dir` where assembles will be stored. Final contigs will be stored in `fna_db_dir`.
+
+File to request: `{fna_db_dir}/assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa`
+
+dfs are separated by `+`, preprocs by `--` and samples by `:`.
 
 ## Implementing new processing step.
-In order to implement new processing step you need to create directory `./results/<result_name>`.
+In order to implement new processing step you need to create directory `./results/<result_name>`. Take any of the files Asshole can generate right now, or write your own rules.
+
 Than you have a couple of options:
-1. The easy way. Just create a file `./results/<result_name>/<result_name>.py` and code your snakemake rule there. Than include this file into `./bin/snake/base.py` 
+
+1. The easy way. Just create a file `./results/<result_name>/<result_name>.py` and code your snakemake rule there. Than include this file into `./bin/snake/base.py`. 

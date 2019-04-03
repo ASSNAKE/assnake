@@ -94,14 +94,14 @@ rule tmtic:
 BBDUK = config['bbduk']
 rule bbduk_rm_aaa:
     input:
-        f="datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz",
-        r="datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz",
+        f="{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz",
+        r="{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz",
         rem = 'params/bbduk/aaaaa.fa'
     output:
-        f="datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}_R1.fastq.gz",
-        r="datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}_R2.fastq.gz",
-        stats="datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/stats.txt",
-    log: "datasets/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}.done"
+        f="{prefix}/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}_R1.fastq.gz",
+        r="{prefix}/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}_R2.fastq.gz",
+        stats="{prefix}/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/stats.txt",
+    log: "{prefix}/{df}/reads/{preproc}__bbduk_rmaaa/{sample}/{sample}.done"
     shell: ("""{BBDUK} -Xmx1g in1={input.f} in2={input.r} out1={output.f} out2={output.r} ref={input.rem} k=31 hdist=1 stats={output.stats} >{log} 2>&1""")
 
 
@@ -121,13 +121,13 @@ rule trim_to_len_r2_after_trimmomatic:
         shell('''{config[python.bin]} bin/scripts/len_trimmer.py --input {input.r2} --out {output.r2} --len 99''')
         
 rule fastqc:
-    input: "datasets/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz"
+    input: "{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz"
     output: 
-        zipped="datasets/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}_fastqc.zip"
+        zipped="{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}_fastqc.zip"
     params: 
-        out="datasets/{df}/reads/{preproc}/{sample}/profile/",
-        zip_out="datasets/{df}/reads/{preproc}/{sample}/profile/"
-    log: "datasets/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.log"
+        out="{prefix}/{df}/reads/{preproc}/{sample}/profile/",
+        zip_out="{prefix}/{df}/reads/{preproc}/{sample}/profile/"
+    log: "{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.log"
     threads: 8
     run:
         shell("{FASTQC} -t {threads} -o {params.out} {input} >{log} 2>&1")
@@ -216,15 +216,15 @@ rule fastq_pair:
         '''/data6/bio/TFM/soft/fastq-pair/fastq_pair in1={input.r1} in2={input.r2} out1={output.r1} out2={output.r2} outsingle={output.s} >{log} 2>&1'''
     
         
-rule repair_fastq:
+rule bbmap_repair:
     input: 
-        r1 = "datasets/{df}/reads/{preproc}/{sample}_R1.fastq.gz",
-        r2 = "datasets/{df}/reads/{preproc}/{sample}_R2.fastq.gz"
+        r1 = "{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz",
+        r2 = "{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz"
     output: 
-        r1 = "datasets/{df}/reads/{preproc}__repair/{sample}_R1.fastq.gz",
-        r2 = "datasets/{df}/reads/{preproc}__repair/{sample}_R2.fastq.gz",
-        s =  "datasets/{df}/reads/{preproc}__repair/{sample}_S.fastq.gz"
-    log: "datasets/{df}/reads/{preproc}__repair/{sample}.log"
+        r1 = "{prefix}/{df}/reads/{preproc}__repair/{sample}/{sample}_R1.fastq.gz",
+        r2 = "{prefix}/{df}/reads/{preproc}__repair/{sample}/{sample}_R2.fastq.gz",
+        s =  "{prefix}/{df}/reads/{preproc}__repair/{sample}/{sample}_S.fastq.gz"
+    log: "{prefix}/{df}/reads/{preproc}__repair/{sample}/{sample}.log"
     shell:
         '''/data6/bio/TFM/soft/bbmap/repair.sh -Xmx16g in1={input.r1} in2={input.r2} out1={output.r1} out2={output.r2} outsingle={output.s} >{log} 2>&1'''
 
