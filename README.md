@@ -24,10 +24,51 @@ Analysis of metagenomics data consists of 2 steps: quality control and preproces
 * Assembly
     1. Megahit
 
-## Architecture.
-Assnake assumes that you work with *datasets*, and inside each *dataset* you have multiple *samples*. All *dataset* names inside of assnake instance **must** be unique. All *sample* names inside one *dataset* **must** be unique.
+## How it works
 
-Meta-information is stored inside `database` directory of your choice. The structure of this folder is as follows:
+Assnake assumes that you work with *datasets*, and inside each *dataset* you have multiple *samples*.
+
+The pipeline itself is built using Snakemake. You define rules, which take files as input an produce output files, executing some code. This easy yet powerful technique allows you to build complex data processing pipelines. Snakemake understands what to do by looking at input/output file paths. 
+
+Consider the following: you have your samples, and you want to assemble them and map on resulting contigs. Your rules will look like this (note that we ask for contigs in mapping rule, and input file for mapping rule is the output file for assembly rule, that's the magic):
+```
+rule assemble:
+    input: 
+        r1 = '{sample}_R1.fastq.gz',
+        r2 = '{sample}_R2.fastq.gz'
+    output:
+        contigs = '{sample}_assembly.fasta'
+    run:
+        shell('megahit -1 {input.r1} -2 {input.r2} -o {output.contigs}')
+
+rule map_on_contigs:
+    input: 
+        r1 = '{sample}_R1.fastq.gz',
+        r2 = '{sample}_R2.fastq.gz',
+        contigs = {assembled_sample}_assembly.fasta
+    output:
+        sam = '{sample}_vs_{assembled_sample}_assembly.sam'
+    run:
+        shell('bwa {input.r1} {input.r2} > {output.sam')
+
+samples = ['A', 'B', 'C']
+rule assemble_and_map:
+    input: 'A_vs_A_assembly.sam'
+```
+
+What we have in curly braces is called *wildcards*. *wildcards* take some user defined value, and that's how Snakemake knows exactly what to do. In the example above rule `map_on_contigs` we have wildcards `sample` and `assembled_sample`. We can give `sample` value `A` and `assembled_sample` value `B`, thus telling snakemake to assemble `B` and map `A` on resulting contg. *Wildcards* are the central part of Assnake, and understanding them is vital.
+
+## Data structure
+
+Metagenomic data is stored in `{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz`. Let's break down the wildcards:
+
+* `prefix` - denotes absolute directory where your dataset is stored. Usage of prefix allows you to store data on different disks, or structure your data by host species, and generally provides more flexibility.
+* `df` - name of your dataset.
+* `preproc` - is short for *preprocessing* and carries information about how you preprocessed your data. You can cascade preprocessing steps using `__` as a delimeter. For example, `raw__tmtic_def1__no_hum` means that you processed yor raw data with trimmomatic usind default1 parameters and than removed human DNA contamination.
+* `sample` - name of your sample.
+* `strand` - strand of your sequences. Assnake works only with paired-end sequences at the moment.
+
+Meta-information is stored inside `assnake_db` directory of your choice. The structure of this folder is as follows:
 
 ```
 |-- <df_name_1>
@@ -43,11 +84,14 @@ Meta-information is stored inside `database` directory of your choice. The struc
 ...
 ```
 
-`df_info.yaml` holds meta-info about dataset. Mandatory fields are:
-1. df - name of the dataset. Must be the same as dataset dir name.
-2. fs_prefix - prefix of the dataset location on the file system.
+* `df_info.yaml` holds meta-info about dataset. Mandatory fields are:
+    * df - name of the dataset. Must be the same as dataset dir name.
+    * fs_prefix - absolute path of the directory, where dataset is stored.
+* `sources.tsv`
+* `biospecimens.tsv`
+* `mg_samples.tsv`
 
-Metagenomics data is stored in `{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz`. Usage of prefix allows you to store data on different disks, or structure your data by host species, and generally provides more flexibility. `preproc` is short for *preprocessing* and carries information about how you, well, *preprocessed* your data :). You can cascade preprocessing steps using `__` as a delimeter. 
+
 
 ### Reference data
 Reference data is stored inside the `database` directory. It includes various databases and fasta files. Fasta files are stored in `fna_db_dir` and inside that folder you can nest folders as deep as you like. For example: `handplaced/RNAbacteriophages/Escherichia_virus_Qbeta/Escherichia_virus_Qbeta_genomic.fa` When asking for output mapped file just replace `/` with `__` in path. 
