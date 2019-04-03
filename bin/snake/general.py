@@ -12,7 +12,7 @@ rule init_bam_mapped:
         shell('{config[samtools.bin]} index {output.bam}')
         shell('rm {params.tmp}')
 
-nucl_dir= config['na_db_dir']
+nucl_dir= config['fna_db_dir']
 rule coverage:
     input:
         bam = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}/{id_seq_set}/{what}/{id_sample}.bam',

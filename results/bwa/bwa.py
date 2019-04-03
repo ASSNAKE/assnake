@@ -1,4 +1,4 @@
-nucl_dir= config['na_db_dir']
+nucl_dir= config['fna_db_dir']
 
 # {type}/{category}/{seq_object}/{seq_set_id}.fa
 # type = handplaced | imported | ??

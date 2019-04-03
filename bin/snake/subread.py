@@ -1,5 +1,5 @@
 FEATURE_COUNTS_BIN='/data6/bio/TFM/soft/bioinf/subread-1.6.3-source/bin/featureCounts'
-nucl_dir= config['na_db_dir']
+nucl_dir= config['fna_db_dir']
 rule feature_counts:
     input: gff = nucl_dir+'{type}/{category}/{seq_object}/{seq_set_id}.gff',
            sam = 'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}__{category}__{seq_object}/{seq_set_id}/mapped/{sample}.sam'

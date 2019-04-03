@@ -1,6 +1,6 @@
 assembly_dir: '/data6/bio/TFM/assembly'
 assnake_db: '/data5/bio/databases/assnake'
-na_db_dir: '/data5/bio/databases/fna/'
+fna_db_dir: '/data5/bio/databases/fna/'
 
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 

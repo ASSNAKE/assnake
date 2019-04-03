@@ -3,11 +3,17 @@ import os
 
 assembly_dir = config['assembly_dir']
 assnake_db = config['assnake_db']
+fna_db_dir = config['fna_db_dir']
 
 
 def megahit_input(wildcards):
     """
-    Generates input files for megahit
+    Parses output file and determines which fastq files to take. 
+
+    Example output file: 
+    ./assembly/mh__def/mg_test+FHM/p136C:p136N+DFM_002_F1_S9--TFM_001_F1-2_S2:TFM_003_F1-3_S7/raw+imp--imp__tmtic_def1/final_contigs.fa
+
+    Datasets are delimeted with `+`, preprocessings with `--` and samples with `:`
     :param wildcards:
     :return:
     """
@@ -23,8 +29,8 @@ def megahit_input(wildcards):
     rr2 = []
     for i, df in enumerate(dfs):
         rrr.append({df:[]})
-        pr = preprocs_by_df[i].split('=')
-        samps_by_df_preproc = samples_by_df[i].split('=')
+        pr = preprocs_by_df[i].split('--')
+        samps_by_df_preproc = samples_by_df[i].split('--')
         for j, p in enumerate(pr):
             rrr[i][df].append({p:[]})
             samps = samps_by_df_preproc[j].split(':')
@@ -49,11 +55,11 @@ rule run_megahit_cross:
     input: 
         unpack(megahit_input)
     output: 
-        out_fa = assembly_dir+'/mh__{params}/{dfs}/{preprocs}/{samples}/final_contigs.fa'
+        out_fa = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
     params:
-        out_folder = assembly_dir+'/mh__{params}/{dfs}/{preprocs}/{samples}/assemb/'
+        out_folder = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/assemb/'
     threads: 12
-    log: assembly_dir+'/mh__{params}/{dfs}/{preprocs}/{samples}/log.txt'
+    log: assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/log.txt'
     run:
         reads1 = ",".join(input.F)
         reads2 = ",".join(input.R)
@@ -67,16 +73,16 @@ rule run_megahit_cross:
 
 rule refine_assemb_results_cross:
     input: 
-        ref = 'datasets/{df}/assemb/{preproc}/mh/{sample}/final.contigs.fa'
+        ref = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
     output: 
-        fa =         'data/ref/assemb-{df}-{preproc}-{tool}/{sample}.fa',
-        fai =        'data/ref/assemb-{df}-{preproc}-{tool}/{sample}.fa.fai',
-        dictionary = 'data/ref/assemb-{df}-{preproc}-{tool}/{sample}.dict'
+        fa =         os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa'),
+        fai =        os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa.fai'),
+        dictionary = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa.dict')
     log: 
-        names = "datasets/{df}/assemb/{preproc}/{tool}/{sample}/name_conversions.txt",
-        ll = 'datasets/{df}/assemb/{preproc}/{tool}/{sample}/reformat_fasta.log'
+        names = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/name_conversions__{min_len}.txt'),
+        ll    = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/reformat_fasta__{min_len}.log')
     run:
-        shell('echo -e "INFO: Filtering contigs < {config[min_contig_size]}bp and simplifying names"')
+        shell('echo -e "INFO: Filtering contigs < {wildcards.min_len}bp and simplifying names"')
         shell("{config[anvi.bin]}anvi-script-reformat-fasta {input.ref} -o {output.fa} --min-len {config[min_contig_size]} --simplify-names --report {log.names} > {log.ll} 2>&1")
         shell('echo -e "INFO: Done filtering contigs < {config[min_contig_size]} and simplifying names!"')
         shell('''echo -e "INFO: Creating fai and dict files for reference" \n
