@@ -25,21 +25,7 @@ rule centrifuge_contigs:
         shell('''cd {params.wd} \n
              /data5/bio/runs-fedorov/tools/krona/bin/ktImportTaxonomy ./centr_krona.tsv -o krona_centr.html''')
         
-rule centrifuge:
-    input: 
-        r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
-        r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
-        params = "params/centr/{params}.json"
-    output:
-        report =         'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_report.tsv',
-        classification = 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_classification.tsv',
-        krak =           'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv', 
-    threads:  6
-    log: 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/log.txt'
-    benchmark: 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/time.txt'
-    run:
-        shell('{CENTRIFUGE_FOLDER}centrifuge -k 1 --mm --min-hitlen 22 -f -x {CENTRIFUGE_INDEX} -1 {input.r1} -2 {input.r2} -p {threads} -S {output.classification} --report-file {output.report} -q >{log} 2>&1')
-        shell('{CENTRIFUGE_FOLDER}centrifuge-kreport -x {CENTRIFUGE_INDEX} {output.classification} > {output.krak}')
+
         
         
         

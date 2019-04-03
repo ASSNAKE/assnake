@@ -27,6 +27,7 @@ results = '../../results/'
 include: results + 'metaphlan2/metaphlan2.py'
 include: results + 'megahit/megahit_cross.py'
 include: results + 'bwa/bwa.py'
+include: results + 'centrifuge/centrifuge.py'
 
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
