@@ -50,7 +50,7 @@ Meta-information is stored inside `database` directory of your choice. The struc
 Metagenomics data is stored in `{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz`. Usage of prefix allows you to store data on different disks, or structure your data by host species, and generally provides more flexibility. `preproc` is short for *preprocessing* and carries information about how you, well, *preprocessed* your data :). You can cascade preprocessing steps using `__` as a delimeter. 
 
 ### Reference data
-Reference data is stored inside the `database` directory. It includes various databases and fasta files. Fasta files are stored in `fna_db_dir` and inside that folder you can nest folders as deep as you like. For example: `handplaced/RNAbacteriophages/Escherichia_virus_Qbeta/Escherichia_virus_Qbeta_genomic.fa`
+Reference data is stored inside the `database` directory. It includes various databases and fasta files. Fasta files are stored in `fna_db_dir` and inside that folder you can nest folders as deep as you like. For example: `handplaced/RNAbacteriophages/Escherichia_virus_Qbeta/Escherichia_virus_Qbeta_genomic.fa` When asking for output mapped file just replace `/` with `__` in path. 
 
 ### Assembly
 You need to configure `assembly_dir`where assembles will be stored. Final contigs will be stored in `fna_db_dir`.

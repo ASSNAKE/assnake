@@ -1,5 +1,3 @@
-
-
 rule tmtic:
     input:
         first="{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq",

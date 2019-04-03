@@ -58,7 +58,7 @@ rule run_megahit_cross:
         out_fa = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
     params:
         out_folder = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/assemb/'
-    threads: 12
+    threads: 28
     log: assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/log.txt'
     run:
         reads1 = ",".join(input.F)
@@ -83,8 +83,8 @@ rule refine_assemb_results_cross:
         ll    = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/reformat_fasta__{min_len}.log')
     run:
         shell('echo -e "INFO: Filtering contigs < {wildcards.min_len}bp and simplifying names"')
-        shell("{config[anvi.bin]}anvi-script-reformat-fasta {input.ref} -o {output.fa} --min-len {config[min_contig_size]} --simplify-names --report {log.names} > {log.ll} 2>&1")
-        shell('echo -e "INFO: Done filtering contigs < {config[min_contig_size]} and simplifying names!"')
+        shell("{config[anvio.bin]}anvi-script-reformat-fasta {input.ref} -o {output.fa} --min-len {wildcards.min_len} --simplify-names --report {log.names} > {log.ll} 2>&1")
+        shell('echo -e "INFO: Done filtering contigs < {wildcards.min_len} and simplifying names!"')
         shell('''echo -e "INFO: Creating fai and dict files for reference" \n
                 {config[samtools.bin]} faidx {output.fa} \n
                 {config[java.bin]} \

@@ -20,20 +20,13 @@ task_id=task_id, rule_name=rule_name, in_list=in_list, out_list=out_list, status
     conn.commit()
     conn.close()
     
-
-from pathlib import Path
-
-mypath = Path(__file__).parent
-print(mypath)
-
-#configfile: '../../config.yml'
     
 snakefiles = './'
+results = '../../results/'
 
-include: '../../results/metaphlan2/metaphlan2.py'
-include: '../../results/megahit/megahit.py'
-include: '../../results/megahit/megahit_cross.py'
-include: '../../results/bwa/bwa.py'
+include: results + 'metaphlan2/metaphlan2.py'
+include: results + 'megahit/megahit_cross.py'
+include: results + 'bwa/bwa.py'
 
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
@@ -42,8 +35,7 @@ include: snakefiles + "humann2.py"
 include: snakefiles + "ariba.py"
 include: snakefiles + "anvio.py"
 include: snakefiles + "prokka.py"
-# include: snakefiles + "bwa.py"
-#include: snakefiles + "megahit.py"
+
 include: snakefiles + "general.py"
 include: snakefiles + "preprocess.py"
 include: snakefiles + "taxa.py"

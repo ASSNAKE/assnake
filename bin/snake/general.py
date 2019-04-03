@@ -1,10 +1,10 @@
 rule init_bam_mapped:
     input:
-        sam = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}__{category}__{seq_object}/{id_seq_set}/{what}/{id_sample}.sam'
+        sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
     output:
-        bam = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}__{category}__{seq_object}/{id_seq_set}/{what}/{id_sample}.bam'
+        bam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.bam'
     params:
-        tmp = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}__{category}__{seq_object}/{id_seq_set}/{what}/{id_sample}.tmp.bam'
+        tmp = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.tmp.bam'
     run: 
         shell('echo "{input.sam}"')   
         shell('{config[samtools.bin]} view -bS {input.sam} -o {params.tmp}')
@@ -33,14 +33,3 @@ rule coverage_stats:
         shell('''{config[java.bin]} -ea -Xmx35000m -cp /data6/bio/TFM/soft/bbmap/current/ jgi.CoveragePileup ref={input.ref} in={input.bam} out={output.stats} >{log} 2>&1 \n
         cat {log}''')
              
-rule init_bam:
-    input:
-        sam = 'data/mapped/bwa/assemb/{sample}-{method}_vs_{contig}-{method}-{tool}.sam'
-    output:
-        bam = 'data/mapped/bwa/assemb/{sample}-{method}_vs_{contig}-{method}-{tool}.bam'
-    params:
-        tmp = 'data/mapped/bwa/assemb/{sample}-{method}_vs_{contig}-{method}-{tool}.tmp.bam'
-    run:    
-        shell('{config[samtools.bin]} view -bS {input.sam} -o {params.tmp}')
-        shell('{config[samtools.bin]} sort {params.tmp} -o {output.bam}')
-        shell('{config[samtools.bin]} index {output.bam}')

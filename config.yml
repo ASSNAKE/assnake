@@ -44,7 +44,7 @@ FindFungi:
         taxids: '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/Fungal-Taxids.txt'
 min_contig_size : 1000
 
-anvio.bin : '/data6/bio/TFM/soft/miniconda3/envs/anvio5/bin/'
+anvio.bin : '/data4/bio/fedorov/miniconda3/envs/anvio5/bin/'
 cogs.dir : '/data5/bio/runs-fedorov/tools/anaconda3/envs/anvio4/cogs/'
 
 

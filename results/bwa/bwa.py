@@ -1,119 +1,48 @@
-nucl_dir= config['fna_db_dir']
+import os
 
-# {type}/{category}/{seq_object}/{seq_set_id}.fa
-# type = handplaced | imported | ??
-# category = anything
+nucl_dir= config['fna_db_dir']
+fna_db_dir= config['fna_db_dir']
+
+def get_reference_fasta(wildcards):
+    """
+    Reconstructs reference fasta location
+    """
+    path = wildcards.path.replace('__', '/')
+    
+    fasta_wc_loc = os.path.join(fna_db_dir, '{path}/{seq_set_id}.fa')
+    fasta = fasta_wc_loc.format(path=path, seq_set_id=wildcards.seq_set_id)
+
+    return fasta
+
+
 rule create_seq_set_index_bwa:
     input:
-        ref = nucl_dir+'{type}/{category}/{seq_object}/{seq_set_id}.fa'
+        ref = get_reference_fasta
     output:
-        ref_index = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index.sa'
+        ref_index = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index.sa')
     params:
-        prefix = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index'
-    log: nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/log.txt'
-    benchmark: nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/time.txt'
+        prefix    = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index')
+    log:            os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/log.txt')
+    benchmark:      os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/benchmark.txt')
     run:
         shell('echo -e "INFO: Creating BWA index for {input.ref}\n"')
         shell('{config[bwa.bin]} index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1')
         shell('echo -e "INFO: Finished creating BWA index for {input.ref}\n"')
         
 
-
-def before(value, a):
-    # Find first part and return slice before it.
-    pos_a = value.find(a)
-    if pos_a == -1: return ""
-    return value[0:pos_a]
-
-def get_samples_for_bwa(wildcards):
-    folder = "datasets/"+wildcards.df+"/reads/"+wildcards.preproc+'/'+wildcards.sample+'/'
-    
-    # sample name
-    sample_name = wildcards.sample
-    files = []
-    result = ''
-    res = []
-    
-    for fname in os.listdir(folder):
-        fl = before(fname, ".fastq")
-        last_3 = (fl[len(fl)-3:len(fl)])
-        if last_3 == '_R1' or last_3 == '_R2':
-            fl = (fl[0:len(fl)-3])
-        if sample_name == fl:
-            files.append(fname)
-            # print(fname)
-    i = 0
-    if len(files) < 1:
-        raise Exception("NO FILES!")
-    elif len(files) > 1:
-        res.append('')
-        res.append('')
-        for f in files:
-            if '_S.' not in f:
-                result += f
-                if '_R1.' in f:
-                    res[0]=(folder+f)
-                elif '_R2.' in f:
-                    res[1]=(folder+f)
-                if i == 0:
-                    result += ' '
-                    i += 1
-    elif len(files) == 1:
-        res.append(folder+str(files[0]))
-        result += files[0]
-    return res
-
-def get_ref(wildcards):
-    wc_str = 'data/ref/index/bwa/{type}/{id_seq_set}/index.sa'
-    
-    if wildcards.type == 'assembRaw':
-        preprocs = ''
-        samples = ''
-        wc_str = 'processing/assemb/{tool_param}/{dfs}/{preprocs}/{samples}/index/bwa/index.sa'
-        df = wildcards.df
-        preproc = wildcards.preproc
-        
-        tool_param, assemb_inp = wildcards.id_seq_set.split('::')
-        print(tool_param)
-        full_assemb = df+'='+preproc+assemb_inp
-        print(full_assemb.split('+'))
-        
-        spl = full_assemb.split('=')
-        dfs = spl[0]
-        pr_w_samps = spl[1:] # preprocs with samples 'imp-p136C:p136N'
-        for prws in pr_w_samps:
-            prws_spl = prws.split('-')
-            print(prws_spl)
-            preprocs += prws_spl[0]+'='
-            samps = prws_spl[1]
-            samples += samps+'='
-        preprocs=preprocs[0:-1]
-        samples=samples [0:-1]
-        
-        return wc_str.format(tool_param=tool_param, dfs=dfs, preprocs=preprocs, samples=samples)
-    else:
-        wc_str = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index.sa'
-        return wc_str.format(type=wildcards.type,
-                             category=wildcards.category,
-                             seq_object=wildcards.seq_object,
-                             seq_set_id=wildcards.seq_set_id)
-        
-        
 rule map_on_ref_bwa:
     input:
-        r1 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
-        r2 = 'datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
-        ref_fasta = get_ref
-        #'data/ref/index/bwa/{type}/{id_seq_set}/index.sa'
+        r1 = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
+        r2 = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
+        ref_index = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index.sa')
     output:
-        sam = 'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}__{category}__{seq_object}/{seq_set_id}/mapped/{sample}.sam'
-    log:      'datasets/{df}/mapped/{preproc}/bwa__{params}/{type}__{category}__{seq_object}/{seq_set_id}/mapped/{sample}.log'
-    #benchmark: 'datasets/{df}/mapped/{preproc}/bwa/{type}/{id_seq_set}/mapped/{sample}.time'
+        sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
+    log:      '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/log.txt'
+    benchmark:'{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/benchmark.txt'
     threads: 8
     run:
-        ind_prefix = input.ref_fasta[0:-3]
+        ind_prefix = input.ref_index[0:-3]
         shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.r1} {input.r2} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
-        # shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.reads} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
 
 rule leave_aligned_bwa:
     input: 
@@ -184,3 +113,45 @@ rule compare_contigs:
         shell('grep -v "@" {params.wd}filtered_no_xa.sam > {output.comp_tsv}')
         shell('sed -i "1i qname\tflag\trname\tpos\tmapq\tcigar\trnext\tpnext\tseq\ttlen\tqual\tNM\tMD\tAS\tXS\tSA\ttmp" {output.comp_tsv}')
         shell('rm {params.wd}filtered.sam {params.wd}filtered_no_xa.sam')
+
+
+def get_ref(wildcards):
+    wc_str = 'data/ref/index/bwa/{type}/{id_seq_set}/index.sa'
+    
+    if wildcards.type == 'assembRaw':
+        preprocs = ''
+        samples = ''
+        wc_str = 'processing/assemb/{tool_param}/{dfs}/{preprocs}/{samples}/index/bwa/index.sa'
+        df = wildcards.df
+        preproc = wildcards.preproc
+        
+        tool_param, assemb_inp = wildcards.id_seq_set.split('::')
+        print(tool_param)
+        full_assemb = df+'='+preproc+assemb_inp
+        print(full_assemb.split('+'))
+        
+        spl = full_assemb.split('=')
+        dfs = spl[0]
+        pr_w_samps = spl[1:] # preprocs with samples 'imp-p136C:p136N'
+        for prws in pr_w_samps:
+            prws_spl = prws.split('-')
+            print(prws_spl)
+            preprocs += prws_spl[0]+'='
+            samps = prws_spl[1]
+            samples += samps+'='
+        preprocs=preprocs[0:-1]
+        samples=samples [0:-1]
+        
+        return wc_str.format(tool_param=tool_param, dfs=dfs, preprocs=preprocs, samples=samples)
+    else:
+        wc_str = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index.sa'
+        return wc_str.format(type=wildcards.type,
+                             category=wildcards.category,
+                             seq_object=wildcards.seq_object,
+                             seq_set_id=wildcards.seq_set_id)
+        
+def before(value, a):
+    # Find first part and return slice before it.
+    pos_a = value.find(a)
+    if pos_a == -1: return ""
+    return value[0:pos_a]
