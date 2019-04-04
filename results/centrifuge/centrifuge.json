@@ -12,7 +12,7 @@
     "input_schema": {
         "type": "object",
         "properties": {
-            "MgSampleFile": {
+            "MgSampleContainer": {
                 "$ref": "./objects/MgSampleFile.json"
             }
         }

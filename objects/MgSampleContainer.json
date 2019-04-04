@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "MgSampleFileContainer",
+  "title": "MgSampleContainer",
   "required": [
     "prefix",  
     "df",
@@ -21,8 +21,7 @@
     "sample": {
       "type": "string",
       "title": "Sample name (on fs?)",
-      "default": "",
-      "shit": "is tasty"
+      "default": ""
     },
     "preproc": {
       "type": "string",

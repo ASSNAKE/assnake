@@ -1,5 +1,5 @@
 import pandas as pd
-import math
+import math, os
 
 #from skbio.stats.composition import *
 
@@ -7,11 +7,28 @@ import loaders as assload
 import anal as anal
 import viz as viz
 
+import yaml
+
+
 #import plotly
 #plotly.offline.init_notebook_mode(connected=True)
 #import plotly.graph_objs as go
 #from scipy.spatial.distance import pdist, squareform
 
+config = None
+dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+cofig_loc = os.path.join(dir_of_this_file, '../config.yml')
+with open(cofig_loc, 'r') as stream:
+    try:
+        config = yaml.load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+
+ASSNAKE_DB = config.get('assnake_db')
+
+SOURCES_META_LOC = '{assnake_db}/datasets/{df}/sources.tsv'
+BIOSPECIMENS_META_LOC = '{assnake_db}/datasets/{df}/biospecimens.tsv'
+MG_SAMPLES_META_LOC = '{assnake_db}/datasets/{df}/mg_samples.tsv'
 
 class Dataset:
     """
@@ -37,9 +54,24 @@ class Dataset:
         self.description = df_dict.get('description', '')
         self.paper = df_dict.get('paper', '')
         self.doi = df_dict.get('doi', '')
-        
+
         self.fs_samples_meta = assload.samples_to_pd(assload.df_full_info(self.fs_prefix, self.df))
-        self.samples_meta = assload.load_samples_metadata(self.fs_prefix, self.df)
+
+
+        sources_loc = SOURCES_META_LOC.format(assnake_db=ASSNAKE_DB, df=self.df)
+        meta_loc = BIOSPECIMENS_META_LOC.format(assnake_db=ASSNAKE_DB, df=self.df)
+        mg_samples_loc = MG_SAMPLES_META_LOC.format(assnake_db=ASSNAKE_DB, df=self.df)
+
+        meta = pd.read_csv(meta_loc, sep='\t')
+        if os.path.isfile(sources_loc):
+            sources = pd.read_csv(sources_loc, sep='\t')
+            meta = meta.merge(sources, left_on='source', right_on='source', suffixes=('_biospecimen', '_source'))
+
+        mg_samples_meta = pd.read_csv(mg_samples_loc, sep='\t')
+        meta = meta.merge(mg_samples_meta, left_on='biospecimen', right_on='biospecimen' )
+
+        self.samples_meta = meta
+
         # Combine metadata with techical data 
         self.samples_meta = self.samples_meta.merge(self.fs_samples_meta, left_on='fs_name', right_on='fs_name')
         
