@@ -87,9 +87,17 @@ Meta-information is stored inside `assnake_db` directory of your choice. The str
 * `df_info.yaml` holds meta-info about dataset. Mandatory fields are:
     * df - name of the dataset. Must be the same as dataset dir name.
     * fs_prefix - absolute path of the directory, where dataset is stored.
-* `sources.tsv`
+* `sources.tsv` contains information about objects of study (sources of biospecimens). Columns are:
+    * `source` - unique identificator of source. Alphanumeric, `-` and `_`
+    * `description` - free text with description of source.
 * `biospecimens.tsv`
+    * `biospecimen`
+    * `source`
+    * `time`
+    * `description`
 * `mg_samples.tsv`
+    * `biospecimen`
+    * `fs_name`
 
 
 

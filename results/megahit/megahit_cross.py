@@ -41,10 +41,8 @@ def megahit_input(wildcards):
                 with open (assnake_db+'/datasets/'+df+'/df_info.yaml', 'r') as df_info:
                     for line in df_info:
                         line = line.split(' ')
-                        print(line)
                         if line[0] == 'fs_prefix:':
                             prefix = line[1].replace("'", '').strip()
-                print(prefix)
                         
                 rr1.append(r_wc_str.format(prefix=prefix,df=df, preproc=p,sample=s,strand='R1'))
                 rr2.append(r_wc_str.format(prefix=prefix,df=df, preproc=p,sample=s,strand='R2'))
@@ -58,12 +56,11 @@ rule run_megahit_cross:
         out_fa = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
     params:
         out_folder = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/assemb/'
-    threads: 28
+    threads: 10
     log: assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/log.txt'
     run:
         reads1 = ",".join(input.F)
         reads2 = ",".join(input.R)
-        print(reads1)
         if os.path.exists(params.out_folder) and os.path.isdir(params.out_folder):
             shutil.rmtree(params.out_folder)
             #os.makedirs(params.out_folder)

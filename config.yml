@@ -2,6 +2,11 @@ assembly_dir: '/data6/bio/TFM/assembly'
 assnake_db: '/data5/bio/databases/assnake'
 fna_db_dir: '/data5/bio/databases/fna/'
 
+run_home_dir: ''
+
+
+
+
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 
 bbduk: '/data6/bio/TFM/soft/bioinf/mapping/bbmap-38.34/bbduk.sh'
