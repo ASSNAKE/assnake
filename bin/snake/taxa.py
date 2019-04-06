@@ -6,24 +6,7 @@ BOWTIE2 = config['bowtie2.bin']
 CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
 CENTRIFUGE_INDEX = config["centrifuge"]["index"]
 
-               
-rule centrifuge_contigs:
-    input: 
-        seq = 'data/ref/assemb/{assemb_name}.fa'
-    output:
-        report = 'data/taxa/assemb/{assemb_name}/centr_report.tsv',
-        classification = 'data/taxa/assemb/{assemb_name}/centr_classification.tsv',
-        krak = 'data/taxa/assemb/{assemb_name}/centr_krak.tsv',
-        krona = 'data/taxa/assemb/{assemb_name}/centr_krona.tsv'
-    params:
-        wd = 'data/taxa/assemb/{assemb_name}/',
-        krona_html = 'data/taxa/assemb/centr_krona'
-    run:
-        shell('{CENTRIFUGE_FOLDER}centrifuge -k 1 --min-hitlen 200 -f -x {CENTRIFUGE_INDEX} {input.seq} -S {output.classification} --report-file {output.report}')
-        shell('{CENTRIFUGE_FOLDER}centrifuge-kreport -x {CENTRIFUGE_INDEX} {output.classification} > {output.krak}')
-        shell('tail -n +2 {output.classification} | cut -f 1,3 > {output.krona}')
-        shell('''cd {params.wd} \n
-             /data5/bio/runs-fedorov/tools/krona/bin/ktImportTaxonomy ./centr_krona.tsv -o krona_centr.html''')
+
         
 
         

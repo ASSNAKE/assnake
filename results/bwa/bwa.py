@@ -7,7 +7,7 @@ def get_reference_fasta(wildcards):
     """
     Reconstructs reference fasta location
     """
-    path = wildcards.path.replace('__', '/')
+    path = wildcards.path.replace('___', '/')
     
     fasta_wc_loc = os.path.join(fna_db_dir, '{path}/{seq_set_id}.fa')
     fasta = fasta_wc_loc.format(path=path, seq_set_id=wildcards.seq_set_id)
@@ -39,7 +39,7 @@ rule map_on_ref_bwa:
         sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
     log:      '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/log.txt'
     benchmark:'{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/benchmark.txt'
-    threads: 8
+    threads: 12
     run:
         ind_prefix = input.ref_index[0:-3]
         shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.r1} {input.r2} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
@@ -114,44 +114,3 @@ rule compare_contigs:
         shell('sed -i "1i qname\tflag\trname\tpos\tmapq\tcigar\trnext\tpnext\tseq\ttlen\tqual\tNM\tMD\tAS\tXS\tSA\ttmp" {output.comp_tsv}')
         shell('rm {params.wd}filtered.sam {params.wd}filtered_no_xa.sam')
 
-
-def get_ref(wildcards):
-    wc_str = 'data/ref/index/bwa/{type}/{id_seq_set}/index.sa'
-    
-    if wildcards.type == 'assembRaw':
-        preprocs = ''
-        samples = ''
-        wc_str = 'processing/assemb/{tool_param}/{dfs}/{preprocs}/{samples}/index/bwa/index.sa'
-        df = wildcards.df
-        preproc = wildcards.preproc
-        
-        tool_param, assemb_inp = wildcards.id_seq_set.split('::')
-        print(tool_param)
-        full_assemb = df+'='+preproc+assemb_inp
-        print(full_assemb.split('+'))
-        
-        spl = full_assemb.split('=')
-        dfs = spl[0]
-        pr_w_samps = spl[1:] # preprocs with samples 'imp-p136C:p136N'
-        for prws in pr_w_samps:
-            prws_spl = prws.split('-')
-            print(prws_spl)
-            preprocs += prws_spl[0]+'='
-            samps = prws_spl[1]
-            samples += samps+'='
-        preprocs=preprocs[0:-1]
-        samples=samples [0:-1]
-        
-        return wc_str.format(tool_param=tool_param, dfs=dfs, preprocs=preprocs, samples=samples)
-    else:
-        wc_str = nucl_dir+'index/bwa/{type}/{category}/{seq_object}/{seq_set_id}/index.sa'
-        return wc_str.format(type=wildcards.type,
-                             category=wildcards.category,
-                             seq_object=wildcards.seq_object,
-                             seq_set_id=wildcards.seq_set_id)
-        
-def before(value, a):
-    # Find first part and return slice before it.
-    pos_a = value.find(a)
-    if pos_a == -1: return ""
-    return value[0:pos_a]

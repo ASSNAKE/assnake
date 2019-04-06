@@ -2,17 +2,18 @@ anvi_dir = 'data/anvi/'
 ANVI = config['anvio.bin']
 CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
 CENTRIFUGE_INDEX = config["centrifuge"]["index"]
+fna_db_dir= config['fna_db_dir']
 
 rule anvi_gen_cont_db:
-    input: fa = 'data/ref/{type}/{ref}.fa'
-    output: db_f = 'datasets/{df}/anvio/{type}/{ref}/db/contigs.db'
+    input: fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')
+    output: db_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db')
     log: 
-        hmm = 'datasets/{df}/anvio/{type}/{ref}/db/hmm.log',
-        gen = 'datasets/{df}/anvio/{type}/{ref}/db/gen.log'
+        # hmm = 'datasets/{df}/anvio/{type}/{ref}/db/hmm.log',
+        gen =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_db_gen_log.txt')
     threads: 10
     run:
-        shell('''source /data6/bio/TFM/soft/miniconda3/bin/activate anvio5; anvi-gen-contigs-database -f {input.fa} -o {output.db_f} -n "{wildcards.ref}" >{log.gen} 2>&1''')
-        shell('''source /data6/bio/TFM/soft/miniconda3/bin/activate anvio5; anvi-run-hmms -c {output.db_f} -T {threads} > {log.hmm} 2>&1''')
+        shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; anvi-gen-contigs-database -f {input.fa} -o {output.db_f} -n "{wildcards.samples}" >{log.gen} 2>&1''')
+        # shell('''source /data6/bio/TFM/soft/miniconda3/bin/activate anvio5; anvi-run-hmms -c {output.db_f} -T {threads} > {log.hmm} 2>&1''')
 #         
 
 rule anvi_cogs:
