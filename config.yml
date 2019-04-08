@@ -4,6 +4,8 @@ fna_db_dir: '/data5/bio/databases/fna/'
 
 run_home_dir: ''
 
+cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
+
 
 
 
