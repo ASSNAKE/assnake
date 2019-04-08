@@ -1,3 +1,7 @@
+fna_db_dir= config['fna_db_dir']
+
+
+
 rule init_bam_mapped:
     input:
         sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
@@ -21,14 +25,25 @@ rule coverage:
         cov = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}/{id_seq_set}/{what}/{id_sample}.cov'
     run:
         shell('/srv/common/bin/genomeCoverageBed -bga -ibam {input.bam} > {output.cov}')
-        
+
+def get_reference_fasta(wildcards):
+    """
+    Reconstructs reference fasta location
+    """
+    path = wildcards.path.replace('___', '/')
+    
+    fasta_wc_loc = os.path.join(fna_db_dir, '{path}/{seq_set_id}.fa')
+    fasta = fasta_wc_loc.format(path=path, seq_set_id=wildcards.seq_set_id)
+
+    return fasta
+
 rule coverage_stats:
     input:
-        bam = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}__{category}__{seq_object}/{id_seq_set}/{what}/{id_sample}.bam',
-        ref = nucl_dir + "{type}/{category}/{seq_object}/{id_seq_set}.fa"
+        bam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.bam',
+        ref = get_reference_fasta
     output:
-        stats = 'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}__{category}__{seq_object}/{id_seq_set}/{what}/{id_sample}.bb_stats'
-    log:'datasets/{df}/mapped/{preproc}/{mapping_tool}/{type}__{category}__{seq_object}/{id_seq_set}/{what}/{id_sample}_cov_summary.txt'
+        stats = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.bb_stats'
+    log: '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped_bb_stats_log.txt'
     run:
         shell('''{config[java.bin]} -ea -Xmx35000m -cp /data6/bio/TFM/soft/bbmap/current/ jgi.CoveragePileup ref={input.ref} in={input.bam} out={output.stats} >{log} 2>&1 \n
         cat {log}''')

@@ -14,7 +14,18 @@ rule anvi_gen_cont_db:
     run:
         shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; anvi-gen-contigs-database -f {input.fa} -o {output.db_f} -n "{wildcards.samples}" >{log.gen} 2>&1''')
         # shell('''source /data6/bio/TFM/soft/miniconda3/bin/activate anvio5; anvi-run-hmms -c {output.db_f} -T {threads} > {log.hmm} 2>&1''')
-#         
+#
+# 
+rule anvi_run_hmms:
+    input: db_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db')
+    output: done = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_hmms.done')
+    log: 
+        # hmm = 'datasets/{df}/anvio/{type}/{ref}/db/hmm.log',
+        hmm =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_db_hmm_log.txt')
+    threads: 22
+    run:
+        shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; anvi-run-hmms -c {input.db_f} -T {threads} > {log.hmm} 2>&1''')     
+        shell('touch {output.done}')    
 
 rule anvi_cogs:
     input:db_f = 'datasets/{df}/anvio/{type}/{ref}/db/contigs.db'
