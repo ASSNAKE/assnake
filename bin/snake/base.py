@@ -28,13 +28,13 @@ include: results + 'metaphlan2/metaphlan2.py'
 include: results + 'megahit/megahit_cross.py'
 include: results + 'bwa/bwa.py'
 include: results + 'centrifuge/centrifuge.py'
+include: results + 'anvio/anvio.py'
 
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
 include: snakefiles + "humann2.py"
 
 include: snakefiles + "ariba.py"
-include: snakefiles + "anvio.py"
 include: snakefiles + "prokka.py"
 
 include: snakefiles + "general.py"
