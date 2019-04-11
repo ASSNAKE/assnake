@@ -1,11 +1,11 @@
-#from scipy.spatial import distance
-#from sklearn.manifold import MDS
-#from sklearn.manifold import LocallyLinearEmbedding
+from scipy.spatial import distance
+from sklearn.manifold import MDS
+from sklearn.manifold import LocallyLinearEmbedding
 import pandas as pd
-#from skbio.stats.composition import *
-#from scipy.spatial.distance import pdist, squareform
+from skbio.stats.composition import *
+from scipy.spatial.distance import pdist, squareform
 
-#import ecopy
+import ecopy
 
 
 def locally_linear_emb(data, n_neighbors=20):

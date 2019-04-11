@@ -1,14 +1,14 @@
-#import scipy.cluster.hierarchy as shc
+import scipy.cluster.hierarchy as shc
 
-#import plotly
+import plotly
 
-#plotly.offline.init_notebook_mode(connected=True)
-#import plotly.graph_objs as go
-#from matplotlib import colors as mcolors
-#import plotly.figure_factory as FF
+plotly.offline.init_notebook_mode(connected=True)
+import plotly.graph_objs as go
+from matplotlib import colors as mcolors
+import plotly.figure_factory as FF
 
-#from skbio.stats.composition import *
-#from scipy.spatial.distance import pdist, squareform
+from skbio.stats.composition import *
+from scipy.spatial.distance import pdist, squareform
 
 def plot_changes(tr_hm2, tr_mp2, plot=True):
     traces = []

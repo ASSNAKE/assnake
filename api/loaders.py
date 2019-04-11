@@ -291,14 +291,16 @@ def mg_samples_for_df_fs(prefix, df):
         samples = set([s.split('/')[-1] for s in glob.glob(SAMPLE_DIR_PREFIX.format(prefix=prefix,df=df,preproc='*',sample='*'))])    
         sample_dicts = []
         
+        print('TOTAL SAMLES: ', len(samples))
         
-        for s in samples:
+        for i, s in enumerate(samples):
             sample_dict = {
                 'df': df,
                 'name_on_fs': s,
                 'containers': []
             }
             preprocs = set([s.split('/')[-2] for s in glob.glob(SAMPLE_DIR_PREFIX.format(prefix=prefix,df=df,preproc='*',sample=s))])
+            print("preprocs: ", len(preprocs))
             containers = []
             
             for p in preprocs:
@@ -311,6 +313,10 @@ def mg_samples_for_df_fs(prefix, df):
                     
             sample_dict['containers'] = containers
             sample_dicts.append(sample_dict)
+
+            i += 1
+            if i % 10 == 0:
+                print('Done with: ', i)
         return sample_dicts
 
 def load_sources_in_df(df, db_loc, return_as='dict'):
