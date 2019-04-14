@@ -220,7 +220,7 @@ def plot_mds(mds, feature_name, meta):
     traces = []
 
     for feature in features:
-        samples_for_source = list(meta.loc[meta[feature_name] == feature]['sample'])
+        samples_for_source = list(meta.loc[meta[feature_name] == feature]['fs_name'])
         mds_sub = mds[mds.index.isin(samples_for_source)]
         trace = go.Scatter3d(
                     x = mds_sub[0], y = mds_sub[1], z = mds_sub[2],

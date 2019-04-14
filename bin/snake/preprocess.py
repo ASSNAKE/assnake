@@ -128,7 +128,7 @@ rule fastqc:
         out="{prefix}/{df}/reads/{preproc}/{sample}/profile/",
         zip_out="{prefix}/{df}/reads/{preproc}/{sample}/profile/"
     log: "{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.log"
-    threads: 8
+    threads: 6
     run:
         shell("{FASTQC} -t {threads} -o {params.out} {input} >{log} 2>&1")
         shell('unzip {output.zipped} -d {params.zip_out}')

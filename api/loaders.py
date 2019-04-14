@@ -157,25 +157,24 @@ def load_count(prefix, df, preproc, sample):
     count_loc1 = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strands[0])
     count_loc2 = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strands[1])
     
-    if os.path.isfile(count_loc1) and os.path.isfile(count_loc2):
-        reads = 0
-        bps = 0
-        
-        try:
-            with open(count_loc1, 'r') as f:
-                line = f.readline().rstrip()
-                reads += int(line.split(' ')[0])
-                bps += int(line.split(' ')[1])
-            with open(count_loc2, 'r') as f:
-                line = f.readline().rstrip()
-                reads += int(line.split(' ')[0])
-                bps += int(line.split(' ')[1])
-        except:
-            print('error loading counts: ' + sample)
-        
-        return {'reads': reads, 'bps': bps}
-    else:
+    reads = -1
+    bps = -1
+    
+    try:
+        with open(count_loc1, 'r') as f:
+            line = f.readline().rstrip()
+            reads += int(line.split(' ')[0])
+            bps += int(line.split(' ')[1])
+        with open(count_loc2, 'r') as f:
+            line = f.readline().rstrip()
+            reads += int(line.split(' ')[0])
+            bps += int(line.split(' ')[1])
+    except:
+        print('error loading counts: ' + sample)
         return {'reads': -1, 'bps': -1}
+    
+    return {'reads': reads+1, 'bps': bps+1}
+        
 
 def load_dfs_from_db(db_loc):
     """
@@ -270,14 +269,13 @@ def load_mg_files(prefix, df, preproc, sample):
         reads = -1
         bps = -1
         size = 0
-        if os.path.isfile(count):
-            try:
-                with open(count, 'r') as f:
-                    line = f.readline().rstrip()
-                    reads = int(line.split(' ')[0])
-                    bps = int(line.split(' ')[1])
-            except:
-                print('error: ' + sample)
+        try:
+            with open(count, 'r') as f:
+                line = f.readline().rstrip()
+                reads = int(line.split(' ')[0])
+                bps = int(line.split(' ')[1])
+        except:
+            print('error: ' + sample)
                 
         files.append({'reads': reads, 'bps': bps, 'size': os.path.getsize(fqgz), 'strand': strand})
     return files
@@ -300,7 +298,6 @@ def mg_samples_for_df_fs(prefix, df):
                 'containers': []
             }
             preprocs = set([s.split('/')[-2] for s in glob.glob(SAMPLE_DIR_PREFIX.format(prefix=prefix,df=df,preproc='*',sample=s))])
-            print("preprocs: ", len(preprocs))
             containers = []
             
             for p in preprocs:
@@ -314,9 +311,6 @@ def mg_samples_for_df_fs(prefix, df):
             sample_dict['containers'] = containers
             sample_dicts.append(sample_dict)
 
-            i += 1
-            if i % 10 == 0:
-                print('Done with: ', i)
         return sample_dicts
 
 def load_sources_in_df(df, db_loc, return_as='dict'):
