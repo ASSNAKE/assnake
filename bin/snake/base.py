@@ -33,6 +33,7 @@ include: results + 'anvio/anvio.py'
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
 include: snakefiles + "humann2.py"
+include: snakefiles + "qiime2.py"
 
 include: snakefiles + "ariba.py"
 include: snakefiles + "prokka.py"
