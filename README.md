@@ -143,3 +143,7 @@ In order to implement new processing step you need to create directory `./result
 Than you have a couple of options:
 
 1. The easy way. Just create a file `./results/<result_name>/<result_name>.py` and code your snakemake rule there. Than include this file into `./bin/snake/base.py`. 
+
+# Running tests
+`python cli.py -s ./tests/test_snake.py`
+

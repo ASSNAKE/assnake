@@ -42,8 +42,20 @@ tmtic_req = tmtic_wc.format(prefix = test_df_prefix,
                             preproc='raw', 
                             sample = samples[samp_ind])
 
+mp2_wc = results.loc[results['short_name'] == 'metaphlan2']['out_str_wc'].values[0]
+centr_wc = results.loc[results['short_name'] == 'centrifuge']['out_str_wc'].values[0]
 
-i_want = count_locs + [tmtic_req]
+mp2_loc = mp2_wc.format(prefix = test_df_prefix, 
+                            df = test_df_name, 
+                            preproc='raw', 
+                            sample = samples[samp_ind])
+centr_loc = centr_wc.format(prefix = test_df_prefix, 
+                            params = 'def',
+                            df = test_df_name, 
+                            preproc='raw', 
+                            sample = samples[samp_ind])
+
+i_want = count_locs + [tmtic_req, mp2_loc, centr_loc]
 
 rule main_test:
     input: i_want
