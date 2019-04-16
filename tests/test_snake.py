@@ -15,7 +15,7 @@ for res in results:
         results_dicts.append(json.load(result_file))
 results = pd.DataFrame(results_dicts)
 
-
+print('installation_dir', config['assnake_install_dir'])
 test_df_prefix = config['test_df_prefix']
 test_df_name = config['test_df_name']
 

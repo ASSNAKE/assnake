@@ -4,11 +4,10 @@ assnake_db: '/data5/bio/databases/assnake'
 fna_db_dir: '/data5/bio/databases/fna/'
 run_dir: ''
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
-assnake_install_dir: '/data6/bio/TFM/pipeline/assnake/'
 conda_prefix: '/data4/bio/fedorov/assnake_conda/'
 
 # TEST DATASET
-test_df_prefix: '/data5/bio/runs-fedorov'
+test_df_prefix: '/data6/bio/TFM/datasets'
 test_df_name: 'mg_test'
 
 # SOFTWARE
