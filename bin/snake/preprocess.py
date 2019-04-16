@@ -9,57 +9,6 @@ FASTQC = config['fastqc.bin']
 
 TRIMMOMATIC = config['trimmomatic']['bin']
 
-def multiple_exts(template, *extensions):
-    def wrapped_input(wildcards):
-        for ext in extensions:
-            p = template.format(**wildcards) + ext
-            if exists(p):
-                return p
-        return p
-    return wrapped_input
-
-def tmtic_params(params_loc):
-    params_str = ''
-    params_dict = {}
-    with open(params_loc, 'r') as f:
-        params_dict = json.loads(f.read())
-        
-    clip = params_dict.pop('ILLUMINACLIP')
-    if(len(clip.keys()) > 0):
-        slw_str = 'ILLUMINACLIP:{fastaWithAdaptersEtc}:{seedMismatches}:{palindromeClipThreshold}:{simpleClipThreshold} '
-        params_str += slw_str.format(**clip)
-    
-    slw = params_dict.pop('SLIDINGWINDOW')
-    if(len(slw.keys()) > 0):
-        slw_str = 'SLIDINGWINDOW:{windowSize}:{requiredQuality} '
-        params_str += slw_str.format(**slw)
-        
-    lead = params_dict.pop('LEADING')
-    if(len(lead.keys()) > 0):
-        slw_str = 'LEADING:{quality} '
-        params_str += slw_str.format(**lead)
-    
-    trail = params_dict.pop('TRAILING')
-    if(len(trail.keys()) > 0):
-        slw_str = 'TRAILING:{quality} '
-        params_str += slw_str.format(**trail)
-        
-    minlen = params_dict.pop('MINLEN')
-    if(len(minlen.keys()) > 0):
-        slw_str = 'MINLEN:{length} '
-        params_str += slw_str.format(**minlen)
-        
-    hcrop = params_dict.pop('HEADCROP')
-    if(len(hcrop.keys()) > 0):
-        slw_str = 'HEADCROP:{length} '
-        params_str += slw_str.format(**hcrop)
-    
-    print(params_str)
-    
-    return params_str
-
-
-
 BBDUK = config['bbduk']
 rule bbduk_rm_aaa:
     input:
@@ -103,16 +52,7 @@ rule fastqc:
         shell('unzip {output.zipped} -d {params.zip_out}')
         #save_to_db(config['task_id'], rule, str(input), str(output.zipped), 'RUN SUCCESSFUL')
 
-rule count:
-    input: 
-        r1 = "{fs_prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz",
-    output: 
-        r1 = "{fs_prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.count"
-    wildcard_constraints:    
-        df="[\w\d_-]+"
-    run:
-        shell('''bin/scripts/count_bp.sh {input.r1} > {output.r1}''')
-        #save_to_db(config['task_id'], rule, str(input), str(output.r1), 'RUN SUCCESSFUL')
+
 
 rule profile:
     input: 

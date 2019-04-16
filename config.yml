@@ -2,7 +2,7 @@
 assembly_dir: '/data6/bio/TFM/assembly'
 assnake_db: '/data5/bio/databases/assnake'
 fna_db_dir: '/data5/bio/databases/fna/'
-run_home_dir: ''
+run_dir: ''
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
 assnake_install_dir: '/data6/bio/TFM/pipeline/assnake/'
 

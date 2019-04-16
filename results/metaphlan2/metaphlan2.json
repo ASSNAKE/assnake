@@ -1,0 +1,20 @@
+{
+    "id": "564a3f3d-a106-4267-a83b-c159ab20464d",
+    "result_type": "38f01676-e6ca-4779-811f-a26a43e8926c",  
+    "result_name": "MetaPhlan2 - marker based taxonomic profiler",
+    "short_name": "metaphlan2",
+    "description": "Profiles metagenomic samples",  
+    "data_type": "mg",
+    "out_str_wc": "{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.mp2",
+    "json_in_to_loc_out_func": "simple",
+    "params_schema": "{}",
+    "tool": null,
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "MgSampleContainer": {
+                "$ref": "./objects/MgSampleFile.json"
+            }
+        }
+    }
+  }
