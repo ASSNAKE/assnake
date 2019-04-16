@@ -27,13 +27,29 @@ samples = [r.split('/')[-1] for r in glob(samples_wc.format(
     sample = '*'
 ))]
 
+samp_ind = 3
 count_wc = results.loc[results['short_name'] == 'count']['out_str_wc'].values[0]
 count_wc = count_wc.replace('strand', '{strand}')
+
+count_locs = expand(count_wc.format(prefix = test_df_prefix, 
+                df = test_df_name, preproc='raw', 
+                sample = samples[samp_ind]), strand = ['R1', 'R2'])
 
 rule test_count: 
     input: expand(count_wc.format(prefix = test_df_prefix, df = test_df_name, preproc='raw', sample = samples[0]), strand = ['R1', 'R2'])
 
 tmtic_wc = results.loc[results['short_name'] == 'tmtic']['out_str_wc'].values[0]
+tmtic_req = tmtic_wc.format(prefix = test_df_prefix, 
+                            params = 'def1', 
+                            df = test_df_name, 
+                            preproc='raw', 
+                            sample = samples[samp_ind])
 
 rule test_tmtic: 
-    input: tmtic_wc.format(prefix = test_df_prefix, params = 'def1', df = test_df_name, preproc='raw', sample = samples[1])
+    input: tmtic_req
+
+i_want = count_locs + tmtic_req
+
+rule main_test:
+    input: i_want
+
