@@ -1,15 +1,27 @@
+# DIRECTORIES
 assembly_dir: '/data6/bio/TFM/assembly'
 assnake_db: '/data5/bio/databases/assnake'
 fna_db_dir: '/data5/bio/databases/fna/'
-
 run_home_dir: ''
-
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
+assnake_install_dir: '/data6/bio/TFM/pipeline/assnake/'
 
+# TEST DATASET
+test_df_prefix: '/data5/bio/runs-fedorov'
+test_df_name: 'mg_test'
 
-
-
+# SOFTWARE
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
+megahit.bin: '/data6/bio/TFM/soft/megahit/megahit'
+bwa.bin : '/srv/common/bin/bwa'
+samtools.bin: '/srv/common/bin/samtools'
+anvio.bin : '/data4/bio/fedorov/miniconda3/envs/anvio5/bin/'
+
+trimmomatic:
+    bin: "/data6/bio/TFM/soft/Trimmomatic-0.36/trimmomatic-0.36.jar"
+
+fastqc.bin: '/data6/bio/TFM/soft/FastQC/fastqc'
+
 
 bbduk: '/data6/bio/TFM/soft/bioinf/mapping/bbmap-38.34/bbduk.sh'
 
@@ -20,11 +32,9 @@ bowtie2-build.bin: /srv/common/bin/bowtie2-build
 bowtie2.additional.params: -k 1 
 bowtie2.threads: '20'
 
-samtools.bin: '/srv/common/bin/samtools'
 
-megahit.bin: '/data5/bio/runs-fedorov/tools/megahit/megahit'
 
-bwa.bin : '/srv/common/bin/bwa'
+
 
 gatk.jar : '/data7a/bio/BacGenomeSoft/GenomeAnalysisTK.jar'
 
@@ -51,14 +61,9 @@ FindFungi:
         taxids: '/data6/bio/TFM/pipeline/bin/scripts/FindFungi/Fungal-Taxids.txt'
 min_contig_size : 1000
 
-anvio.bin : '/data4/bio/fedorov/miniconda3/envs/anvio5/bin/'
-cogs.dir : '/data5/bio/runs-fedorov/tools/anaconda3/envs/anvio4/cogs/'
 
 
-trimmomatic:
-    bin: "/data6/bio/TFM/soft/Trimmomatic-0.36/trimmomatic-0.36.jar"
 
-fastqc.bin: '/data5/bio/runs-fedorov/tools/FastQC/fastqc'
 
 prodigal: '/data5/bio/runs-fedorov/tools/prodigal_2.6.3/prodigal'
 

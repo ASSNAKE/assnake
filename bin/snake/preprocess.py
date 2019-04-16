@@ -58,38 +58,7 @@ def tmtic_params(params_loc):
     
     return params_str
 
-rule tmtic:
-    input:
-        first=multiple_exts("datasets/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq", '', '.gz'),
-        second=multiple_exts("datasets/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq", '', '.gz'),
-        params="params/tmtic/{params}.json"
-    output:
-        r1="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1.fastq.gz", 
-        r2="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R2.fastq.gz", 
-        u ="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_S.fastq.gz"
-    params:
-        u1="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1_unpaired.fastq", 
-        u2="datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R2_unpaired.fastq",
-    log: "datasets/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}.done"
-    threads: 8
-    run:
-        param_str = tmtic_params(input.params)
-        
-        shell(
-        '''
-            {JAVA} -jar \
-             {TRIMMOMATIC} PE -phred33 \
-                 -threads {threads} \
-                 {input.first} {input.second} \
-                 {output.r1} {params.u1} \
-                 {output.r2} {params.u2} \
-                 {param_str} \
-         >{log} 2>&1 && \
-         cat {params.u1} {params.u2} | gzip > {output.u} 2>>{log} && \
-         rm {params.u1} {params.u2} 2>>{log} \
-         ''')
-        if 'task_id' in config.keys():
-            save_to_db(config['task_id'], 'tmtic', str(input), str(log), 'RUN SUCCESSFUL')
+
 
 BBDUK = config['bbduk']
 rule bbduk_rm_aaa:

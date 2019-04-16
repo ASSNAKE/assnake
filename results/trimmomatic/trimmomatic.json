@@ -1,0 +1,149 @@
+{
+    "id": "3b515e64-2bec-4af6-bd7d-a476b9ebd74a",
+    "result_type": "fe5687a5-42de-4b47-aa2e-00e81f8fd3ea",
+    "result_name": "Trimmomatic",
+    "short_name": "tmtic",
+    "description": "Trim your reads based on quality scores",
+    "data_type": "mg",
+    "out_str_wc": "{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1.fastq.gz",
+    "json_in_to_loc_out_func": "simple",
+    "params_schema": {
+        "title": "Trimmomatic parameters",
+        "type": "object",
+        "properties": {
+            "ILLUMINACLIP": {
+                "type": "object",
+                "title": "ILLUMINACLIP",
+                "description": "This step is used to find and remove Illumina adapters.",
+                "required": [
+                    "fastaWithAdaptersEtc"
+                ],
+                "properties": {
+                    "fastaWithAdaptersEtc": {
+                        "type": "string",
+                        "title": "Fasta with adapters",
+                        "description": "specifies the path to a fasta file containing all the adapters,PCR sequences etc. The naming of the various sequences within this file determines how they are used. See the section below or use one of the provided adapter files"
+                    },
+                    "seedMismatches": {
+                        "type": "integer",
+                        "title": "seedMismatches",
+                        "description": "specifies the maximum mismatch count which will still allow a full match to be performed"
+                    },
+                    "palindromeClipThreshold": {
+                        "type": "integer",
+                        "title": "palindromeClipThreshold",
+                        "description": "specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment."
+                    },
+                    "simpleClipThreshold": {
+                        "type": "integer",
+                        "title": "simpleClipThreshold",
+                        "description": "specifies how accurate the match between any adapter etc. sequence must be against a read."
+                    }
+                }
+            },
+            "SLIDINGWINDOW": {
+                "type": "object",
+                "title": "SLIDINGWINDOW",
+                "description": "Perform a sliding window trimming, cutting once the average quality within the window falls below a threshold. By considering multiple bases, a single poor quality base will not cause the removal of high quality data later in the read. ",
+                "properties": {
+                    "windowSize": {
+                        "type": "integer",
+                        "title": "windowSize",
+                        "description": "specifies the number of bases to average across"
+                    },
+                    "requiredQuality": {
+                        "type": "integer",
+                        "title": "requiredQuality",
+                        "description": "specifies the average quality required."
+                    }
+                }
+            },
+            "MAXINFO": {
+                "type": "object",
+                "title": "MAXINFO",
+                "description": "Performs an adaptive quality trim, balancing the benefits of retaining longer reads against the costs of retaining bases with errors. ",
+                "properties": {
+                    "targetLength": {
+                        "type": "integer",
+                        "title": "targetLength",
+                        "description": "This specifies the read length which is likely to allow thelocation of the read within the target sequence to be determined. "
+                    },
+                    "strictness": {
+                        "type": "integer",
+                        "title": "strictness",
+                        "description": "This value, which should be set between 0 and 1, specifies the balance between preserving as much read length as possible vs. removal of incorrect bases. A low value of this parameter (<0.2) favours longer reads, while a high value (>0.8) favours read correctness. "
+                    }
+                }
+            },
+            "LEADING": {
+                "type": "object",
+                "title": "LEADING",
+                "description": "Remove low quality bases from the beginning. As long as a base has a value below this threshold the base is removed and the next base will be investigated. ",
+                "properties": {
+                    "quality": {
+                        "type": "integer",
+                        "title": "quality",
+                        "description": "Specifies the minimum quality required to keep a base"
+                    }
+                }
+            },
+            "TRAILING": {
+                "type": "object",
+                "title": "TRAILING",
+                "description": "Remove low quality bases from the end. As long as a base has a value below this threshold the base is removed and the next base (which as trimmomatic is starting from the 3‟ prime end would be base preceding the just removed base) will be investigated. This approach can be used removing the special illumina „low quality segment‟ regions (which are marked with quality score of 2), but we recommend Sliding Window or MaxInfo instead ",
+                "properties": {
+                    "quality": {
+                        "type": "integer",
+                        "title": "quality",
+                        "description": "Specifies the minimum quality required to keep a base."
+                    }
+                }
+            },
+            "CROP": {
+                "type": "object",
+                "title": "CROP",
+                "description": "Removes bases regardless of quality from the end of the read, so that the read has maximally the specified length after this step has been performed. Steps performed after CROP might of course further shorten the read. ",
+                "properties": {
+                    "length": {
+                        "type": "integer",
+                        "title": "length",
+                        "description": "The number of bases to keep, from the start of the read"
+                    }
+                }
+            },
+            "HEADCROP": {
+                "type": "object",
+                "title": "HEADCROP",
+                "description": "Removes the specified number of bases, regardless of quality, from the beginning of the read.",
+                "properties": {
+                    "length": {
+                        "type": "integer",
+                        "title": "length",
+                        "description": "The number of bases to keep, from the start of the read"
+                    }
+                }
+            },
+            "MINLEN": {
+                "type": "object",
+                "title": "MINLEN",
+                "description": "This module removes reads that fall below the specified minimal length. If required, it should normally be after all other processing steps. Reads removed by this step will be counted and included in the „dropped reads‟ count presented in the trimmomatic summary",
+                "properties": {
+                    "length": {
+                        "type": "integer",
+                        "title": "length",
+                        "description": "Specifies the minimum length of reads to be kept."
+                    }
+                }
+            }
+        }
+    },
+    "tool": null,
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "MgSampleContainer": {
+                "$ref": "./objects/MgSampleFile.json"
+            }
+        }
+    }
+}

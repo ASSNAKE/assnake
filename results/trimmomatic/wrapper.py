@@ -39,17 +39,17 @@ def tmtic_params(params_loc):
     
     return params_str
 
-param_str = tmtic_params(snakemake.config[] + snakemake.input.params)
+param_str = tmtic_params(snakemake.input.params)
         
 shell('''trimmomatic PE -phred33 \
-                 -threads {threads} \
-                 {input.first} {input.second} \
-                 {output.r1} {params.u1} \
-                 {output.r2} {params.u2} \
+                 -threads {snakemake.threads} \
+                 {snakemake.input.first} {snakemake.input.second} \
+                 {snakemake.output.r1} {snakemake.params.u1} \
+                 {snakemake.output.r2} {snakemake.params.u2} \
                  {param_str} \
-         >{log} 2>&1 && \
-         cat {params.u1} {params.u2} | gzip > {output.u} 2>>{log} && \
-         rm {params.u1} {params.u2} 2>>{log}''')
+         >{snakemake.log} 2>&1 && \
+         cat {snakemake.params.u1} {snakemake.params.u2} | gzip > {snakemake.output.u} 2>>{snakemake.log} && \
+         rm {snakemake.params.u1} {snakemake.params.u2} 2>>{snakemake.log}''')
 
 if 'task_id' in snakemake.config.keys():
     save_to_db(config['task_id'], 'tmtic', str(input), str(log), 'RUN SUCCESSFUL')

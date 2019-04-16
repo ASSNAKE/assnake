@@ -22,13 +22,14 @@ task_id=task_id, rule_name=rule_name, in_list=in_list, out_list=out_list, status
     
     
 snakefiles = './'
-results = '../../results/'
+results    = '../../results/'
 
 include: results + 'metaphlan2/metaphlan2.py'
 include: results + 'megahit/megahit_cross.py'
 include: results + 'bwa/bwa.py'
 include: results + 'centrifuge/centrifuge.py'
 include: results + 'anvio/anvio.py'
+include: results + 'trimmomatic/trimmomatic.py'
 
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
