@@ -1,0 +1,20 @@
+{
+    "id": "b31e6621-ab60-49c1-a28c-4fe9c64f922f",
+    "result_type": "0bc990f0-3fd2-4edc-9d9d-a67c3640d61a",  
+    "result_name": "Fastqc - quality control checks on raw sequence data",
+    "short_name": "fastqc",
+    "description": "Quality control of your data",  
+    "data_type": "mg",
+    "out_str_wc": "{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}_fastqc.zip",
+    "json_in_to_loc_out_func": "simple",
+    "params_schema": "{}",
+    "tool": null,
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "MgSampleFile": {
+                "$ref": "./objects/MgSampleFile.json"
+            }
+        }
+    }
+  }

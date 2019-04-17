@@ -27,7 +27,7 @@ samples = [r.split('/')[-1] for r in glob(samples_wc.format(
     sample = '*'
 ))]
 
-samp_ind = 3
+samp_ind = 4
 count_wc = results.loc[results['short_name'] == 'count']['out_str_wc'].values[0]
 count_wc = count_wc.replace('strand', '{strand}')
 

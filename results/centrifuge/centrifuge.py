@@ -15,9 +15,9 @@ rule centrifuge:
     threads:  6
     log:       '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/log.txt'
     benchmark: '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/benchmark.txt'
-    run:
-        shell('{CENTRIFUGE_FOLDER}centrifuge -k 1 --mm --min-hitlen 22 -f -x {CENTRIFUGE_INDEX} -1 {input.r1} -2 {input.r2} -p {threads} -S {output.classification} --report-file {output.report} -q >{log} 2>&1')
-        shell('{CENTRIFUGE_FOLDER}centrifuge-kreport -x {CENTRIFUGE_INDEX} {output.classification} > {output.krak}')
+    conda: 'env_v1.0.4_beta.yaml'
+    shell: ('''centrifuge -k 1 --mm --min-hitlen 22 -f -x {CENTRIFUGE_INDEX} -1 {input.r1} -2 {input.r2} -p {threads} -S {output.classification} --report-file {output.report} -q >{log} 2>&1; \n
+          centrifuge-kreport -x {CENTRIFUGE_INDEX} {output.classification} > {output.krak}''')
 
 rule centrifuge_fasta:
     input: 
@@ -30,6 +30,7 @@ rule centrifuge_fasta:
     threads:  20
     log:       os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_log.txt')
     benchmark: os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_benchmark.txt')
-    run:
-        shell('{CENTRIFUGE_FOLDER}centrifuge -k 1 --mm --min-hitlen 120 -f -x {CENTRIFUGE_INDEX} -U {input.fa} -p {threads} -S {output.classification} --report-file {output.report} >{log} 2>&1')
-        shell('{CENTRIFUGE_FOLDER}centrifuge-kreport -x {CENTRIFUGE_INDEX} {output.classification} > {output.krak}')
+    conda: 'env_v1.0.4_beta.yaml'
+    shell:
+        ('''centrifuge -k 1 --mm --min-hitlen 120 -f -x {CENTRIFUGE_INDEX} -U {input.fa} -p {threads} -S {output.classification} --report-file {output.report} >{log} 2>&1; \n
+         centrifuge-kreport -x {CENTRIFUGE_INDEX} {output.classification} > {output.krak}''')

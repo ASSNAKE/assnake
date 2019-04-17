@@ -38,19 +38,7 @@ rule trim_to_len_r2_after_trimmomatic:
         shell('''cp {input.u} {output.u}''')
         shell('''{config[python.bin]} bin/scripts/len_trimmer.py --input {input.r2} --out {output.r2} --len 99''')
         
-rule fastqc:
-    input: "{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz"
-    output: 
-        zipped="{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}_fastqc.zip"
-    params: 
-        out="{prefix}/{df}/reads/{preproc}/{sample}/profile/",
-        zip_out="{prefix}/{df}/reads/{preproc}/{sample}/profile/"
-    log: "{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.log"
-    threads: 6
-    run:
-        shell("{FASTQC} -t {threads} -o {params.out} {input} >{log} 2>&1")
-        shell('unzip {output.zipped} -d {params.zip_out}')
-        #save_to_db(config['task_id'], rule, str(input), str(output.zipped), 'RUN SUCCESSFUL')
+
 
 
 

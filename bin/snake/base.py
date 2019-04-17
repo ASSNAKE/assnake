@@ -31,6 +31,7 @@ include: results + 'centrifuge/centrifuge.py'
 include: results + 'anvio/anvio.py'
 include: results + 'trimmomatic/trimmomatic.py'
 include: results + 'count/count.py'
+include: results + 'fastqc/fastqc.py'
 
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
