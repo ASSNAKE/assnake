@@ -6,3 +6,4 @@ channels:
   - defaults
 dependencies:
   - centrifuge=1.0.4_beta=py36pl526he941832_2
+  - krona=2.7

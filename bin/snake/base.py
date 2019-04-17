@@ -47,5 +47,4 @@ include: snakefiles + "taxa.py"
 include: snakefiles + "strain_finder.py"
 include: snakefiles + "download.py"
 include: snakefiles + "find_fungi.py"
-include: snakefiles + "subread.py"
     
