@@ -3,6 +3,9 @@ include: results + 'megahit/megahit_cross.py'
 include: results + 'bwa/bwa.py'
 include: results + 'centrifuge/centrifuge.py'
 include: results + 'anvio/anvio.py'
+include: results + 'trimmomatic/trimmomatic.py'
+include: results + 'count/count.py'
+include: results + 'fastqc/fastqc.py'
 
 include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
@@ -18,4 +21,3 @@ include: snakefiles + "taxa.py"
 include: snakefiles + "strain_finder.py"
 include: snakefiles + "download.py"
 include: snakefiles + "find_fungi.py"
-include: snakefiles + "subread.py"
