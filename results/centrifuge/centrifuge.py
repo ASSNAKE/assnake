@@ -6,7 +6,7 @@ rule centr_krona:
     input:classification = 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_classification.tsv'
     output: krona = 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krona.tsv'
     params: wd = 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/'
-    conda: 'env_v1.0.4_beta.yaml'
+    # conda: 'env_v1.0.4_beta.yaml'
     run:
         shell('tail -n +2 {input.classification} | cut -f 1,3 > {output.krona}')
         shell('''cd {params.wd} \n /data5/bio/runs-fedorov/tools/krona/bin/ktImportTaxonomy ./{wildcards.sample}_krona.tsv -o krona.html''')
