@@ -45,7 +45,7 @@ picard.jar : '/data7a/bio/BacGenomeSoft/picard.jar'
 centrifuge:
     bin: '/data6/bio/TFM/soft/bioinf/centrifuge-1.0.4-beta/'
     # bin : '/data5/bio/runs-fedorov/tools/centrifuge/centrifuge/'
-    index : '/data5/bio/runs-fedorov/tools/centrifuge/centrifuge-1.0.3-beta/p+h+v/p+h+v'
+    index : '/data5/bio/databases/centrifuge/p+h+v/p+h+v'
 kraken:
     v1.1: '/data6/bio/TFM/soft/bioinf/taxa/kraken-1.1/kraken'
     db:
