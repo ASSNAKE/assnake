@@ -5,13 +5,22 @@ CENTRIFUGE_INDEX = config["centrifuge"]["index"]
 fna_db_dir= config['fna_db_dir']
 
 clean_script = os.path.join( config['assnake_install_dir'], 'bin/scripts/filter_contigs_using_centrifuge.py')
+human_contigs_list_script = os.path.join( config['assnake_install_dir'], 'bin/scripts/human_contigs_list.py')
 
 rule clean_contigs_from_human:
     input:
+        ll = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__human_contigs.list'),
+        fa = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000.fa'),
+    output: fa = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')
+    conda: 'env.yaml'
+    shell: ('''seqkit grep -v -n -f {input.ll} {input.fa} > {output.fa}''')
+
+rule centr_human_contigs:
+    input:
         fa = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000.fa'),
         centr = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__centr__def_classification.tsv'),
-    output: fa = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')
-    shell: ('''python3 {clean_script} --classification {input.centr} --contigs {input.fa} --clean {output.fa}''')
+    output: ll = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__human_contigs.list')
+    shell: ('''python3 {human_contigs_list_script} --classification {input.centr} --out {output.ll}''')
 
 rule anvi_gen_cont_db:
     input: fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')

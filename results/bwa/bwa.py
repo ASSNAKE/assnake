@@ -24,10 +24,10 @@ rule create_seq_set_index_bwa:
         prefix    = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index')
     log:            os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/log.txt')
     benchmark:      os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/benchmark.txt')
-    conda: 'env_0.7.17'
-    shell: ('''echo -e "INFO: Creating BWA index for {input.ref}; \n
-         {config[bwa.bin]} index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1; \n
-         'echo -e "INFO: Finished creating BWA index for {input.ref}\n''')
+    conda: 'env_0.7.17.yaml'
+    shell: ('''echo -e "INFO: Creating BWA index for {input.ref}"; \n
+         bwa index -p {params.prefix} -a bwtsw {input.ref} > {log} 2>&1; \n
+         echo -e "INFO: Finished creating BWA index for {input.ref}\n"''')
         
 
 rule map_on_ref_bwa:
@@ -37,13 +37,13 @@ rule map_on_ref_bwa:
         ref_index = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index.sa')
     output:
         sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
+    params:
+        ind_prefix = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index')
     log:      '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/log.txt'
     benchmark:'{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/benchmark.txt'
     threads: 12
-    # conda: 'env_0.7.17'
-    run:
-        ind_prefix = input.ref_index[0:-3]
-        shell('({config[bwa.bin]} mem -M -t {threads} {ind_prefix} {input.r1} {input.r2} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
+    conda: 'env_0.7.17.yaml'
+    shell: ('(bwa mem -M -t {threads} {params.ind_prefix} {input.r1} {input.r2} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
 
 rule leave_aligned_bwa:
     input: 
