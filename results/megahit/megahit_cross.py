@@ -78,6 +78,8 @@ rule refine_assemb_results_cross:
     log: 
         names = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/name_conversions__{min_len}.txt'),
         ll    = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/reformat_fasta__{min_len}.log')
+    wildcard_constraints:    
+        min_len="[\d_-]+"
     run:
         shell('echo -e "INFO: Filtering contigs < {wildcards.min_len}bp and simplifying names"')
         shell("{config[anvio.bin]}anvi-script-reformat-fasta {input.ref} -o {output.fa} --min-len {wildcards.min_len} --simplify-names --report {log.names} > {log.ll} 2>&1")

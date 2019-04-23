@@ -4,6 +4,15 @@ CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
 CENTRIFUGE_INDEX = config["centrifuge"]["index"]
 fna_db_dir= config['fna_db_dir']
 
+clean_script = os.path.join( config['assnake_install_dir'], 'bin/scripts/filter_contigs_using_centrifuge.py')
+
+rule clean_contigs_from_human:
+    input:
+        fa = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000.fa'),
+        centr = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__centr__def_classification.tsv'),
+    output: fa = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')
+    shell: ('''python3 {clean_script} --classification {input.centr} --contigs {input.fa} --clean {output.fa}''')
+
 rule anvi_gen_cont_db:
     input: fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')
     output: db_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db')
