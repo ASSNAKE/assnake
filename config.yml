@@ -11,6 +11,9 @@ assnake_install_dir: '/data6/bio/TFM/pipeline/assnake'
 test_df_prefix: '/data6/bio/TFM/datasets'
 test_df_name: 'mg_test'
 
+# DATABSES
+BLAST_NCBI_NT: '/data5/bio/runs-jeniaole/tools/NCBI_nt'
+NCBI_TAX: '/data5/bio/runs-jeniaole/tools/NCBI_tax'
 # SOFTWARE
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 megahit.bin: '/data6/bio/TFM/soft/megahit/megahit'

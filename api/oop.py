@@ -114,7 +114,7 @@ class Dataset:
         mp2 = assload.load_mp2(self.fs_prefix,
                                self.samples_meta.to_dict(orient='records'), 
                                level=level, 
-                               index_by='sample')
+                               index_by='fs_name')
         
         if clr:
             mp2=anal.coda(mp2, rm_more_than_zeroes_percent)

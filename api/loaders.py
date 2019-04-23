@@ -397,6 +397,7 @@ def load_mp2(prefix, samples, level='s__', org='Bacteria', index_by = 'fs_name')
     loc_wc = '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.mp2'
 
     for s in samples:
+        
         loc = loc_wc.format(prefix=prefix, df = s['df'], preproc=s['preproc'], sample = s['fs_name'])
         if os.path.isfile(loc):
             try:
@@ -406,8 +407,9 @@ def load_mp2(prefix, samples, level='s__', org='Bacteria', index_by = 'fs_name')
                 mp2_df.index.name = ''
                 mp2_df = mp2_df.T
                 dfs.append(mp2_df)
-            except:
+            except Exception as e:
                 print('ERROR: ' + loc)
+                print(e)
     mp2_combined = pd.concat(dfs, axis=0)
     mp2_combined = mp2_combined.fillna(0)
 

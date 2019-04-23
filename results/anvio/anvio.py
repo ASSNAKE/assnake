@@ -122,8 +122,7 @@ rule anvi_merge:
                 -c {input.contigs} \
                 --overwrite-output-destinations \
                 --enforce-hierarchical-clustering \
-            >{log} 2>&1
-        ''')
+                >{log} 2>&1''')
         shell('touch {output.done}')
         
 

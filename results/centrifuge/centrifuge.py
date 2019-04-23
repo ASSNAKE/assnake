@@ -36,7 +36,7 @@ rule centrifuge_fasta:
         report =         os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_report.tsv'),
         classification = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_classification.tsv'),
         krak =           os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_krak.tsv'), 
-    threads:  20
+    threads:  12
     log:       os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_log.txt')
     benchmark: os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_benchmark.txt')
     conda: 'env_v1.0.4_beta.yaml'
