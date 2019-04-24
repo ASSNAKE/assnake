@@ -80,11 +80,14 @@ rule anvi_profile:
     params:
         dir_n =  '{prefix}/{df}/anvio/profile/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/{sample}___{preproc}/db/'
     log:         '{prefix}/{df}/anvio/profile/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/{sample}___{preproc}/log.txt'
-    threads: 8
+    threads: 20
     run:
+        sample_name = wildcards.sample
+        if str.isdigit(sample_name[0]):
+            sample_name = 's' + sample_name 
         shell('''
             source /data4/bio/fedorov/miniconda3/bin/activate anvio5; \n
-            sample="{wildcards.sample}" \n
+            sample="{sample_name}" \n
             sample=$(tr -d - <<< $sample) \n
                 anvi-profile \
                     -i {input.bam} \
