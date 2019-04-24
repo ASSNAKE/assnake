@@ -34,6 +34,8 @@ include: results + 'count/count.py'
 include: results + 'fastqc/fastqc.py'
 include: results + 'blastn/blastn.py'
 include: results + 'metawrap_classify_bins/metawrap_classify_bins.py'
+include: results + 'bbmap/bbmap.py'
+include: results + 'remove_human_bbmap/remove_human_bbmap.py'
 
 
 include: snakefiles + "bowtie2.py"

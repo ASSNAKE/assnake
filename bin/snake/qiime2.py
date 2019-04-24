@@ -18,3 +18,14 @@ rule dada2_qiime2:
             --o-denoising-stats {output.denoising_stats} \
             --p-n-threads {threads} \
             --verbose >{log} 2>&1''')
+
+rule summarize_qiime2:
+    input: table = '{prefix}/{df}/qiime2/table.qza',
+        meta = '{prefix}/{df}/samples_meta.tsv',
+    output: 
+        table = '{prefix}/{df}/qiime2/table.qzv',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
+                qiime feature-table summarize \
+            --i-table {input.table} \
+            --o-visualization {output.table} \
+            --m-sample-metadata-file {input.meta}''')
