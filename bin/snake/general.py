@@ -37,14 +37,5 @@ def get_reference_fasta(wildcards):
 
     return fasta
 
-rule coverage_stats:
-    input:
-        bam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.bam',
-        ref = get_reference_fasta
-    output:
-        stats = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.bb_stats'
-    log: '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped_bb_stats_log.txt'
-    run:
-        shell('''{config[java.bin]} -ea -Xmx35000m -cp /data6/bio/TFM/soft/bbmap/current/ jgi.CoveragePileup ref={input.ref} in={input.bam} out={output.stats} >{log} 2>&1 \n
-        cat {log}''')
+
              

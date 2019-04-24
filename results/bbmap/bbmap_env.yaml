@@ -1,7 +1,6 @@
 channels:
-  - ursky
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - bbmap

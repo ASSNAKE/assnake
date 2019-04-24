@@ -40,7 +40,7 @@ rule anvi_run_hmms:
     log: 
         # hmm = 'datasets/{df}/anvio/{type}/{ref}/db/hmm.log',
         hmm =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_db_hmm_log.txt')
-    threads: 12
+    threads: 20
     run:
         shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; anvi-run-hmms -c {input.db_f} -T {threads} > {log.hmm} 2>&1''')     
         shell('touch {output.done}')    
@@ -134,7 +134,6 @@ rule anvi_merge:
        '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/log.txt',
     params:
         out_dir = '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db',
-    threads: 20
     run:
         shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; \n
             anvi-merge \
@@ -142,7 +141,6 @@ rule anvi_merge:
                 -o {params.out_dir} \
                 -c {input.contigs} \
                 --overwrite-output-destinations \
-                --enforce-hierarchical-clustering \
                 >{log} 2>&1''')
         shell('touch {output.done}')
         

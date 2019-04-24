@@ -42,6 +42,7 @@ include: snakefiles + "bowtie2.py"
 include: snakefiles + "megares.py"
 include: snakefiles + "humann2.py"
 include: snakefiles + "qiime2.py"
+include: snakefiles + "fasta_operations.py"
 
 include: snakefiles + "ariba.py"
 include: snakefiles + "prokka.py"
