@@ -41,7 +41,7 @@ rule map_on_ref_bwa:
         ind_prefix = os.path.join(fna_db_dir, 'index/bwa/{path}/{seq_set_id}/index')
     log:      '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/log.txt'
     benchmark:'{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/benchmark.txt'
-    threads: 12
+    threads: 20
     conda: 'env_0.7.17.yaml'
     shell: ('(bwa mem -M -t {threads} {params.ind_prefix} {input.r1} {input.r2} | /srv/common/bin/samtools view -SF 4 -h > {output.sam}) >{log} 2>&1')
 

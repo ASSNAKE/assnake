@@ -4,3 +4,6 @@ channels:
   - defaults
 dependencies:
   - bbmap
+  - openssl=1.0
+  - samtools
+  - sambamba
