@@ -215,10 +215,10 @@ def plot_reads_bps(meta):
     plotly.offline.iplot(fig)
     
 def plot_centr(centr):
-    trace1 = go.Bar(
+    trace4 = go.Bar(
         y=list(centr.index),
-        x=list(centr['homo']/centr['total']),
-        name='HUMAN',
+        x=list(centr['uncl']/centr['total']),
+        name='uncl',
         orientation = 'h',
     )
     trace2 = go.Bar(
@@ -233,10 +233,10 @@ def plot_centr(centr):
         name='other',
         orientation = 'h',
     )
-    trace4 = go.Bar(
+    trace1 = go.Bar(
         y=list(centr.index),
-        x=list(centr['uncl']/centr['total']),
-        name='uncl',
+        x=list(centr['homo']/centr['total']),
+        name='HUMAN',
         orientation = 'h',
     )
     trace5 = go.Bar(
@@ -252,7 +252,7 @@ def plot_centr(centr):
         orientation = 'h'
     )
 
-    data = [trace1, trace2, trace3, trace4, trace5, trace6]
+    data = [trace4, trace2, trace3, trace1, trace5, trace6]
     layout = go.Layout(
         barmode='stack'
     )

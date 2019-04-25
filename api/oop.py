@@ -7,6 +7,8 @@ import loaders as assload
 import anal as anal
 import viz as viz
 
+import glob
+
 import yaml
 
 
@@ -88,7 +90,6 @@ class Dataset:
         fig = viz.plotly_heatmap(self.hm2, 'Humann2 ' + self.df)
         fig = viz.plotly_heatmap(self.mp2, 'Metaplan2 ' + self.df)
         
-        
     def load_hm2(self, db, drop = True, clr = True):
         """
         This method loads Humann2 data for samples in df. 
@@ -119,7 +120,6 @@ class Dataset:
         if clr:
             mp2=anal.coda(mp2, rm_more_than_zeroes_percent)
         self.mp2 = mp2
-        
         
     def __repr__(self):
         return str({
@@ -179,3 +179,29 @@ class Dataset:
             fig['layout']['yaxis'+str(i+1)].update(autorange='reversed')
 
         plotly.offline.iplot(fig, config={'showLink': True})
+
+
+class Mag:
+    dfs = ''
+    preprocs = ''
+    samples = ''
+
+    bins = []
+
+    bins_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}'
+
+    def __init__(self, dfs, preprocs, samples):
+        self.dfs = dfs
+        self.preprocs = preprocs,
+        self.samples = samples
+        self.bins  = [r.split('/')[-1] for r 
+             in glob.glob(self.bins_wc.format(binn = '*', samples = self.samples))]
+
+    def __repr__(self):
+        return str({
+            'dfs': self.dfs,
+            'samples': self.samples,
+            'preprocs': self.preprocs,
+            'bins': self.bins,
+        })
+
