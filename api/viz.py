@@ -214,6 +214,52 @@ def plot_reads_bps(meta):
     fig = go.Figure(data=data)
     plotly.offline.iplot(fig)
     
+def plot_centr(centr):
+    trace1 = go.Bar(
+        y=list(centr.index),
+        x=list(centr['homo']/centr['total']),
+        name='HUMAN',
+        orientation = 'h',
+    )
+    trace2 = go.Bar(
+        y=list(centr.index),
+        x=list(centr['bacteria']/centr['total']),
+        name='bacteria',
+        orientation = 'h',
+    )
+    trace3 = go.Bar(
+        y=list(centr.index),
+        x=list(centr['other']/centr['total']),
+        name='other',
+        orientation = 'h',
+    )
+    trace4 = go.Bar(
+        y=list(centr.index),
+        x=list(centr['uncl']/centr['total']),
+        name='uncl',
+        orientation = 'h',
+    )
+    trace5 = go.Bar(
+        y=list(centr.index),
+        x=list(centr['vir']/centr['total']),
+        name='vir',
+        orientation = 'h'
+    )
+    trace6 = go.Bar(
+        y=list(centr.index),
+        x=list(centr['archaea']/centr['total']),
+        name='archaea',
+        orientation = 'h'
+    )
+
+    data = [trace1, trace2, trace3, trace4, trace5, trace6]
+    layout = go.Layout(
+        barmode='stack'
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    plotly.offline.iplot(fig)
+
 def plot_mds(mds, feature_name, meta):
     features = set(meta[feature_name])
     colors = list(mcolors.CSS4_COLORS.values())

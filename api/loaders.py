@@ -612,4 +612,58 @@ def get_general_taxa_comp_krak_style(samples):
                 comp.append(composition)
             except:
                 print('error' + loc)
+        else:
+            print('NO FILE: ', loc)
     return comp
+
+def load_mags_info(meta, source, assembly, centr):
+    mags = []
+    
+    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}'
+    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    bins  = [r.split('/')[-1] for r 
+             in glob.glob(bin_wc.format(binn = '*', ass = assembly))]
+    bin_wc += '/{binn}-contigs.names'
+
+    samples_for_source = meta.loc[meta['source'] == source]
+    samples_for_source = list(samples_for_source['fs_name'])
+    T5_stats = bb_stats.get_cov_stats('/data6/bio/TFM/pipeline/datasets', 
+                           'FHM', 
+                           samples_for_source,
+                           'bwa', 
+                           'imp__tmtic_def1', 
+                           'assembly___mh__def___FHM___{ass}___imp__tmtic_def1'.format(ass = assembly),
+                          'final_contigs__1000__no_hum_centr')
+
+    for b in bins:
+        contigs_in_bin = pd.read_csv(bin_wc.format(binn = b, ass = assembly), header=None)
+        contigs_in_bin.columns = ['contig']
+        merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
+        merged = merged.drop(['#ID'], axis=1)
+
+        no_drop = ['contig', 'Length', 'Ref_GC',]
+
+        merged['part'] = merged['Length']/merged['Length'].sum()
+        for s in samples_for_source:
+            no_drop.append('avg_on_per_on_part__'+s)
+
+            merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
+#             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
+            merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/centr.loc[s]['bacteria'].item()
+        cols = list(merged.columns)    
+        drop = list(set(cols) - set(no_drop))    
+
+        merged = merged.drop(drop, axis=1)
+
+
+        taxa = pd.read_csv(taxa_wc.format(binn = b, ass = assembly), header=None, sep='\t')
+        taxa = taxa.fillna('Unknown')
+        dd = {'Mag': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]}
+        for s in samples_for_source:
+            dd.update({s: merged['avg_on_per_on_part__'+s].sum()})
+        mags.append(dd)
+
+    mags = pd.DataFrame(mags)
+    mags.index = mags['Mag']
+    mags = mags.drop(['Mag'], axis=1)
+    return mags

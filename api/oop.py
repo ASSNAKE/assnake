@@ -48,14 +48,14 @@ class Dataset:
     mp2 = None
     hm2 = None
     
-    def __init__(self, df_dict):
+    def __init__(self, df_dict,preproc = 'longest'):
         self.fs_prefix = df_dict.get('fs_prefix', '')
         self.df = df_dict.get('df', '')
         self.description = df_dict.get('description', '')
         self.paper = df_dict.get('paper', '')
         self.doi = df_dict.get('doi', '')
 
-        self.fs_samples_meta = assload.samples_to_pd(assload.df_full_info(self.fs_prefix, self.df))
+        self.fs_samples_meta = assload.samples_to_pd(assload.df_full_info(self.fs_prefix, self.df, preproc))
 
 
         sources_loc = SOURCES_META_LOC.format(assnake_db=ASSNAKE_DB, df=self.df)
