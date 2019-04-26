@@ -214,7 +214,7 @@ def plot_reads_bps(meta):
     fig = go.Figure(data=data)
     plotly.offline.iplot(fig)
     
-def plot_centr(centr):
+def plot_centr(centr, subtitle=''):
     trace4 = go.Bar(
         y=list(centr.index),
         x=list(centr['uncl']/centr['total']),
@@ -254,7 +254,8 @@ def plot_centr(centr):
 
     data = [trace4, trace2, trace3, trace1, trace5, trace6]
     layout = go.Layout(
-        barmode='stack'
+        barmode='stack',
+        title = 'General taxa composition; ' + subtitle 
     )
 
     fig = go.Figure(data=data, layout=layout)

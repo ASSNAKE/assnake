@@ -193,6 +193,7 @@ class MagCollection:
 
     bins_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}'
     taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    summary_wc = '/data6/bio/TFM/pipeline/datasets/FHM/anvio/merged_profiles/bwa__def1___assembly___mh__def___FHM___{samples}___imp__tmtic_def1/MERGED/SUMMARY/bins_summary.txt'
 
     def __init__(self, dfs, preprocs, samples):
         self.dfs = dfs
@@ -208,6 +209,9 @@ class MagCollection:
             dd = {"Bin": b, 'Taxa': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]}
             mags.append(dd)
         self.bins = pd.DataFrame(mags)
+
+        self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples), sep='\t')
+        
 
     def __repr__(self):
         return str({

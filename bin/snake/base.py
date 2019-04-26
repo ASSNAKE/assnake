@@ -36,6 +36,7 @@ include: results + 'blastn/blastn.py'
 include: results + 'metawrap_classify_bins/metawrap_classify_bins.py'
 include: results + 'bbmap/bbmap.py'
 include: results + 'remove_human_bbmap/remove_human_bbmap.py'
+include: results + 'metabat2/metabat2.py'
 
 
 include: snakefiles + "bowtie2.py"
