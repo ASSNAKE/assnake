@@ -181,7 +181,10 @@ class Dataset:
         plotly.offline.iplot(fig, config={'showLink': True})
 
 
-class Mag:
+class MagCollection:
+    '''
+    Wrapper class for working with collections of MAGs. 
+    '''
     dfs = ''
     preprocs = ''
     samples = ''
@@ -189,13 +192,22 @@ class Mag:
     bins = []
 
     bins_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}'
+    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
 
     def __init__(self, dfs, preprocs, samples):
         self.dfs = dfs
         self.preprocs = preprocs,
         self.samples = samples
-        self.bins  = [r.split('/')[-1] for r 
+        bins  = [r.split('/')[-1] for r 
              in glob.glob(self.bins_wc.format(binn = '*', samples = self.samples))]
+
+        mags = []
+        for b in bins:
+            taxa = pd.read_csv(self.taxa_wc.format(binn = b, samples = self.samples), header=None, sep='\t')
+            taxa = taxa.fillna('Unknown')
+            dd = {"Bin": b, 'Taxa': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]}
+            mags.append(dd)
+        self.bins = pd.DataFrame(mags)
 
     def __repr__(self):
         return str({

@@ -618,6 +618,9 @@ def get_general_taxa_comp_krak_style(samples):
     return comp
 
 def load_mag_contigs(meta, source, assembly, centr, binn):
+    '''
+    Loads info about one bin from MAGs, returns dataframe with contigs coverage info in samples.
+    '''
     bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-contigs.names'
     taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
     
@@ -645,8 +648,13 @@ def load_mag_contigs(meta, source, assembly, centr, binn):
     return merged
 
 def load_mags_info(meta, source, assembly, centr):
+    '''
+    Loads information about MAGs for specific assembly and samples, estimates abundance and returns a dataframe
+     with index corresponding to bins and columns corresponding to abundance in samples. Can be transformed to OTU table by applying `df.T`
+    '''
     mags = []
     
+    # TODO replace with load_mag_contigs function
     bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}'
     taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
     bins  = [r.split('/')[-1] for r 
