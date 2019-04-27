@@ -685,7 +685,7 @@ def load_mags_info(meta, source, assembly, centr):
 
             merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
 #             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
-            merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/centr.loc[s]['bacteria'].item()
+            merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/(centr.loc[s]['bacteria'].item() + centr.loc[s]['uncl'].item())
         cols = list(merged.columns)    
         drop = list(set(cols) - set(no_drop))    
 

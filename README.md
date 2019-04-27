@@ -137,6 +137,12 @@ File to request: `{fna_db_dir}/assembly/mh__{params}/{dfs}/{samples}/{preprocs}/
 
 dfs are separated by `+`, preprocs by `--` and samples by `:`.
 
+## Metagenome Assembled Genomes
+MAG workflow is built around anvio, which is an awesome tool with great capabilities, you should defenitley check it out.
+MAGs are binned using contigs assembled fron *n* samples. First, we create contigs_db in the folder with contigs, then we map reads back to contigs, create profiles and after that we apply binning step. #TODO We should store sample_profiles in samples mapping folder. We store merged profile in `{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/`
+
+
+
 ## Implementing new processing step.
 In order to implement new processing step you need to create directory `./results/<result_name>`. Take any of the files Asshole can generate right now, or write your own rules.
 
