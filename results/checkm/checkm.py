@@ -15,3 +15,21 @@ rule check_m:
     shell: ('''echo {CHECKM} | checkm data setRoot {CHECKM}; \n
         (checkm lineage_wf -t {threads} -x fa {input.bin_folder} {params.wd}) >{log} 2>&1; \n
         touch {output.done}''')
+
+
+rule check_m_collection:
+    input:
+        # TODO replace with files
+        exported = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins.done')
+    output:
+        done =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm.done')
+    params:
+        wd    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm'),
+        bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins/'), 
+    log:          os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm-log.txt')
+    benchmark:      os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm-benchmark.txt')
+    threads: 40
+    conda: 'checkm_env.yaml'
+    shell: ('''echo {CHECKM} | checkm data setRoot {CHECKM}; \n
+        (checkm lineage_wf -t {threads} -x fa {params.bin_folder} {params.wd}) >{log} 2>&1; \n
+        touch {output.done}''')

@@ -145,16 +145,27 @@ rule anvi_merge:
         shell('touch {output.done}')
         
 
-def get_bins(wildcards):
-    bin_wc = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/bin_by_bin')
 
-rule exported_bins_to_folder:
-    input: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/export.done'),
-    output: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins.done')
-    params: 
-        all_bins_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins/'), 
-        bins_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/bin_by_bin/*/*-contigs.fa')
-    shell: ('''for f in {params.bins_f}; do echo $f; done''')
+
+
+#anvi-summarize -p ./db/PROFILE.db -c /data5/bio/databases/fna/assembly/mh__def/FHM/5F1_S44:T5T1_L1S1_B6_S4:5F2_S45:T5T2_L1S1_B6_S5:5F3_S46:T5T3_L1S1_B6_S6/imp__tmtic_def1/final_contigs__1000__no_hum_centr.db -C CONCOCT -o ./SUMMARY
+
+rule anvi_summarize:
+    input:
+        contigs = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db'),
+        merged = '/data6/bio/TFM/pipeline/datasets/FHM/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
+    output:        
+        bins_summary = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/bins_summary.txt'),
+    params:
+        wd = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/'),
+    run:
+        shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; \n
+                rm -rf {params.wd}; \n
+                anvi-summarize \
+                 -p {input.merged} \
+                 -c {input.contigs} \
+                 -C {wildcards.collection} \
+                 -o {params.wd}''')
         
 rule anvi_get_hmm_seqs:
     input: db_f = anvi_dir+'db/{ref}/contigs.db'

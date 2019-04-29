@@ -9,3 +9,13 @@ rule classify_bins:
             -db {BLASTDB}/nt \
             -outfmt '6 qseqid qstart qend qlen sseqid staxids sstart send bitscore evalue nident length' \
             -query {input} > {output}''')
+
+rule classify_contigs:
+    input: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa')
+    output: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.megablast_out.fa')
+    conda: 'env.yaml'
+    threads: 24
+    shell: ('''blastn -task megablast -num_threads {threads} \
+            -db {BLASTDB}/nt \
+            -outfmt '6 qseqid qstart qend qlen sseqid staxids sstart send bitscore evalue nident length' \
+            -query {input} > {output}''')
