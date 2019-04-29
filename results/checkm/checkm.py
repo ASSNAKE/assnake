@@ -20,14 +20,14 @@ rule check_m:
 rule check_m_collection:
     input:
         # TODO replace with files
-        exported = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins.done')
+        exported = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins.done')
     output:
-        done =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm.done')
+        done =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/checkm.done')
     params:
-        wd    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm'),
-        bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins/'), 
-    log:          os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm-log.txt')
-    benchmark:      os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/checkm-benchmark.txt')
+        wd    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/checkm'),
+        bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins/'), 
+    log:          os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/checkm-log.txt')
+    benchmark:      os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/checkm-benchmark.txt')
     threads: 40
     conda: 'checkm_env.yaml'
     shell: ('''echo {CHECKM} | checkm data setRoot {CHECKM}; \n

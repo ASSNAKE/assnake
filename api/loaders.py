@@ -617,12 +617,12 @@ def get_general_taxa_comp_krak_style(samples):
             print('NO FILE: ', loc)
     return comp
 
-def load_mag_contigs(meta, source, assembly, centr, binn):
+def load_mag_contigs(meta, source, assembly, centr, binn, collection):
     '''
     Loads info about one bin from MAGs, returns dataframe with contigs coverage info in samples.
     '''
-    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-contigs.names'
-    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-contigs.names'
+    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
     
     samples_for_source = meta.loc[meta['source'] == source]
     samples_for_source = list(samples_for_source['fs_name'])
@@ -634,7 +634,7 @@ def load_mag_contigs(meta, source, assembly, centr, binn):
                            'assembly___mh__def___FHM___{ass}___imp__tmtic_def1'.format(ass = assembly),
                           'final_contigs__1000__no_hum_centr')
 
-    contigs_in_bin = pd.read_csv(bin_wc.format(binn = binn, ass = assembly), header=None)
+    contigs_in_bin = pd.read_csv(bin_wc.format(binn = binn, ass = assembly, collection=collection), header=None)
     contigs_in_bin.columns = ['contig']
     merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
     merged = merged.drop(['#ID'], axis=1)
@@ -647,7 +647,7 @@ def load_mag_contigs(meta, source, assembly, centr, binn):
     
     return merged
 
-def load_mags_info(meta, source, assembly, centr):
+def load_mags_info(meta, source, assembly, centr, collection):
     '''
     Loads information about MAGs for specific assembly and samples, estimates abundance and returns a dataframe
      with index corresponding to bins and columns corresponding to abundance in samples. Can be transformed to OTU table by applying `df.T`
@@ -655,10 +655,10 @@ def load_mags_info(meta, source, assembly, centr):
     mags = []
     
     # TODO replace with load_mag_contigs function
-    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}'
-    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/conocot_anvio5_def/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
+    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
     bins  = [r.split('/')[-1] for r 
-             in glob.glob(bin_wc.format(binn = '*', ass = assembly))]
+             in glob.glob(bin_wc.format(binn = '*', ass = assembly, collection=collection))]
     bin_wc += '/{binn}-contigs.names'
 
     samples_for_source = meta.loc[meta['source'] == source]
@@ -672,7 +672,7 @@ def load_mags_info(meta, source, assembly, centr):
                           'final_contigs__1000__no_hum_centr')
 
     for b in bins:
-        contigs_in_bin = pd.read_csv(bin_wc.format(binn = b, ass = assembly), header=None)
+        contigs_in_bin = pd.read_csv(bin_wc.format(binn = b, ass = assembly, collection=collection), header=None)
         contigs_in_bin.columns = ['contig']
         merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
         merged = merged.drop(['#ID'], axis=1)
@@ -692,9 +692,9 @@ def load_mags_info(meta, source, assembly, centr):
         merged = merged.drop(drop, axis=1)
 
 
-        taxa = pd.read_csv(taxa_wc.format(binn = b, ass = assembly), header=None, sep='\t')
-        taxa = taxa.fillna('Unknown')
-        dd = {'Mag': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]}
+        # taxa = pd.read_csv(taxa_wc.format(binn = b, ass = assembly), header=None, sep='\t')
+        # taxa = taxa.fillna('Unknown')
+        dd = {'Mag': b}
         for s in samples_for_source:
             dd.update({s: merged['avg_on_per_on_part__'+s].sum()})
         mags.append(dd)
