@@ -209,13 +209,15 @@ class MagCollection:
             try:
                 taxa = pd.read_csv(self.taxa_wc.format(binn = b, samples = self.samples, collection=collection), header=None, sep='\t')
                 taxa = taxa.fillna('Unknown')
+                dd = {"Bin": b,
+                'Taxa': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]
+                }
+                mags.append(dd)
             except:
                 pass
-                # print("Can't load: ", self.taxa_wc.format(binn = b, samples = self.samples, collection=collection))
-            dd = {"Bin": b,
-                # 'Taxa': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]
-            }
-            mags.append(dd)
+                print("Can't load: ", self.taxa_wc.format(binn = b, samples = self.samples, collection=collection))
+            
+            # mags.append(dd)
         self.bins = pd.DataFrame(mags)
 
         self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples, collection=collection), sep='\t')

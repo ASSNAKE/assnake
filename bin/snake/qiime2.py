@@ -103,12 +103,15 @@ rule classify_qiime2:
     output: 
         classification = '{prefix}/{df}/qiime2/taxonomy.qza',
         class_v        = '{prefix}/{df}/qiime2/taxonomy.qzv',
+    threads: 10
+    log: '{prefix}/{df}/qiime2/taxonomy.log',
     shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
-                qiime feature-classifier classify-sklearn \
+                (qiime feature-classifier classify-sklearn \
                     --i-classifier {QIIME2_SILVA99} \
                     --i-reads {input.reads} \
-                    --o-classification {output.classification};\n
-
+                    --o-classification {output.classification} \
+                    --verbose \
+                    --p-n-jobs {threads}) > {log} 2>&1;\n
                 qiime metadata tabulate \
                     --m-input-file {output.classification} \
                     --o-visualization {output.class_v}''') 
