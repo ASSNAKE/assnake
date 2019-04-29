@@ -94,3 +94,21 @@ rule diversity_results:
                 --i-alpha-diversity {input.evenness_vector} \
                 --m-metadata-file {input.meta} \
                 --o-visualization {output.evenness_group_significance}''') 
+
+QIIME2_SILVA99 = config['QIIME2_SILVA99']
+
+rule classify_qiime2:
+    input: 
+        reads          = '{prefix}/{df}/qiime2/rep-seqs.qza',
+    output: 
+        classification = '{prefix}/{df}/qiime2/taxonomy.qza',
+        class_v        = '{prefix}/{df}/qiime2/taxonomy.qzv',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
+                qiime feature-classifier classify-sklearn \
+                    --i-classifier {QIIME2_SILVA99} \
+                    --i-reads {input.reads} \
+                    --o-classification {output.classification};\n
+
+                qiime metadata tabulate \
+                    --m-input-file {output.classification} \
+                    --o-visualization {output.class_v}''') 

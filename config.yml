@@ -15,6 +15,7 @@ test_df_name: 'mg_test'
 BLAST_NCBI_NT: '/data5/bio/runs-jeniaole/tools/NCBI_nt'
 NCBI_TAX: '/data5/bio/runs-jeniaole/tools/NCBI_tax'
 CHECKM: '/data5/bio/databases/checkm'
+QIIME2_SILVA99: '/data5/bio/databases/qiime2/silva-132-99-nb-classifier.qza'
 # SOFTWARE
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 megahit.bin: '/data6/bio/TFM/soft/megahit/megahit'

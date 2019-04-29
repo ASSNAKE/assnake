@@ -15,6 +15,17 @@ rule prune:
                 cat {params} | cut -f1,2,3,4,5,7,8,9,10,11,12 > {output.megablast}; \n
                 cat {params} | cut -f5,6 > {output.mapping}''')
 
+rule prune_contigs:
+    input: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.megablast_out.raw.fa')
+    output: megablast = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.megablast_out.fa'),
+        mapping = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.mapping.tax')
+    params:os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.megablast_out.pruned.tab')
+    conda: 'env.yaml'
+    threads: 1
+    shell: ('''python2.7 {prune_script} {NCBI_NODES} {input} > {params}; \n
+                cat {params} | cut -f1,2,3,4,5,7,8,9,10,11,12 > {output.megablast}; \n
+                cat {params} | cut -f5,6 > {output.mapping}''')
+
 rule taxator:
     input: 
         megablast = '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/SUMMARY/bin_by_bin/{bin}/{bin}-contigs.megablast_out.tab',
@@ -23,6 +34,23 @@ rule taxator:
         binned_predictions = '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/SUMMARY/bin_by_bin/{bin}/{bin}-contigs.binned_predictions.txt',
         contig_taxonomy =  '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/SUMMARY/bin_by_bin/{bin}/{bin}-contigs.contig_taxonomy.tab',
     params:'{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/SUMMARY/bin_by_bin/{bin}/{bin}-contigs.megablast_out.pruned.tab'
+    conda: '../blastn/env.yaml'
+    threads: 1
+    shell: ('''export TAXATORTK_TAXONOMY_NCBI={NCBI_TAX}; \n
+    cat {input.megablast} | taxator -a megan-lca -t 0.3 -e 0.01 -g {input.mapping} > {output.predictions}; \n
+        sort -k1,1 {output.predictions} | binner -n classification -i genus:0.6 > {output.binned_predictions}; \n
+            cat {output.binned_predictions} | taxknife -f 2 --mode annotate -s path | grep -v "Could not" | cut -f1,2 > {output.contig_taxonomy};''')
+
+
+rule taxator_contigs:
+    input: 
+        megablast = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.megablast_out.fa'),
+        mapping = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.mapping.tax')
+    output: 
+        predictions =os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.predictions.gff3'),
+        binned_predictions = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.binned_predictions.txt'),
+        contig_taxonomy =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.contig_taxonomy.tab'),
+    params: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.megablast_out.pruned.tab'),
     conda: '../blastn/env.yaml'
     threads: 1
     shell: ('''export TAXATORTK_TAXONOMY_NCBI={NCBI_TAX}; \n
