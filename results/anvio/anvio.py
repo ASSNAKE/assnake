@@ -145,6 +145,16 @@ rule anvi_merge:
         shell('touch {output.done}')
         
 
+def get_bins(wildcards):
+    bin_wc = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/bin_by_bin')
+
+rule exported_bins_to_folder:
+    input: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/export.done'),
+    output: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins.done')
+    params: 
+        all_bins_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/all_bins/'), 
+        bins_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/bin_by_bin/*/*-contigs.fa')
+    shell: ('''for f in {params.bins_f}; do echo $f; done''')
         
 rule anvi_get_hmm_seqs:
     input: db_f = anvi_dir+'db/{ref}/contigs.db'
