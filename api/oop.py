@@ -221,10 +221,13 @@ class MagCollection:
         self.bins = pd.DataFrame(mags)
 
         self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples, collection=collection), sep='\t')
-        self.checkm = self.get_bins()
-        subcheckm = self.checkm[['Bin', 'Completeness', 'Contamination', 'marker lineage']]
-        self.summary = self.summary.merge(subcheckm, left_on = 'bins', right_on = 'Bin')
-        self.summary = self.summary.drop(['Bin'], axis=1)
+        try:
+            self.checkm = self.get_bins()
+            subcheckm = self.checkm[['Bin', 'Completeness', 'Contamination', 'marker lineage']]
+            self.summary = self.summary.merge(subcheckm, left_on = 'bins', right_on = 'Bin')
+            self.summary = self.summary.drop(['Bin'], axis=1)
+        except:
+            pass
         # self.summary = self.summary.merge(self.bins, left_on = 'bins', right_on = 'Bin')
         # self.summary = self.summary.drop(['bins'], axis=1)
 
