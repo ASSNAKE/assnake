@@ -145,10 +145,8 @@ rule anvi_merge:
         shell('touch {output.done}')
         
 
-
-
-
-#anvi-summarize -p ./db/PROFILE.db -c /data5/bio/databases/fna/assembly/mh__def/FHM/5F1_S44:T5T1_L1S1_B6_S4:5F2_S45:T5T2_L1S1_B6_S5:5F3_S46:T5T3_L1S1_B6_S6/imp__tmtic_def1/final_contigs__1000__no_hum_centr.db -C CONCOCT -o ./SUMMARY
+def get_bins(wildcards):
+    bin_wc = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/bin_by_bin')
 
 rule anvi_summarize:
     input:

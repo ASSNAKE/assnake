@@ -2,7 +2,7 @@ def get_bins(wildcards):
     bin_wc = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/bin_by_bin')
 
 rule exported_bins_to_folder:
-    input: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/export.done'),
+    input: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/bins_summary.txt'),
     output: os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins.done')
     params: 
         all_bins_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins/'), 

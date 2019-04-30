@@ -6,7 +6,7 @@ plotly.offline.init_notebook_mode(connected=True)
 import plotly.graph_objs as go
 from matplotlib import colors as mcolors
 import plotly.figure_factory as FF
-
+import pandas as pd
 from skbio.stats.composition import *
 from scipy.spatial.distance import pdist, squareform
 
@@ -87,7 +87,7 @@ def boxplots_dist(data, meta, type_of_data='', plot = True):
     
     return traces
 
-def plotly_heatmap(otu_table, title):
+def plotly_heatmap(otu_table, title, groups = None):
     dend_cols = shc.dendrogram(shc.linkage(otu_table, method='ward'), no_plot = True) 
     dend_rows = shc.dendrogram(shc.linkage(otu_table.T, method='ward'), no_plot = True) 
     
@@ -103,6 +103,8 @@ def plotly_heatmap(otu_table, title):
         new_cols.append(dictionary[int(c)])
     reordered_table = reordered_table[new_cols]
     
+    if isinstance(groups, pd.DataFrame):
+        groups = groups.reindex(new_cols)
     
     rows = dend_rows['ivl']
     rows_pre = list(otu_table.T.index)
@@ -113,7 +115,6 @@ def plotly_heatmap(otu_table, title):
     for r in rows:
         new_rows.append(dictionary[int(r)])
     reordered_table = reordered_table.reindex(new_rows)
-    
     
     
     figure = FF.create_dendrogram(
@@ -137,9 +138,46 @@ def plotly_heatmap(otu_table, title):
             x=figure['layout']['xaxis']['tickvals'],
             y=dendro_side['layout']['yaxis']['tickvals'],
             colorscale='Viridis')]
-
-     
     figure.add_traces(heatmap)
+
+    if isinstance(groups, pd.DataFrame):
+        heatmap = [go.Heatmap( 
+                z=groups['diagnosis'].values,
+                x=figure['layout']['xaxis']['tickvals'],
+                y=[0]*len(groups),
+                yaxis = 'y3',
+                colorscale=[
+                    [0, 'green'], 
+                    [0.25, 'green'], 
+                    
+                    [0.25, 'red'], 
+                    [0.5, 'red'], 
+                    
+                    [0.5, 'blue'],
+                    [0.75, 'blue'],
+                    
+                    [0.75, 'black'],
+                    [1, 'black']
+                ],
+                
+                colorbar = {
+                    'x':1.1, 
+                    'tickvals': [0,1,2,3],
+                    'ticktext': ['Control','CeD','UC', 'CD']
+                    })
+                ]
+        figure.add_traces(heatmap)
+
+        figure['layout'].update({'yaxis3':{'domain':[0, .1],
+                                       'mirror': False,
+                                       'showgrid': False,
+                                       'showline': False,
+                                       'zeroline': False,
+                                       'showticklabels': False,
+                                       'ticks': ''
+                                      }})
+    
+
     # Edit xaxis
     figure['layout']["autosize"] =  True
     figure['layout']['title'].update({'text':title}),
@@ -161,7 +199,7 @@ def plotly_heatmap(otu_table, title):
                                        }})
 
     # Edit yaxis
-    figure['layout']['yaxis'].update({'domain': [0, .85],
+    figure['layout']['yaxis'].update({'domain': [0.1, .85],
                                       'mirror': False,
                                       'showgrid': False,
                                       'showline': False,
@@ -180,6 +218,7 @@ def plotly_heatmap(otu_table, title):
                                        'showticklabels': False,
                                        'ticks': ''
                                       }})
+    
 
     plotly.offline.iplot(figure, config={'showLink': True})
     return figure
@@ -261,13 +300,13 @@ def plot_centr(centr, subtitle=''):
     fig = go.Figure(data=data, layout=layout)
     plotly.offline.iplot(fig)
 
-def plot_mds(mds, feature_name, meta):
+def plot_mds(mds, feature_name, meta, title='MDS'):
     features = set(meta[feature_name])
     colors = list(mcolors.CSS4_COLORS.values())
     traces = []
 
     for feature in features:
-        samples_for_source = list(meta.loc[meta[feature_name] == feature]['fs_name'])
+        samples_for_source = list(meta.loc[meta[feature_name] == feature].index)
         mds_sub = mds[mds.index.isin(samples_for_source)]
         trace = go.Scatter3d(
                     x = mds_sub[0], y = mds_sub[1], z = mds_sub[2],
@@ -279,7 +318,7 @@ def plot_mds(mds, feature_name, meta):
                     text = mds_sub.index)
         traces.append(trace)
 
-    layout = dict(title = 'MDS on multiple datasets',
+    layout = dict(title = title,
           yaxis = dict(zeroline = False, title= 'MDS1',),
           xaxis = dict(zeroline = False, title= 'RMDS2',)
          )

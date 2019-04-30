@@ -75,7 +75,8 @@ def diversity(otu_table):
 
 def coda(data, rm_more_than_zeroes_percent = 0.5, viz_zeroes = False):
     data_clean = data.loc[:, (data==0).mean() < rm_more_than_zeroes_percent]
-    
+    # remove rows with all zeroes
+    data_clean = data_clean.loc[(data_clean.T==0).mean() != 1, :]
     if viz_zeroes:
         # TODO plot zeroes profile
         pass

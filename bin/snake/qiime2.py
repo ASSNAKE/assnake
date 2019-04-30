@@ -117,6 +117,31 @@ rule classify_qiime2:
                 # qiime metadata tabulate \
                 #     --m-input-file {output.classification} \
                 #     --o-visualization {output.class_v}
+
+rule classify_qiime2_meta:
+    input: 
+        classification = '{prefix}/{df}/qiime2/taxonomy.qza',
+    output: 
+        class_v        = '{prefix}/{df}/qiime2/taxonomy.qzv',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
+                qiime metadata tabulate \
+                     --m-input-file {input.classification} \
+                     --o-visualization {output.class_v}
+                ''') 
+
+rule taxa_barr:
+    input: 
+        classification = '{prefix}/{df}/qiime2/taxonomy.qza',
+        table = '{prefix}/{df}/qiime2/table.qza',
+        meta = '{prefix}/{df}/samples_meta.tsv',
+    output: 
+        bar        = '{prefix}/{df}/qiime2/taxa-bar-plots.qzv',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
+                    qiime taxa barplot \
+                --i-table {input.table} \
+                --i-taxonomy {input.classification} \
+                --m-metadata-file {input.meta} \
+                --o-visualization {output.bar}''')
 QIIME2_GG99 = config['QIIME2_GG99']
 
 rule classify_qiime2_gg:
