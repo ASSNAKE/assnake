@@ -102,8 +102,8 @@ rule classify_qiime2:
         reads          = '{prefix}/{df}/qiime2/rep-seqs.qza',
     output: 
         classification = '{prefix}/{df}/qiime2/taxonomy.qza',
-        class_v        = '{prefix}/{df}/qiime2/taxonomy.qzv',
-    threads: 10
+        # class_v        = '{prefix}/{df}/qiime2/taxonomy.qzv',
+    threads: 6
     log: '{prefix}/{df}/qiime2/taxonomy.log',
     shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
                 (qiime feature-classifier classify-sklearn \
@@ -112,6 +112,52 @@ rule classify_qiime2:
                     --o-classification {output.classification} \
                     --verbose \
                     --p-n-jobs {threads}) > {log} 2>&1;\n
+                ''') 
+
+                # qiime metadata tabulate \
+                #     --m-input-file {output.classification} \
+                #     --o-visualization {output.class_v}
+QIIME2_GG99 = config['QIIME2_GG99']
+
+rule classify_qiime2_gg:
+    input: 
+        reads          = '{prefix}/{df}/qiime2/rep-seqs.qza',
+    output: 
+        classification = '{prefix}/{df}/qiime2/gg/taxonomy.qza',
+        # class_v        = '{prefix}/{df}/qiime2/taxonomy.qzv',
+    threads: 6
+    log: '{prefix}/{df}/qiime2/gg/taxonomy.log',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
+                (qiime feature-classifier classify-sklearn \
+                    --i-classifier {QIIME2_GG99} \
+                    --i-reads {input.reads} \
+                    --reads-per-batch 1000 \
+                    --o-classification {output.classification} \
+                    --verbose \
+                    --p-n-jobs {threads}) > {log} 2>&1;\n
+                ''') 
+
+rule classify_qiime2_gg_meta:
+    input: 
+        classification = '{prefix}/{df}/qiime2/gg/taxonomy.qza',
+    output: 
+        class_v        = '{prefix}/{df}/qiime2/gg/taxonomy.qzv',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
                 qiime metadata tabulate \
-                    --m-input-file {output.classification} \
-                    --o-visualization {output.class_v}''') 
+                     --m-input-file {input.classification} \
+                     --o-visualization {output.class_v}
+                ''') 
+
+rule taxa_bar:
+    input: 
+        classification = '{prefix}/{df}/qiime2/gg/taxonomy.qza',
+        table = '{prefix}/{df}/qiime2/table.qza',
+        meta = '{prefix}/{df}/samples_meta.tsv',
+    output: 
+        bar        = '{prefix}/{df}/qiime2/gg/taxa-bar-plots.qzv',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate qiime2-2019.1; \n
+                    qiime taxa barplot \
+                --i-table {input.table} \
+                --i-taxonomy {input.classification} \
+                --m-metadata-file {input.meta} \
+                --o-visualization {output.bar}''')
