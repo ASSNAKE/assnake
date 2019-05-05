@@ -1,8 +1,8 @@
 rule sf_preprocess_bam:
     input:
-        sam = 'data/mapped/bwa/{type}/{contig}/{sample}-{method}.sam'
+        sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
     output:
-        sorted_bam = 'data/snv/StrainFinder/{type}/{contig}/{sample}-{method}.bam'
+        sorted_bam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
     params:
         filt = 'data/snv/StrainFinder/{type}/{contig}/{sample}-{method}.filt.sam',
         bam = 'data/snv/StrainFinder/{type}/{contig}/{sample}-{method}.presort.bam',

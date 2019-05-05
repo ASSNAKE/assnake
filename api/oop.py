@@ -228,8 +228,8 @@ class MagCollection:
             self.summary = self.summary.drop(['Bin'], axis=1)
         except:
             pass
-        # self.summary = self.summary.merge(self.bins, left_on = 'bins', right_on = 'Bin')
-        # self.summary = self.summary.drop(['bins'], axis=1)
+        self.summary = self.summary.merge(self.bins, left_on = 'bins', right_on = 'Bin')
+        self.summary = self.summary.drop(['bins'], axis=1)
 
     def filter_by_comp_cont(self, completeness, contamination):
         summ = self.summary.loc[self.summary['Completeness'] > completeness]
