@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+dependencies:
+  - python=2.7
+  - scipy

@@ -38,6 +38,7 @@ include: results + 'bbmap/bbmap.py'
 include: results + 'remove_human_bbmap/remove_human_bbmap.py'
 include: results + 'metabat2/metabat2.py'
 include: results + 'checkm/checkm.py'
+include: results + 'strain_finder/strain_finder.py'
 
 include: snakefiles + "bins.py"
 
@@ -54,7 +55,6 @@ include: snakefiles + "prokka.py"
 include: snakefiles + "general.py"
 include: snakefiles + "preprocess.py"
 include: snakefiles + "taxa.py"
-include: snakefiles + "strain_finder.py"
 include: snakefiles + "download.py"
 include: snakefiles + "find_fungi.py"
     

@@ -18,8 +18,8 @@ args = parser.parse_args()
 
 samples = []
 for s in args.samples:
-    samples.append(s.split('/')[-1].replace('.kp', ''))
-
+    samples.append(s.split('/')[-2])
+print(samples)
 
 # Initialize data
 nts = 'ACGT'

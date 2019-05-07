@@ -32,7 +32,7 @@ y = {}
 # M = [sample1, sample2, ...]
 samples = []
 for s in args.samples:
-    samples.append(s.split('/')[-1].replace('.kp', ''))
+    samples.append(s.split('/')[-2])
 M = np.array(samples)
 
 # Contig map
@@ -42,7 +42,10 @@ for line in open(args.map):
     line = line.rstrip().split()
     genome = line[0]
     contig = line[1]
+    
     if genome not in cmap:
+        print(genome)
+
         cmap[genome] = []
     cmap[genome].append(contig)
 
@@ -63,6 +66,8 @@ for genome in cmap:
     # Add alignment data
     beg = 0
     end = 0
+
+    print(genome)
     for contig in contigs:
         end += (np.shape(x[contig])[1] - 2*args.tlen)
         if args.tlen == 0:
