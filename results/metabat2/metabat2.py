@@ -36,5 +36,5 @@ rule metabat2:
     conda: 'metabat2_env.yaml'
     shell: ('''
             cd {params.wd}; \n
-            (runMetaBat.sh {input.fa} {input.samples}) >{log} 2>&1; \n
+            (runMetaBat.sh -t {threads} {input.fa} {input.samples}) >{log} 2>&1; \n
             touch {output.done}''')

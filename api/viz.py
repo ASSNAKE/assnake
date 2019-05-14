@@ -300,13 +300,13 @@ def plot_centr(centr, subtitle=''):
     fig = go.Figure(data=data, layout=layout)
     plotly.offline.iplot(fig)
 
-def plot_mds(mds, feature_name, meta, title='MDS'):
+def plot_mds(mds, feature_name, meta, title='MDS', select_by='fs_name'):
     features = set(meta[feature_name])
     colors = list(mcolors.CSS4_COLORS.values())
     traces = []
 
     for feature in features:
-        samples_for_source = list(meta.loc[meta[feature_name] == feature].index)
+        samples_for_source = list(meta.loc[meta[feature_name] == feature][select_by])
         mds_sub = mds[mds.index.isin(samples_for_source)]
         trace = go.Scatter3d(
                     x = mds_sub[0], y = mds_sub[1], z = mds_sub[2],

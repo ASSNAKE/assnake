@@ -17,6 +17,8 @@ NCBI_TAX: '/data5/bio/runs-jeniaole/tools/NCBI_tax'
 CHECKM: '/data5/bio/databases/checkm'
 QIIME2_SILVA99: '/data5/bio/databases/qiime2/silva-132-99-nb-classifier.qza'
 QIIME2_GG99: '/data5/bio/databases/qiime2/gg-13-8-99-nb-classifier.qza'
+CAT_BAT_DB: '/data5/bio/databases/CAT_BAT/CAT_prepare_20190108/2019-01-08_CAT_database'
+CAT_BAT_TAXA: '/data5/bio/databases/CAT_BAT/CAT_prepare_20190108/2019-01-08_taxonomy'
 # SOFTWARE
 java.bin: '/srv/common/opt/jdk1.8.0_91/bin/java'
 megahit.bin: '/data6/bio/TFM/soft/megahit/megahit'

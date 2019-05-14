@@ -56,7 +56,7 @@ rule run_megahit_cross:
         out_fa = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
     params:
         out_folder = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/assemb/'
-    threads: 10
+    threads: 24
     log: assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/log.txt'
     run:
         reads1 = ",".join(input.F)

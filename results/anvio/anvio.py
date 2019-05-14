@@ -28,7 +28,7 @@ rule anvi_gen_cont_db:
     log: 
         # hmm = 'datasets/{df}/anvio/{type}/{ref}/db/hmm.log',
         gen =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_db_gen_log.txt')
-    threads: 12
+    threads: 24
     run:
         shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; anvi-gen-contigs-database -f {input.fa} -o {output.db_f} -n "{wildcards.samples}" >{log.gen} 2>&1''')
         # shell('''source /data6/bio/TFM/soft/miniconda3/bin/activate anvio5; anvi-run-hmms -c {output.db_f} -T {threads} > {log.hmm} 2>&1''')
@@ -40,7 +40,7 @@ rule anvi_run_hmms:
     log: 
         # hmm = 'datasets/{df}/anvio/{type}/{ref}/db/hmm.log',
         hmm =  os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_db_hmm_log.txt')
-    threads: 20
+    threads: 24
     run:
         shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; anvi-run-hmms -c {input.db_f} -T {threads} > {log.hmm} 2>&1''')     
         shell('touch {output.done}')    
@@ -49,7 +49,7 @@ rule anvi_cogs:
     input:db_f = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db')
     output:cogs_done = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_cogs.done')
     log: cogs = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_db_cogs_log.txt')
-    threads: 12
+    threads: 24
     run:
         shell('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5;  anvi-run-ncbi-cogs --cog-data-dir {config[cogs_dir]} -T {threads} -c {input.db_f} >{log.cogs} 2>&1''')
 
@@ -62,7 +62,7 @@ rule anvi_centrifuge:
         gc = anvi_dir+'db/{ref}/gene-calls.fa',
         centr_hits = anvi_dir+'db/{ref}/centrifuge_hits.tsv',
         centr_rep = anvi_dir+'db/{ref}/centrifuge_report.tsv'
-    threads: 16
+    threads: 24
     run:
         shell("{ANVI}anvi-get-dna-sequences-for-gene-calls -c {input.db_f} -o {output.gc}")
         shell('{CENTRIFUGE_FOLDER}centrifuge -f -x {CENTRIFUGE_INDEX} {output.gc} -p {threads} -S {output.centr_hits} --report-file {output.centr_rep}')
@@ -80,7 +80,7 @@ rule anvi_profile:
     params:
         dir_n =  '{prefix}/{df}/anvio/profile/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/{sample}___{preproc}/db/'
     log:         '{prefix}/{df}/anvio/profile/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/{sample}___{preproc}/log.txt'
-    threads: 20
+    threads: 24
     run:
         sample_name = wildcards.sample
         if str.isdigit(sample_name[0]):
@@ -127,6 +127,7 @@ def get_samples_to_merge(wildcards):
 rule anvi_merge:
     input:
         contigs = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db'),
+        hmms    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr_hmms.done'),
         samples = get_samples_to_merge
     output:        
         done = '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/merge.done',
@@ -141,6 +142,7 @@ rule anvi_merge:
                 -o {params.out_dir} \
                 -c {input.contigs} \
                 --overwrite-output-destinations \
+                --skip-concoct-binning \
                 >{log} 2>&1''')
         shell('touch {output.done}')
         
@@ -151,7 +153,7 @@ def get_bins(wildcards):
 rule anvi_summarize:
     input:
         contigs = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db'),
-        merged = '/data6/bio/TFM/pipeline/datasets/FHM/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
+        merged = '/data6/bio/TFM/pipeline/datasets/{dfs}/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
     output:        
         bins_summary = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/bins_summary.txt'),
     params:

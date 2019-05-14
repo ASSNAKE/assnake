@@ -39,6 +39,9 @@ include: results + 'remove_human_bbmap/remove_human_bbmap.py'
 include: results + 'metabat2/metabat2.py'
 include: results + 'checkm/checkm.py'
 include: results + 'strain_finder/strain_finder.py'
+include: results + 'cat_bat/cat_bat.py'
+
+
 
 include: snakefiles + "bins.py"
 

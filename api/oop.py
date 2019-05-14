@@ -191,10 +191,10 @@ class MagCollection:
 
     bins = []
 
-    bins_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
-    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
-    summary_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/{collection}/bins_summary.txt'
-    checkm_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{samples}/imp__tmtic_def1/{collection}/checkm/storage/bin_stats_ext.tsv'
+    bins_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
+    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    summary_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/bins_summary.txt'
+    checkm_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/checkm/storage/bin_stats_ext.tsv'
 
     def __init__(self, dfs, preprocs, samples, collection):
         self.dfs = dfs
@@ -202,12 +202,12 @@ class MagCollection:
         self.samples = samples
         self.collection = collection
         bins  = [r.split('/')[-1] for r 
-             in glob.glob(self.bins_wc.format(binn = '*', samples = self.samples, collection=collection))]
+             in glob.glob(self.bins_wc.format(binn = '*', dfs = dfs, samples = self.samples, collection=collection))]
 
         mags = []
         for b in bins:
             try:
-                taxa = pd.read_csv(self.taxa_wc.format(binn = b, samples = self.samples, collection=collection), header=None, sep='\t')
+                taxa = pd.read_csv(self.taxa_wc.format(binn = b, dfs = dfs, samples = self.samples, collection=collection), header=None, sep='\t')
                 taxa = taxa.fillna('Unknown')
                 dd = {"Bin": b,
                 'Taxa': list(taxa[0])[0].split('-')[0] + '__' + list(taxa[1])[0]
@@ -215,12 +215,12 @@ class MagCollection:
                 mags.append(dd)
             except:
                 pass
-                print("Can't load: ", self.taxa_wc.format(binn = b, samples = self.samples, collection=collection))
+                print("Can't load: ", self.taxa_wc.format(binn = b, dfs = dfs, samples = self.samples, collection=collection))
             
             # mags.append(dd)
         self.bins = pd.DataFrame(mags)
 
-        self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples, collection=collection), sep='\t')
+        self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples, dfs = dfs, collection=collection), sep='\t')
         try:
             self.checkm = self.get_bins()
             subcheckm = self.checkm[['Bin', 'Completeness', 'Contamination', 'marker lineage']]
@@ -246,7 +246,7 @@ class MagCollection:
 
     def get_bins(self):
         bins = []
-        with open(self.checkm_wc.format(samples = self.samples, collection=self.collection), 'r') as checkm: 
+        with open(self.checkm_wc.format(dfs = self.dfs, samples = self.samples, collection=self.collection), 'r') as checkm: 
             for line in checkm:
                 dic=eval(line.strip().split("\t")[1])
                 dic.update({'Bin': line.strip().split("\t")[0]})

@@ -21,7 +21,7 @@ rule centrifuge:
         report =         '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_report.tsv',
         classification = '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_classification.tsv',
         krak =           '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv', 
-    threads:  10
+    threads:  20
     log:       '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/log.txt'
     benchmark: '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/benchmark.txt'
     conda: 'env_v1.0.4_beta.yaml'
