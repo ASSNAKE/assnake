@@ -167,14 +167,11 @@ rule anvi_summarize:
                  -C {wildcards.collection} \
                  -o {params.wd}''')
         
-rule anvi_get_hmm_seqs:
-    input: db_f = anvi_dir+'db/{ref}/contigs.db'
-    output: hmm_seqs = anvi_dir+'db/{ref}/hmm_seqs.fa'
-    run: 
-        shell('''{ANVI}anvi-get-sequences-for-hmm-hits -c {input.db_f} -o {output.hmm_seqs}''')
-        
-rule fuck:
-    input:db_f = anvi_dir+'db/{ref}/contigs.db'
-    output:func = anvi_dir+'db/{ref}/functions.txt'
-    run: shell("{ANVI}anvi-export-functions -c {input.db_f} -o {output.func}")    
-     
+rule export_cov:
+    input:
+        contigs = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db'),
+        merged = '/data6/bio/TFM/pipeline/datasets/{dfs}/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
+    output: '/data6/bio/TFM/pipeline/datasets/{dfs}/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/cov/contigs-COVs.txt'
+    params: '/data6/bio/TFM/pipeline/datasets/{dfs}/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/cov',
+    shell: ('''source /data4/bio/fedorov/miniconda3/bin/activate anvio5; \n
+        anvi-export-splits-and-coverages -p {input.merged} -c {input.contigs} -o {params} -O contigs --report-contigs''')
