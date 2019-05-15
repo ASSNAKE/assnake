@@ -68,12 +68,13 @@ rule maxbin2:
         done       = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/maxbin2.done'
     params:
         wd         = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/bins/',
-        prefix     = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/bins/bin'
+        prefix     = 'bin'
     log:             '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/log.txt'
     benchmark:       '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/benchmark.txt'
     threads: 40
     conda: 'maxbin2_env.yaml'
     shell: ('''export PERL5LIB="/data6/bio/TFM/pipeline/.snakemake/conda/fcda6b9a/lib/site_perl/5.26.2";\n
         mkdir -p {params.wd}; \n
+        cd {params.wd}; \n
         (run_MaxBin.pl -contig {input.fa} -out {params.prefix} -abund_list {input.abund_list} -thread {threads}) >{log} 2>&1; \n
             touch {output.done}''')
