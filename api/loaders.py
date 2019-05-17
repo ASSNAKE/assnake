@@ -647,7 +647,7 @@ def load_mag_contigs(meta, source, assembly, centr, binn, collection):
     
     return merged
 
-def load_mags_info(meta, source, dfs, assembly, centr, collection):
+def load_mags_info(meta, source, dfs, assembly, centr, collection, report_abundance_as = 'width'):
     '''
     Loads information about MAGs for specific assembly and samples, estimates abundance and returns a dataframe
      with index corresponding to bins and columns corresponding to abundance in samples. Can be transformed to OTU table by applying `df.T`
@@ -682,10 +682,12 @@ def load_mags_info(meta, source, dfs, assembly, centr, collection):
         merged['part'] = merged['Length']/merged['Length'].sum()
         for s in samples_for_source:
             no_drop.append('avg_on_per_on_part__'+s)
+            no_drop.append('cov_width__'+s)
 
             merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
 #             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/(centr.loc[s]['bacteria'].item() + centr.loc[s]['uncl'].item())
+            merged['cov_width__'+s] = merged['Covered_percent__'+s]/100*merged['part']
         cols = list(merged.columns)    
         drop = list(set(cols) - set(no_drop))    
 
@@ -696,7 +698,10 @@ def load_mags_info(meta, source, dfs, assembly, centr, collection):
         # taxa = taxa.fillna('Unknown')
         dd = {'Mag': b}
         for s in samples_for_source:
-            dd.update({s: merged['avg_on_per_on_part__'+s].sum()})
+            if report_abundance_as == 'width':
+                dd.update({s: merged['cov_width__'+s].sum()})
+            else:
+                dd.update({s: merged['avg_on_per_on_part__'+s].sum()})
         mags.append(dd)
 
     mags = pd.DataFrame(mags)
