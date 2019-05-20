@@ -219,7 +219,7 @@ def plotly_heatmap(otu_table, title, groups = None):
                                        'ticks': ''
                                       }})
     
-
+    figure['layout'].update(dict(height=900, width=900))
     plotly.offline.iplot(figure, config={'showLink': True})
     return figure
 

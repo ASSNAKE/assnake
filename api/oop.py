@@ -98,7 +98,7 @@ class Dataset:
             self.fs_prefix,
             self.samples_meta.to_dict(orient='records'), 
             dbs=db, 
-            index_by='sample', 
+            index_by='fs_name', 
             norm = False, 
             modifier = 'norm_unstratified')
 

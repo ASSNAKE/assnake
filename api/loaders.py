@@ -477,22 +477,22 @@ def load_hm2(prefix, samples, dbs = 'chocophlan__uniref90', index_by = 'fs_name'
                             dbs = dbs,
                            modifier=modifier)
         if os.path.isfile(loc):
-            try:
-                hp2_df = pd.read_csv(loc, sep='\t')
-                hp2_df = hp2_df.set_index('# Pathway')
-                hp2_df.columns = [s[index_by]]
-                hp2_df.index.name = ''
-                hp2_df = hp2_df.T
-                if norm:
-                    count = load_sample(df = s['df'], preproc=s['preproc'], sample = s['fs_name'])
-                    comp = general_taxa_one(s)
-                    if comp is not None:
-                        hp2_df = hp2_df.divide(comp['bacteria'])
-                    else:
-                        hp2_df = hp2_df.divide(count['reads'])
-                dfs.append(hp2_df)
-            except:
-                print('ERROR: ' + loc)
+            # try:
+            hp2_df = pd.read_csv(loc, sep='\t')
+            hp2_df = hp2_df.set_index('# Pathway')
+            hp2_df.columns = [s[index_by]]
+            hp2_df.index.name = ''
+            hp2_df = hp2_df.T
+            if norm:
+                count = load_sample(df = s['df'], preproc=s['preproc'], sample = s['fs_name'])
+                comp = general_taxa_one(s)
+                if comp is not None:
+                    hp2_df = hp2_df.divide(comp['bacteria'])
+                else:
+                    hp2_df = hp2_df.divide(count['reads'])
+            dfs.append(hp2_df)
+            # except:
+                # print('ERROR: ' + loc)
         else:
             print(loc)
     mp2_combined = pd.concat(dfs, axis=0)
