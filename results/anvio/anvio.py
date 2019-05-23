@@ -131,6 +131,7 @@ rule anvi_merge:
         samples = get_samples_to_merge
     output:        
         done = '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/merge.done',
+        merged = '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
     log:
        '{prefix}/{df}/anvio/merged_profiles/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/log.txt',
     params:
@@ -150,10 +151,11 @@ rule anvi_merge:
 def get_bins(wildcards):
     bin_wc = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/conocot_anvio5_def/bin_by_bin')
 
+# TODO - PREFIX!!
 rule anvi_summarize:
     input:
         contigs = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.db'),
-        merged = '/data6/bio/TFM/pipeline/datasets/{dfs}/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
+        merged = '/data6/bio/TFM/datasets/{dfs}/anvio/merged_profiles/bwa__def1___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/MERGED/db/PROFILE.db',
     output:        
         bins_summary = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/bins_summary.txt'),
     params:
