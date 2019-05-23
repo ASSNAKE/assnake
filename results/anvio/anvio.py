@@ -86,7 +86,7 @@ rule anvi_profile:
         if str.isdigit(sample_name[0]):
             sample_name = 's' + sample_name 
         shell('''
-            source /data4/bio/fedorov/miniconda3/bin/activate anvio5; \n
+            source /data6/bio/TFM/soft/miniconda3/bin/activate anvio5; \n
             sample="{sample_name}" \n
             sample=$(tr -d - <<< $sample) \n
                 anvi-profile \
