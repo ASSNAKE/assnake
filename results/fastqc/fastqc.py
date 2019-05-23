@@ -9,5 +9,5 @@ rule fastqc:
     threads: 6
     conda: 'env_v0.11.8.yaml'
     shell: ('''fastqc -t {threads} -o {params.out} {input} >{log} 2>&1; \n
-          unzip {output.zipped} -d {params.zip_out}''')
+          unzip -o {output.zipped} -d {params.zip_out}''')
         #save_to_db(config['task_id'], rule, str(input), str(output.zipped), 'RUN SUCCESSFUL')
