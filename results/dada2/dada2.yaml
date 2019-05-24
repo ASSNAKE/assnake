@@ -3,5 +3,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconductor-genomeinfodbdata
   - bioconductor-dada2
