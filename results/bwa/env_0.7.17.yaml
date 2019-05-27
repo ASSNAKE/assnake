@@ -1,6 +1,5 @@
 name: bwa
 channels:
-  - ursky
   - bioconda
   - conda-forge
   - defaults

@@ -1,5 +1,4 @@
 channels:
-  - ursky
   - bioconda
   - conda-forge
   - defaults

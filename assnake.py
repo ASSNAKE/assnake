@@ -48,7 +48,7 @@ def main():
                                 conda_prefix = conda_prefix
                                 )
 
-    if 1: # translate "success" into shell exit code of 0
+    if status: # translate "success" into shell exit code of 0
        return 0
     return 1
 

@@ -1,6 +1,5 @@
 name: humann2
 channels:
-  - ursky
   - bioconda
   - conda-forge
   - defaults

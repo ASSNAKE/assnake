@@ -1,6 +1,5 @@
 name: MetaPhlAn2
 channels:
-  - ursky
   - bioconda
   - conda-forge
   - defaults

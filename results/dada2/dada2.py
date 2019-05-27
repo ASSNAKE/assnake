@@ -8,5 +8,6 @@ rule dada2_filater_and_trim:
     output:
         r1 = '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R1.fastq.gz',
         r2 = '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R2.fastq.gz'
+    log: '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}.log'
     conda: 'dada2.yaml'
-    wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'results/dada2/filter_trim_wrapper.py')
+    wrapper: "file:///data6/bio/TFM/pipeline/assnake/results/dada2/filter_trim_wrapper.py"
