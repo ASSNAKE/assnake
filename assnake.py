@@ -19,6 +19,8 @@ def main():
     parser.add_argument('-s', type=str, default='',
                         help='Snakefile with defenitions of your request')
     parser.add_argument('-n', '--dry-run', action='store_true')
+    parser.add_argument('-j', '--jobs', type=int, default=1, help='Number of jobs')
+    parser.add_argument('--threads', type=int, default=1, help='Threads per job')
     parser.add_argument("target",
                         nargs="*",
                         default=None,
