@@ -669,10 +669,10 @@ def load_mags_info(meta, source, dfs, assembly, assembler, centr, collection, re
                            'bwa', 
                            'imp__tmtic_def1', 
                            'assembly___{assembler}___{dfs}___{ass}___imp__tmtic_def1'.format(ass = assembly, assembler=assembler, dfs= dfs),
-                          'final_contigs__1000__no_hum_centr')
+                          'final_contigs__1000')
 
     for b in bins:
-        contigs_in_bin = pd.read_csv(bin_wc.format(binn = b, ass = assembly, dfs= dfs, collection=collection), header=None)
+        contigs_in_bin = pd.read_csv(bin_wc.format(binn = b, ass = assembly,assembler=assembler, dfs= dfs, collection=collection), header=None)
         contigs_in_bin.columns = ['contig']
         merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
         merged = merged.drop(['#ID'], axis=1)
@@ -686,7 +686,8 @@ def load_mags_info(meta, source, dfs, assembly, assembler, centr, collection, re
 
             merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
 #             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
-            merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/(centr.loc[s]['bacteria'].item() + centr.loc[s]['uncl'].item())
+            if centr is not None:
+                merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/(centr.loc[s]['bacteria'].item() + centr.loc[s]['uncl'].item())
             merged['cov_width__'+s] = merged['Covered_percent__'+s]/100*merged['part']
         cols = list(merged.columns)    
         drop = list(set(cols) - set(no_drop))    

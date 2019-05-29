@@ -194,13 +194,14 @@ class MagCollection:
     bins_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
     taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
     summary_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/bins_summary.txt'
-    checkm_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{samples}/imp__tmtic_def1/{collection}/checkm/storage/bin_stats_ext.tsv'
+    checkm_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{samples}/imp__tmtic_def1/{collection}/checkm/storage/bin_stats_ext.tsv'
 
-    def __init__(self, dfs, preprocs, samples, collection):
+    def __init__(self, dfs, preprocs, samples, collection, assembler):
         self.dfs = dfs
         self.preprocs = preprocs,
         self.samples = samples
         self.collection = collection
+        self.assembler = assembler
         bins  = [r.split('/')[-1] for r 
              in glob.glob(self.bins_wc.format(binn = '*', dfs = dfs, samples = self.samples, collection=collection))]
 
@@ -220,16 +221,18 @@ class MagCollection:
             # mags.append(dd)
         self.bins = pd.DataFrame(mags)
 
-        self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples, dfs = dfs, collection=collection), sep='\t')
+        
         try:
+            self.summary = pd.read_csv(self.summary_wc.format(samples = self.samples, dfs = dfs, collection=collection), sep='\t')
             self.checkm = self.get_bins()
             subcheckm = self.checkm[['Bin', 'Completeness', 'Contamination', 'marker lineage']]
             self.summary = self.summary.merge(subcheckm, left_on = 'bins', right_on = 'Bin')
             self.summary = self.summary.drop(['Bin'], axis=1)
+            self.summary = self.summary.merge(self.bins, left_on = 'bins', right_on = 'Bin')
+            self.summary = self.summary.drop(['bins'], axis=1)
         except:
             pass
-        self.summary = self.summary.merge(self.bins, left_on = 'bins', right_on = 'Bin')
-        self.summary = self.summary.drop(['bins'], axis=1)
+        
 
     def filter_by_comp_cont(self, completeness, contamination):
         summ = self.summary.loc[self.summary['Completeness'] > completeness]
@@ -246,7 +249,7 @@ class MagCollection:
 
     def get_bins(self):
         bins = []
-        with open(self.checkm_wc.format(dfs = self.dfs, samples = self.samples, collection=self.collection), 'r') as checkm: 
+        with open(self.checkm_wc.format(dfs = self.dfs, samples = self.samples, collection=self.collection,assembler=self.assembler), 'r') as checkm: 
             for line in checkm:
                 dic=eval(line.strip().split("\t")[1])
                 dic.update({'Bin': line.strip().split("\t")[0]})
