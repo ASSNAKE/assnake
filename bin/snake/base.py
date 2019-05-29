@@ -42,6 +42,7 @@ include: results + 'strain_finder/strain_finder.py'
 include: results + 'cat_bat/cat_bat.py'
 include: results + 'maxbin2/maxbin2.py'
 include: results + 'dada2/dada2.py'
+include: results + 'coverage/profile.py'
 
 
 

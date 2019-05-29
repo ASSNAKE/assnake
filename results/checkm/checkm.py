@@ -28,7 +28,7 @@ rule check_m_collection:
         bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins/'), 
     log:          os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/checkm-log.txt')
     benchmark:      os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/checkm-benchmark.txt')
-    threads: 40
+    threads: 24
     conda: 'checkm_env.yaml'
     shell: ('''echo {CHECKM} | checkm data setRoot {CHECKM}; \n
         (checkm lineage_wf -t {threads} -x fa {params.bin_folder} {params.wd}) >{log} 2>&1; \n

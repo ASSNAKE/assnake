@@ -647,7 +647,7 @@ def load_mag_contigs(meta, source, assembly, centr, binn, collection):
     
     return merged
 
-def load_mags_info(meta, source, dfs, assembly, centr, collection, report_abundance_as = 'width'):
+def load_mags_info(meta, source, dfs, assembly, assembler, centr, collection, report_abundance_as = 'width'):
     '''
     Loads information about MAGs for specific assembly and samples, estimates abundance and returns a dataframe
      with index corresponding to bins and columns corresponding to abundance in samples. Can be transformed to OTU table by applying `df.T`
@@ -655,10 +655,10 @@ def load_mags_info(meta, source, dfs, assembly, centr, collection, report_abunda
     mags = []
     
     # TODO replace with load_mag_contigs function
-    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
-    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    bin_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
+    taxa_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
     bins  = [r.split('/')[-1] for r 
-             in glob.glob(bin_wc.format(binn = '*', dfs=dfs, ass = assembly, collection=collection))]
+             in glob.glob(bin_wc.format(binn = '*', dfs=dfs, ass = assembly, assembler=assembler, collection=collection))]
     bin_wc += '/{binn}-contigs.names'
 
     samples_for_source = meta.loc[meta['source'] == source]
@@ -668,7 +668,7 @@ def load_mags_info(meta, source, dfs, assembly, centr, collection, report_abunda
                            samples_for_source,
                            'bwa', 
                            'imp__tmtic_def1', 
-                           'assembly___mh__def___{dfs}___{ass}___imp__tmtic_def1'.format(ass = assembly, dfs= dfs),
+                           'assembly___{assembler}___{dfs}___{ass}___imp__tmtic_def1'.format(ass = assembly, assembler=assembler, dfs= dfs),
                           'final_contigs__1000__no_hum_centr')
 
     for b in bins:
