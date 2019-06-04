@@ -617,33 +617,33 @@ def get_general_taxa_comp_krak_style(samples):
             print('NO FILE: ', loc)
     return comp
 
-def load_mag_contigs(meta, source, assembly, centr, binn, collection):
+def load_mag_contigs(samples, source, dfs, assembly, assembler, centr, binn, collection,):
     '''
     Loads info about one bin from MAGs, returns dataframe with contigs coverage info in samples.
     '''
-    bin_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-contigs.names'
-    taxa_wc = '/data5/bio/databases/fna/assembly/mh__def/FHM/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
-    
-    samples_for_source = meta.loc[meta['source'] == source]
-    samples_for_source = list(samples_for_source['fs_name'])
+    bin_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-contigs.names'
+    taxa_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+
+    # samples_for_source = meta.loc[meta['source'] == source]
+    # samples_for_source = list(samples_for_source['fs_name'])
     T5_stats = bb_stats.get_cov_stats('/data6/bio/TFM/pipeline/datasets', 
-                           'FHM', 
-                           samples_for_source,
+                           dfs, 
+                           samples,
                            'bwa', 
                            'imp__tmtic_def1', 
-                           'assembly___mh__def___FHM___{ass}___imp__tmtic_def1'.format(ass = assembly),
-                          'final_contigs__1000__no_hum_centr')
+                           'assembly___{assembler}___{dfs}___{ass}___imp__tmtic_def1'.format(ass = assembly, assembler=assembler, dfs= dfs),
+                          'final_contigs__1000')
 
-    contigs_in_bin = pd.read_csv(bin_wc.format(binn = binn, ass = assembly, collection=collection), header=None)
+    contigs_in_bin = pd.read_csv(bin_wc.format(binn = binn, ass = assembly,assembler=assembler, dfs= dfs, collection=collection), header=None)
     contigs_in_bin.columns = ['contig']
     merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
     merged = merged.drop(['#ID'], axis=1)
 
     merged['part'] = merged['Length']/merged['Length'].sum()
-    for s in samples_for_source:
+    for s in samples:
         merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
 #             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
-        merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/centr.loc[s]['bacteria'].item()
+        # merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/centr.loc[s]['bacteria'].item()
     
     return merged
 
@@ -657,6 +657,7 @@ def load_mags_info(meta, source, dfs, assembly, assembler, centr, collection, re
     # TODO replace with load_mag_contigs function
     bin_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
     taxa_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
+    
     bins  = [r.split('/')[-1] for r 
              in glob.glob(bin_wc.format(binn = '*', dfs=dfs, ass = assembly, assembler=assembler, collection=collection))]
     bin_wc += '/{binn}-contigs.names'

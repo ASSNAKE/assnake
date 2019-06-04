@@ -1,6 +1,6 @@
 import yaml
 
-rule dada2_filater_and_trim:
+rule dada2_filter_and_trim:
     input: 
         r1 = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
         r2 = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
@@ -24,4 +24,4 @@ rule dada2_derep_dada_merge:
     log: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{run}.log'
     conda: 'dada2.yaml'
     shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
-        Rscript  /data6/bio/TFM/pipeline/assnake/results/dada2/scripts/derep_dada_merge.R '{input.r1}' '{input.r2}' '{input.errF}' '{input.errR}' '{output.merged}' 8 >{log} 2>&1''')
+        Rscript  /data6/bio/TFM/pipeline/assnake/results/dada2/scripts/derep_dada_merge.R '{input.r1}' '{input.r2}' '{input.errF}' '{input.errR}' '{output.merged}' 12 >{log} 2>&1''')
