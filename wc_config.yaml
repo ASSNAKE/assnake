@@ -1,4 +1,7 @@
 fastq_gz_file_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
-sample_dir_wc: '{prefix}/{df}/reads/{preproc}/{sample}'
+fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'
+sample_dir_wc:    '{prefix}/{df}/reads/{preproc}/{sample}'
+multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
+
 dada2_err_wc: '{dada2_dir}/{sample_set}/err{strand}.rds'
 dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'

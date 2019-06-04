@@ -8,6 +8,7 @@ class SampleSet:
 
     # prefix, df, preproc, fs_name
     samples = []
+    samples_df = None
     wc_config = None
     config = None
 
@@ -30,7 +31,34 @@ class SampleSet:
 
         for fs_name in fs_names:
             if not fs_name in do_not_add:
-                self.samples.append(dict(prefix=prefix, df=df, preproc=preproc, fs_name = fs_name))        
+                self.samples.append(dict(prefix=prefix, df=df, preproc=preproc, fs_name = fs_name))     
+
+        self.samples_df = pd.DataFrame(self.samples)
+
+    def prepare_fastqc_list_multiqc(self, strand, set_name):
+        fastqc_list = []
+
+        for s in self.samples:
+            fastqc_list.append(self.wc_config['fastqc_data_wc'].format(**s, strand=strand))
+
+        dfs = list(set(self.samples_df['df']))
+        
+        if len(dfs) == 1:
+            prefix = list(set(self.samples_df['prefix']))[0]
+            sample_list = self.wc_config['multiqc_fatqc_wc'].format(
+                df = dfs[0], 
+                prefix = prefix, 
+                strand = strand,
+                sample_set=set_name)
+            print(sample_list)
+            
+            multiqc_dir = os.path.dirname(sample_list)
+            if not os.path.isdir(multiqc_dir):
+                os.makedirs(multiqc_dir)
+                with open(sample_list, 'x') as file:
+                    file.writelines(':'.join(fastqc_list)) 
+
+        return fastqc_list
 
     def prepare_dada2_sample_list(self, set_name):
         dada2_set_dir = os.path.join(self.config['dada2_dir'], set_name)
