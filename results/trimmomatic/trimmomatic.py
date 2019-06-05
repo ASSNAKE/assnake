@@ -12,7 +12,7 @@ rule tmtic:
         u1="{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1_unpaired.fastq", 
         u2="{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R2_unpaired.fastq",
     log: "{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}.done"
-    threads: 20
+    threads: 12
     conda: 'env_0.38.yaml'
     wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'results/trimmomatic/wrapper.py')
         

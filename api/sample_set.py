@@ -55,8 +55,8 @@ class SampleSet:
             multiqc_dir = os.path.dirname(sample_list)
             if not os.path.isdir(multiqc_dir):
                 os.makedirs(multiqc_dir)
-                with open(sample_list, 'x') as file:
-                    file.writelines(':'.join(fastqc_list)) 
+            with open(sample_list, 'x') as file:
+                file.writelines('\n'.join(fastqc_list)) 
 
         return fastqc_list
 

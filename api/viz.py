@@ -87,7 +87,7 @@ def boxplots_dist(data, meta, type_of_data='', plot = True):
     
     return traces
 
-def plotly_heatmap(otu_table, title, groups = None):
+def plotly_heatmap(otu_table, title, groups = None, feature = ''):
     dend_cols = shc.dendrogram(shc.linkage(otu_table, method='ward'), no_plot = True) 
     dend_rows = shc.dendrogram(shc.linkage(otu_table.T, method='ward'), no_plot = True) 
     
@@ -140,32 +140,33 @@ def plotly_heatmap(otu_table, title, groups = None):
             colorscale='Viridis')]
     figure.add_traces(heatmap)
 
+    # Add grouping information to Heatmap
     if isinstance(groups, pd.DataFrame):
         heatmap = [go.Heatmap( 
-                z=groups['diagnosis'].values,
+                z=int(groups[feature].values),
                 x=figure['layout']['xaxis']['tickvals'],
                 y=[0]*len(groups),
                 yaxis = 'y3',
-                colorscale=[
-                    [0, 'green'], 
-                    [0.25, 'green'], 
+                # colorscale=[
+                #     [0, 'green'], 
+                #     [0.25, 'green'], 
                     
-                    [0.25, 'red'], 
-                    [0.5, 'red'], 
+                #     [0.25, 'red'], 
+                #     [0.5, 'red'], 
                     
-                    [0.5, 'blue'],
-                    [0.75, 'blue'],
+                #     [0.5, 'blue'],
+                #     [0.75, 'blue'],
                     
-                    [0.75, 'black'],
-                    [1, 'black']
-                ],
+                #     [0.75, 'black'],
+                #     [1, 'black']
+                # ],
                 
-                colorbar = {
-                    'x':1.1, 
-                    'tickvals': [0,1,2,3],
-                    'ticktext': ['Control','CeD','UC', 'CD']
-                    })
-                ]
+                # colorbar = {
+                #     'x':1.1, 
+                #     'tickvals': [0,1,2,3],
+                #     'ticktext': ['Control','CeD','UC', 'CD']
+                #     }
+            )]
         figure.add_traces(heatmap)
 
         figure['layout'].update({'yaxis3':{'domain':[0, .1],
@@ -247,9 +248,13 @@ def time_filled_scatter(otu_table):
     fig = dict(data=data)
     plotly.offline.iplot(fig, config={'showLink': True})
 
-def plot_reads_bps(meta):
-    meta = meta.sort_values('bps')
-    data = [go.Bar( x=meta['fs_name'], y=meta['bps'] )]
+def plot_reads_bps(meta, reads=True):
+    feature = 'reads'
+    if reads == False:
+        feature = 'bps'
+
+    meta = meta.sort_values(feature)
+    data = [go.Bar( x=meta['fs_name'], y=meta[feature] )]
     fig = go.Figure(data=data)
     plotly.offline.iplot(fig)
     

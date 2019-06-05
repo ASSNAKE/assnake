@@ -43,6 +43,7 @@ include: results + 'cat_bat/cat_bat.py'
 include: results + 'maxbin2/maxbin2.py'
 include: results + 'dada2/dada2.py'
 include: results + 'coverage/profile.py'
+include: results + 'multiqc/multiqc.py'
 
 
 
