@@ -1,5 +1,5 @@
-from Bio import SeqIO
-import pysam
+# from Bio import SeqIO
+# import pysam
 
 def load_coverage_info_for_markers_in_sequences(fasta_loc, bampath_wc, working_dir,
                                                 only_variable = True, print_progress = True):
