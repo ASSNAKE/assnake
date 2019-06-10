@@ -84,6 +84,9 @@ hmmer:
 MetaPhlAn2:
     mpa_v20_m200: '/data5/bio/databases/MetaPhlAn2/mpa_v20_m200/mpa_v20_m200.pkl'
     BOWTIE2DB: '/data5/bio/databases/MetaPhlAn2/mpa_v20_m200'
+
+    mpa_v29: '/data5/bio/databases/MetaPhlAn2/mpa_v29_CHOCOPhlAn_201901/mpa_v29_CHOCOPhlAn_201901.pkl'
+    mpa_v29_bt: '/data5/bio/databases/MetaPhlAn2/mpa_v29_CHOCOPhlAn_201901'
 METAPHLAN2: '/data3/bio/biouser/tools/metaphlan2/metaphlan2.py'
 MPA_PKL: '/data3/bio/biouser/tools/metaphlan2/db_v20/mpa_v20_m200.pkl'
 BOWTIE2DB: '/data3/bio/biouser/tools/metaphlan2/db_v20/mpa_v20_m200'

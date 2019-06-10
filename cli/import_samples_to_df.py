@@ -5,6 +5,7 @@ import sys
 import glob
 import fnmatch
 
+"Script for importing files to the assnake. Creates {prefix}/{df}/reads/{preproc}/{sample_name}"
 
 def find_files(base, pattern):
     """

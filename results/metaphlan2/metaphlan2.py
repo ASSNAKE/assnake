@@ -6,8 +6,9 @@ rule metaphlan2:
         o = '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.mp2'
     params:
         b =  '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.b2',
-        MPA_PKL = config['MetaPhlAn2']['mpa_v20_m200'],
-        BOWTIE2DB = config['MetaPhlAn2']['BOWTIE2DB'],
+        MPA_PKL = config['MetaPhlAn2']['mpa_v29'],
+        BOWTIE2DB = config['MetaPhlAn2']['mpa_v29_bt'],
+        INDEX = 'mpa_v29_CHOCOPhlAn_201901'
         task_id = config['task_id'] if 'task_id' in config.keys() else None,
     log: '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/log.txt'
     benchmark: '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/time.txt'

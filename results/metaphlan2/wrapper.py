@@ -8,6 +8,6 @@ from snakemake.shell import shell
 
 print(snakemake.params.task_id)
 
-shell('''metaphlan2.py --mpa_pkl {snakemake.params.MPA_PKL} --bowtie2db {snakemake.params.BOWTIE2DB} \
+shell('''metaphlan2.py --mpa_pkl {snakemake.params.MPA_PKL} --bowtie2db {snakemake.params.BOWTIE2DB} -x {snakemake.params.INDEX}  \
          {snakemake.input.r1},{snakemake.input.r2} --input_type fastq --bowtie2out {snakemake.params.b} \
          --nproc {snakemake.threads} > {snakemake.output.o}''' )
