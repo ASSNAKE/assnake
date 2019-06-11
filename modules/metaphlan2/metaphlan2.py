@@ -14,5 +14,5 @@ rule metaphlan2:
     benchmark: '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/time.txt'
     threads: 12
     conda: 'env_2.7.8.yaml'
-    wrapper: "file:///data6/bio/TFM/pipeline/assnake/results/metaphlan2/wrapper.py"
+    wrapper: "file:///data6/bio/TFM/pipeline/assnake/modules/metaphlan2/wrapper.py"
         

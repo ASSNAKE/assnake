@@ -14,5 +14,5 @@ rule tmtic:
     log: "{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}.done"
     threads: 12
     conda: 'env_0.38.yaml'
-    wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'results/trimmomatic/wrapper.py')
+    wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'modules/trimmomatic/wrapper.py')
         

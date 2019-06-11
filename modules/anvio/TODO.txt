@@ -1,0 +1,10 @@
+UPDATE MERGED PROFILES AND STUFF
+
+ANVIO DB AND PROFILE_DB SHOULD GO HAND TO HAND.
+
+Inside dataset?
+Inside fna_db_dir?
+
+Virtual datasets?
+
+

@@ -2,6 +2,16 @@
 import os
 import json
 import pandas as pd
+import yaml
+
+# LOAD WC CONFIG
+wc_config = None
+wc_config_loc = os.path.join(dir_of_this_file, '../wc_config.yaml')
+with open(wc_config_loc, 'r') as stream:
+    try:
+        wc_config = yaml.load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
 
 # Configuration
 include: os.path.join(config['assnake_install_dir'], 'bin/snake/base.py')
@@ -56,6 +66,9 @@ centr_loc = centr_wc.format(prefix = test_df_prefix,
                             sample = samples[samp_ind])
 
 i_want = count_locs + [tmtic_req, mp2_loc, centr_loc]
+
+
+
 
 rule main_test:
     input: i_want

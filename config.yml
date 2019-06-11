@@ -5,7 +5,7 @@ fna_db_dir: '/data5/bio/databases/fna/'
 run_dir: ''
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
 conda_prefix: '/data4/bio/fedorov/assnake_conda/'
-assnake_install_dir: '/data6/bio/TFM/pipeline/assnake'
+assnake_install_dir: '/data4/bio/fedorov/assnake_dev'
 dada2_dir: '/data6/bio/TFM/dada2'
 
 # TEST DATASET

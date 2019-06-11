@@ -1,6 +1,6 @@
 install_dir = config['assnake_install_dir']
-prune_script = os.path.join(install_dir, 'results/metawrap_classify_bins/prune_blast_hits.py')
-classify_bins = os.path.join(install_dir, 'results/metawrap_classify_bins/classify_bins.py')
+prune_script = os.path.join(install_dir, 'modules/metawrap_classify_bins/prune_blast_hits.py')
+classify_bins = os.path.join(install_dir, 'modules/metawrap_classify_bins/classify_bins.py')
 NCBI_TAX =config['NCBI_TAX']
 NCBI_NODES = os.path.join(config['NCBI_TAX'],'nodes.dmp')
 

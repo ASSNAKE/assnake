@@ -73,7 +73,7 @@ rule sf_to_numpy:
         aligments = '{prefix}/{df}/StrainFinder/bwa__{params}/{preproc}/{sample_list}/all_alignments.cPickle'
     conda: '../../envs/python3_std.yaml'    
     shell: ('''which python;\n
-        python {config[assnake_install_dir]}/results/strain_finder/scripts/kp2np.py --samples {input.samples} --gene_file {input.gf} --out {output.aligments}''')
+        python {config[assnake_install_dir]}/modules/strain_finder/scripts/kp2np.py --samples {input.samples} --gene_file {input.gf} --out {output.aligments}''')
         
 rule sf_concact:
     input:
@@ -84,7 +84,7 @@ rule sf_concact:
     output:
         log = '{prefix}/{df}/StrainFinder/bwa__{params}/{preproc}/{sample_list}/all_alignments.log'
     run:
-        shell('python {config[assnake_install_dir]}/results/strain_finder/scripts/filter_np.py --aln {input.aln} --map {input.mapp} --samples {input.samples} > {output.log}')
+        shell('python {config[assnake_install_dir]}/modules/strain_finder/scripts/filter_np.py --aln {input.aln} --map {input.mapp} --samples {input.samples} > {output.log}')
 
         
 rule sf:
@@ -97,4 +97,4 @@ rule sf:
     conda: 'python_env.yaml'
     shell: ('''conda activate /data6/bio/TFM/pipeline/.snakemake/conda/caf26b02;\n
         which python2.7; \n
-        /data6/bio/TFM/pipeline/.snakemake/conda/3dfdbd67/bin/python {config[assnake_install_dir]}/results/strain_finder/scripts/StrainFinder.py --aln {input.aln} -N 5 --max_reps 10 --dtol 1 --ntol 2 --max_time 3600 --converge  --em_out {output.em_out} --otu_out {output.otu_out} --log {output.log} --n_keep 3 --force_update --merge_out --msg''')
+        /data6/bio/TFM/pipeline/.snakemake/conda/3dfdbd67/bin/python {config[assnake_install_dir]}/modules/strain_finder/scripts/StrainFinder.py --aln {input.aln} -N 5 --max_reps 10 --dtol 1 --ntol 2 --max_time 3600 --converge  --em_out {output.em_out} --otu_out {output.otu_out} --log {output.log} --n_keep 3 --force_update --merge_out --msg''')

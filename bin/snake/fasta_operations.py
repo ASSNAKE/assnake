@@ -3,6 +3,7 @@ rule extract_sequence_names:
     output: os.path.join(fna_db_dir, '{path}/{seq_set_id}.names')
     shell: ('''awk 'sub(/^>/, "")' {input} > {output}''')
 
+
 rule filter_by_kumar:
     input: sam = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped.sam'
     output:
@@ -13,7 +14,7 @@ rule filter_by_kumar:
         no_xa = '{prefix}/{df}/mapped/bwa__{params}/{path}/{seq_set_id}/{sample}/{preproc}/mapped_no_xa.sam',
     run: 
         shell('echo "{input.sam}"')
-        shell('python /data6/bio/TFM/pipeline/assnake/bin/scripts/mgSNP_sam-filter.py -i {input.sam} -o {params.filt_sam} -m 97 -l 60')   
+        shell('python {config[assnake_install_dir]}/assnake/bin/scripts/mgSNP_sam-filter.py -i {input.sam} -o {params.filt_sam} -m 97 -l 60')   
         shell('grep -v "XA:" {params.filt_sam} > {params.no_xa}')   
         shell('{config[samtools.bin]} view -bS {params.no_xa} -o {params.tmp}')
         shell('{config[samtools.bin]} sort {params.tmp} -o {output.bam}')
