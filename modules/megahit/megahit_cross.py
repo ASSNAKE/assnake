@@ -102,7 +102,7 @@ rule megahit_from_table:
     input:
         unpack(megahit_input_from_table),
         table      = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv',
-        
+        params=os.path.join(config['assnake_db'], "params/megahit/{params}.json")
     output:
         out_fa     = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa'
     params:
@@ -110,14 +110,7 @@ rule megahit_from_table:
     threads: 24
     log: '{prefix}/{df}/assembly/mh__{params}/{sample_set}/log.txt'
     conda: 'megahit_env_v1.1.3.yaml'
-    run:
-        reads1 = ",".join(input.F)
-        reads2 = ",".join(input.R)
-        if os.path.exists(params.out_folder) and os.path.isdir(params.out_folder):
-            shutil.rmtree(params.out_folder)
-        shell('{config[megahit.bin]} -1 {reads1} -2 {reads2} --min-contig-len 850 -o {params.out_folder} -t {threads}  >{log} 2>&1')
-        fc_loc = params.out_folder+'final.contigs.fa'
-        shell('cp {fc_loc} {output.out_fa}')
+    wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'modules/megahit/megahit_wrapper.py')
 
 
 rule refine_assemb_results_cross:
