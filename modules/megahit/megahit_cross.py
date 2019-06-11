@@ -1,5 +1,6 @@
 import shutil
 import os
+import pandas as pd
 
 assembly_dir = config['assembly_dir']
 assnake_db = config['assnake_db']
@@ -79,34 +80,41 @@ def megahit_input_from_table(wildcards):
     table = pd.read_csv(table_wc.format(prefix = wildcards.prefix,
                                         df = wildcards.df,
                                         params = wildcards.params,
-                                        sample_set = wildcards.sample_set)
+                                        sample_set = wildcards.sample_set),
                         sep = '\t')
     rr1 = []
     rr2 = []                        
-    for s in table.to_dict(orient='records'):
-        print(s)
-                        
-    rr1.append(r_wc_str.format(prefix=prefix,df=df, preproc=p,sample=s,strand='R1'))
-    rr2.append(r_wc_str.format(prefix=prefix,df=df, preproc=p,sample=s,strand='R2'))
+    for s in table.to_dict(orient='records'):     
+        rr1.append(r_wc_str.format(prefix=wildcards.prefix,
+                                    df=s['df'], 
+                                    preproc=s['preproc'],
+                                    sample=s['sample'],
+                                    strand='R1'))
+        rr2.append(r_wc_str.format(prefix=wildcards.prefix,
+                                    df=s['df'], 
+                                    preproc=s['preproc'],
+                                    sample=s['sample'],
+                                    strand='R2'))
     return {'F': rr1, 'R': rr2}
 
 
 rule megahit_from_table:
     input:
-        table      = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv'
-        unpack(megahit_input)
+        unpack(megahit_input_from_table),
+        table      = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv',
+        
     output:
         out_fa     = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa'
     params:
         out_folder = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/assembly/'
     threads: 24
     log: '{prefix}/{df}/assembly/mh__{params}/{sample_set}/log.txt'
+    conda: 'megahit_env_v1.1.3.yaml'
     run:
         reads1 = ",".join(input.F)
         reads2 = ",".join(input.R)
         if os.path.exists(params.out_folder) and os.path.isdir(params.out_folder):
             shutil.rmtree(params.out_folder)
-            #os.makedirs(params.out_folder)
         shell('{config[megahit.bin]} -1 {reads1} -2 {reads2} --min-contig-len 850 -o {params.out_folder} -t {threads}  >{log} 2>&1')
         fc_loc = params.out_folder+'final.contigs.fa'
         shell('cp {fc_loc} {output.out_fa}')

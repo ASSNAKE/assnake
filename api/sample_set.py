@@ -29,9 +29,14 @@ class SampleSet:
     def add_samples(self, prefix, df, preproc, samples = [], do_not_add = []):
         fs_names = [f.split('/')[-1] for f in glob.glob(self.wc_config['sample_dir_wc'].format(prefix=prefix, df=df, preproc=preproc, sample = '*'))]
 
-        for fs_name in fs_names:
-            if not fs_name in do_not_add:
-                self.samples.append(dict(prefix=prefix, df=df, preproc=preproc, fs_name = fs_name))     
+        if len(samples) > 0:
+            for s in samples:
+                if s in fs_names:
+                    self.samples.append(dict(prefix=prefix, df=df, preproc=preproc, fs_name = s))
+        else:
+            for fs_name in fs_names:
+                if not (fs_name in do_not_add):
+                    self.samples.append(dict(prefix=prefix, df=df, preproc=preproc, fs_name = fs_name))     
 
         self.samples_df = pd.DataFrame(self.samples)
 
@@ -74,5 +79,48 @@ class SampleSet:
 
         dada2_df = pd.DataFrame(dada2_dicts)
         dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
+
+    def prepare_assembly_set(self, assembler, params, set_name):
+        # prepare dataframe
+        samples = self.samples_df[['df', 'fs_name', 'preproc']]
+        samples = samples.rename({'fs_name': 'sample'}, axis=1)
+
+        # Here we select df and prefix where the list will be saved. What to do if thre is more than 1 df i the list?
+        dfs = list(set(self.samples_df['df']))
+        prefix = list(set(self.samples_df['prefix']))[0]
+
+        sample_table_loc = self.wc_config['assembly_table_wc'].format(
+                df = dfs[0], 
+                prefix = prefix, 
+                assembler = assembler,
+                params = params,
+                sample_set=set_name)
+
+        sample_table_dir = os.path.dirname(sample_table_loc)
+        if not os.path.isdir(sample_table_dir):
+            os.makedirs(sample_table_dir)
+        samples.to_csv(sample_table_loc, sep='\t', index=False)
+
+        # for s in self.samples:
+        #     fastqc_list.append(self.wc_config['fastqc_data_wc'].format(**s, strand=strand))
+
+        # 
+        
+        # if len(dfs) == 1:
+        #     prefix = list(set(self.samples_df['prefix']))[0]
+        #     sample_list = self.wc_config['multiqc_fatqc_wc'].format(
+        #         df = dfs[0], 
+        #         prefix = prefix, 
+        #         strand = strand,
+        #         sample_set=set_name)
+        #     print(sample_list)
+            
+        #     multiqc_dir = os.path.dirname(sample_list)
+        #     if not os.path.isdir(multiqc_dir):
+        #         os.makedirs(multiqc_dir)
+        #     with open(sample_list, 'x') as file:
+        #         file.writelines('\n'.join(fastqc_list)) 
+
+        
 
     

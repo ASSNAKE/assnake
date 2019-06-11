@@ -7,3 +7,5 @@ dada2_err_wc: '{dada2_dir}/{sample_set}/err{strand}.rds'
 dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'
 
 sam_wc: ''
+
+assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
