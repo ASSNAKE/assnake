@@ -39,7 +39,7 @@ reads2 = ','.join(snakemake.input.R)
 
 shell('''rm -rf {snakemake.params.out_folder}; megahit -1 {reads1} -2 {reads2} {params_str} -o {snakemake.params.out_folder} -t {snakemake.threads} > {snakemake.log} 2>&1''')
 fc_loc = snakemake.params.out_folder+'final.contigs.fa'
-shell('cp {fc_loc} {snakemake.output.out_fa}')
+shell('cp {fc_loc} {snakemake.output.out_fa}; cp {snakemake.input.params} {snakemake.output.params}')
 
 if 'task_id' in snakemake.config.keys():
     save_to_db(config['task_id'], 'tmtic', str(input), str(log), 'RUN SUCCESSFUL')

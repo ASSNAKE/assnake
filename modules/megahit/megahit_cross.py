@@ -104,7 +104,8 @@ rule megahit_from_table:
         table      = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv',
         params=os.path.join(config['assnake_db'], "params/megahit/{params}.json")
     output:
-        out_fa     = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa'
+        out_fa     = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa',
+        params = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/params.json'
     params:
         out_folder = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/assembly/'
     threads: 24
