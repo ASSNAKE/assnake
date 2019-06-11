@@ -5,3 +5,5 @@ multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
 
 dada2_err_wc: '{dada2_dir}/{sample_set}/err{strand}.rds'
 dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'
+
+sam_wc: ''

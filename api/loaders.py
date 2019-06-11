@@ -179,16 +179,18 @@ def load_count(prefix, df, preproc, sample):
 
 def load_dfs_from_db(db_loc):
     """
-    Returns list of dictionaries with info about datasets from fs database.
+    Returns dict of dictionaries with info about datasets from fs database. Key - df name
     Mandatory fields: df, prefix
     """
-    dfs = []
+    dfs = {}
     df_info_locs = glob.glob(db_loc+'/datasets/*/df_info.yaml')
     
     for df_info in df_info_locs:
         with open(df_info, 'r') as stream:
             try:
-                dfs.append(yaml.load(stream))
+                info = yaml.load(stream)
+                if 'df' in info:
+                    dfs.update({info['df']: info})
             except yaml.YAMLError as exc:
                 print(exc)
     return dfs
