@@ -26,7 +26,10 @@ class SampleSet:
         except yaml.YAMLError as exc:
             print(exc)
 
+        
     def add_samples(self, prefix, df, preproc, samples = [], do_not_add = []):
+        self.samples = []
+        self.samples_df = None
         fs_names = [f.split('/')[-1] for f in glob.glob(self.wc_config['sample_dir_wc'].format(prefix=prefix, df=df, preproc=preproc, sample = '*'))]
 
         if len(samples) > 0:
