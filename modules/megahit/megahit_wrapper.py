@@ -36,7 +36,7 @@ def megahit_params(params_loc):
 params_str = megahit_params(snakemake.input.params)
 reads1 = ','.join(snakemake.input.F)
 reads2 = ','.join(snakemake.input.R)
-
+print(snakemake.config)
 shell('''rm -rf {snakemake.params.out_folder}; megahit -1 {reads1} -2 {reads2} {params_str} -o {snakemake.params.out_folder} -t {snakemake.threads} > {snakemake.log} 2>&1''')
 fc_loc = snakemake.params.out_folder+'final.contigs.fa'
 shell('cp {fc_loc} {snakemake.output.out_fa}; cp {snakemake.input.params} {snakemake.output.params}')
