@@ -4,6 +4,9 @@ import glob
 import pandas as pd
 
 class SampleSet:
+    """
+    Class that agglomerates samles and provides convinience functions for different tasks.
+    """
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
     # prefix, df, preproc, fs_name
@@ -27,10 +30,14 @@ class SampleSet:
             print(exc)
 
         
-    def add_samples(self, prefix, df, preproc, samples = [], do_not_add = []):
+    def add_samples(self, prefix, df, preproc, samples = [], do_not_add = [], pattern = ''):
         self.samples = []
         self.samples_df = None
         fs_names = [f.split('/')[-1] for f in glob.glob(self.wc_config['sample_dir_wc'].format(prefix=prefix, df=df, preproc=preproc, sample = '*'))]
+
+        if pattern != '':
+            fs_names = [f.split('/')[-1] for f in 
+            glob.glob(self.wc_config['sample_dir_wc'].format(prefix=prefix, df=df, preproc=preproc, sample = pattern))]
 
         if len(samples) > 0:
             for s in samples:
@@ -124,6 +131,11 @@ class SampleSet:
         #     with open(sample_list, 'x') as file:
         #         file.writelines('\n'.join(fastqc_list)) 
 
-        
+
+    def __str__(self):
+        print('Number of samples: ', len(self.samples_df))
+
+    def __repr__(self):
+        return 'Number of samples: ' +  str(len(self.samples_df))
 
     
