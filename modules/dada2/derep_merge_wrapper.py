@@ -1,5 +1,6 @@
 from snakemake.shell import shell
 import yaml
+import os
 
 def get_params_str(params_loc):
     params_str = '{minOverlap}'

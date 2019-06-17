@@ -1,5 +1,6 @@
 from snakemake.shell import shell
 import yaml
+import os
 
 def get_params_str(params_loc):
     params_str = '{truncLen_f} {truncLen_r} {trimLeft_l} {trimLeft_r} {maxEE_f} {maxEE_r} {truncQ} {maxN}'
