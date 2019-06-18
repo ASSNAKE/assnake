@@ -46,7 +46,9 @@ class SampleSet:
         else:
             for fs_name in fs_names:
                 if not (fs_name in do_not_add):
-                    samples.append(loaders.load_sample(prefix, df, preproc, fs_name))     
+                    sample = loaders.load_sample(prefix, df, preproc, fs_name)
+                    sample.update({'prefix': prefix})
+                    samples.append(sample)     
 
         samples_pd = pd.DataFrame(samples)
         samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc']

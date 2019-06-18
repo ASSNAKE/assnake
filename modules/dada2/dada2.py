@@ -17,8 +17,8 @@ rule dada2_learn_errors:
         samples_list = os.path.join(config['dada2_dir'], '{sample_set}', 'samples.tsv'),
         params = os.path.join(config['assnake_db'], 'params/dada2/learn_errors/{params}.yaml')
     output:
-        err          = os.path.join(config['dada2_dir'], '{sample_set}__{params}/err{strand}.rds')
-    log:               os.path.join(config['dada2_dir'], '{sample_set}__{params}/err{strand}.log')
+        err          = os.path.join(config['dada2_dir'], '{sample_set}/{params}/err{strand}.rds')
+    log:               os.path.join(config['dada2_dir'], '{sample_set}/{params}/err{strand}.log')
     conda: 'dada2.yaml'
     wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/learn_errors_wrapper.py')
 

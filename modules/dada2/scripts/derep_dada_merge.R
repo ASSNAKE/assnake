@@ -19,7 +19,7 @@ ddF <- dada(derepF, err=errF, multithread=TRUE)
 ddR <- dada(derepR, err=errR, multithread=TRUE)
 
 # MERGE back
-merger <- mergePairs(ddF, derepF, ddR, derepR, minOverlap=8)
+merger <- mergePairs(ddF, derepF, ddR, derepR, minOverlap=minOverlap)
 
 # WRITE MERGED
 saveRDS(merger, merged) # CHANGE ME to where you want sequence table saved

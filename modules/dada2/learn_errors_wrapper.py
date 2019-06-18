@@ -3,7 +3,7 @@ import yaml
 import os
 
 def get_params_str(params_loc):
-    params_str = '{truncLen_f} {truncLen_r} {trimLeft_l} {trimLeft_r} {maxEE_f} {maxEE_r} {truncQ} {maxN}'
+    params_str = "'{randomize}' {MAX_CONSIST}"
     with open(snakemake.input.params, 'r') as stream:
         try:
             par = yaml.safe_load(stream)
