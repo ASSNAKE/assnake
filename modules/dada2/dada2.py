@@ -12,16 +12,16 @@ rule dada2_filter_and_trim:
     conda: 'dada2.yaml'
     wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/filter_trim_wrapper.py')
 
-learn_errors_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/learn_errors.R')
 rule dada2_learn_errors:
     input: 
-        samples_list = os.path.join(config['dada2_dir'], '{sample_set}', 'samples.tsv')
+        samples_list = os.path.join(config['dada2_dir'], '{sample_set}', 'samples.tsv'),
+        params = os.path.join(config['assnake_db'], 'params/dada2/learn_errors/{params}.yaml')
     output:
-        err   = os.path.join(config['dada2_dir'], '{sample_set}/err{strand}.rds')
-    log: os.path.join(config['dada2_dir'], '{sample_set}/err{strand}.log')
+        err          = os.path.join(config['dada2_dir'], '{sample_set}__{params}/err{strand}.rds')
+    log:               os.path.join(config['dada2_dir'], '{sample_set}__{params}/err{strand}.log')
     conda: 'dada2.yaml'
-    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
-        Rscript  {learn_errors_script} '{input.samples_list}' '{output.err}' '{wildcards.strand}' > {log} 2>&1''')
+    wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/learn_errors_wrapper.py')
+
 
 derep_dada_merge_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/derep_dada_merge.R')
 rule dada2_derep_dada_merge:

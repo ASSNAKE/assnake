@@ -153,28 +153,34 @@ def human2bytes(s):
 
 
 
-def load_count(prefix, df, preproc, sample):
+def load_count(prefix, df, preproc, sample, report_bps=False):
+    """
+    Loads information about read and bp count in paired-end sample.
+    """
     strands = ['R1', 'R2']
     count_loc1 = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strands[0])
     count_loc2 = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strands[1])
     
-    reads = -1
-    bps = -1
-    
+    count_dict = {'reads': -1}
+
     try:
         with open(count_loc1, 'r') as f:
             line = f.readline().rstrip()
-            reads += int(line.split(' ')[0])
-            bps += int(line.split(' ')[1])
+            count_dict['reads'] += int(line.split(' ')[0]) + 1
+            if report_bps:
+                count_dict.update({'bps':int(line.split(' ')[1])})
         with open(count_loc2, 'r') as f:
             line = f.readline().rstrip()
-            reads += int(line.split(' ')[0])
-            bps += int(line.split(' ')[1])
+            count_dict['reads'] += int(line.split(' ')[0])
+            if report_bps:
+                count_dict['bps'] += int(line.split(' ')[1])
     except:
-        print('error loading counts: ' + sample)
-        return {'reads': -1, 'bps': -1}
+        print('error loading counts: ', sample)
+        if report_bps:
+            count_dict.update({'bps': -1})
+        return count_dict
     
-    return {'reads': reads+1, 'bps': bps+1}
+    return count_dict
         
 
 def load_dfs_from_db(db_loc):
@@ -196,7 +202,8 @@ def load_dfs_from_db(db_loc):
     return dfs
 
 
-def load_sample(prefix, df, preproc, sample):
+def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False):
+    sample_dict = {}
     strands = ['R1', 'R2']
     
     final_preproc = ''
@@ -217,11 +224,12 @@ def load_sample(prefix, df, preproc, sample):
             containers.append(p)
             if len(p) > len(final_preproc):
                 final_preproc = p
-                size = os.path.getsize(r1) + os.path.getsize(r2)
+                if report_size:
+                    size = os.path.getsize(r1) + os.path.getsize(r2)
+                    sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
 
     return {'df':df, 'fs_name':sample, 'sample':sample,  'preproc':final_preproc, 
                          'preprocs':containers, 
-                         'size': bytes2human(size, symbols='iec'), 'bytes': size,
                          **load_count(prefix, df, final_preproc, sample)}
 
 def samples_in_df(df, db_loc):
