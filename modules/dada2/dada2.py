@@ -28,11 +28,18 @@ rule dada2_derep_dada_merge:
     input: 
         r1     = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz',
         r2     = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R2.fastq.gz',
-        errF   = os.path.join(config['dada2_dir'], '{sample_set}/errR1.rds'),
-        errR   = os.path.join(config['dada2_dir'], '{sample_set}/errR2.rds')
+        errF   = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/errR1.rds'),
+        errR   = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/errR2.rds'),
+        params = os.path.join(config['assnake_db'], 'params/dada2/merge/{params}.yaml')
     output:
-        merged = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds',
-    log: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.log'
+        merged = '{prefix}/{df}/reads/{preproc}/{sample}/dada2/{sample_set}/{err_params}/merged_{params}.rds',
+        stats  = '{prefix}/{df}/reads/{preproc}/{sample}/dada2/{sample_set}/{err_params}/merged_{params}.stats',
+    log: '{prefix}/{df}/reads/{preproc}/{sample}/dada2/{sample_set}/{err_params}/log_{params}.txt'
     conda: 'dada2.yaml'
-    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
-        Rscript  {derep_dada_merge_script} '{input.r1}' '{input.r2}' '{input.errF}' '{input.errR}' '{output.merged}' 12 >{log} 2>&1''')
+    wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/derep_merge_wrapper.py') 
+
+rule dada2_make_seqtab:
+    input: ''
+    output: ''
+    conda: 'dada2.yaml'
+    wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/make_seqtab_wrapper.py') 
