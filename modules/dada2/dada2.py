@@ -38,6 +38,15 @@ rule dada2_derep_dada_merge:
     conda: 'dada2.yaml'
     wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/derep_merge_wrapper.py') 
 
+rule dada2_derep_infer_pooled:
+    input: 
+        samples_list = os.path.join(config['dada2_dir'], '{sample_set}', 'samples.tsv'),
+        err   = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/err{strand}.rds'),
+    output:
+        infered = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/dada{strand}.rds'),
+    conda: 'dada2.yaml'
+    wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/infer_pooled_wrapper.py') 
+
 rule dada2_make_seqtab:
     input: ''
     output: ''

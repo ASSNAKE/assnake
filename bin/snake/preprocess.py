@@ -99,12 +99,12 @@ rule profile:
         if 'task_id' in config.keys():
             save_to_db(config['task_id'], rule, str(input), str(output.profiled), 'RUN SUCCESSFUL')
         
-rule gzip_fastq:
-    input: 
-        r1 = '{prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq'
-    output:
-        r1_gz = '{prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz'
-    shell: ('''gzip {input.r1}''')
+# rule gzip_fastq:
+#     input: 
+#         r1 = '{prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq'
+#     output:
+#         r1_gz = '{prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz'
+#     shell: ('''gzip {input.r1}''')
 
         
 rule fastq_pair:

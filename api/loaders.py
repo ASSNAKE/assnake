@@ -4,7 +4,7 @@ import glob
 import pandas as pd
 import numpy as np
 import bb_stats
-
+import sample_set
 import yaml
 
 data_dir = "/data6/bio/TFM/pipeline/"
@@ -201,6 +201,38 @@ def load_dfs_from_db(db_loc):
                 print(exc)
     return dfs
 
+def load_df_from_db(df_name, db_loc=''):
+    """
+    Returns one dictionary with df info
+    """
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    config_loc = os.path.join(curr_dir, '../config.yml')
+    with open(config_loc, 'r') as stream:
+        try:
+            config = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    df_info_loc = config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
+    df_info = {}
+    with open(df_info_loc, 'r') as stream:
+        try:
+            info = yaml.load(stream)
+            if 'df' in info:
+                df_info =  info
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
+    preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
+    preprocessing = {}
+    for p in preprocs:
+        samples = sample_set.SampleSet()
+        samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
+        samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
+        preprocessing.update({p:samples})
+    df_info.update({"preprocs": preprocessing})
+    return df_info
 
 def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False):
     sample_dict = {}
@@ -228,9 +260,12 @@ def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False
                     size = os.path.getsize(r1) + os.path.getsize(r2)
                     sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
 
-    return {'df':df, 'fs_name':sample, 'sample':sample,  'preproc':final_preproc, 
-                         'preprocs':containers, 
-                         **load_count(prefix, df, final_preproc, sample)}
+    return {'df':df, 
+            'fs_name':sample, 
+            'sample':sample,  
+            'preproc':final_preproc, 
+            #'preprocs':containers, 
+            **load_count(prefix, df, final_preproc, sample)}
 
 def samples_in_df(df, db_loc):
     df_info = None

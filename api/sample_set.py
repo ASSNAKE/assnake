@@ -11,7 +11,7 @@ class SampleSet:
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
     # prefix, df, preproc, fs_name
-    samples_pd = pd.DataFrame(columns=['df', 'fs_name', 'preproc', 'preprocs', 'reads', 'sample'])
+    samples_pd = pd.DataFrame(columns=['df', 'fs_name', 'preproc', 'reads', 'sample'])
     reads_info = pd.DataFrame()
     wc_config = {}
     config = {}
@@ -33,7 +33,12 @@ class SampleSet:
         
     def add_samples(self, prefix, df, preproc, samples = [], do_not_add = [], pattern = ''):
         samples = []
-        fs_names = [f.split('/')[-1] for f in glob.glob(self.wc_config['sample_dir_wc'].format(prefix=prefix, df=df, preproc=preproc, sample = '*'))]
+        fs_names = [f.split('/')[-1] for f in 
+            glob.glob(self.wc_config['sample_dir_wc'].format(
+                prefix=prefix, 
+                df=df, 
+                preproc=preproc, 
+                sample = '*'))]
 
         if pattern != '':
             fs_names = [f.split('/')[-1] for f in 
@@ -51,7 +56,7 @@ class SampleSet:
                     samples.append(sample)     
 
         samples_pd = pd.DataFrame(samples)
-        samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc']
+        #samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc']
 
         self.samples_pd = pd.concat([self.samples_pd, samples_pd])
         self.reads_info = pd.DataFrame(self.samples_pd['reads'])
@@ -96,6 +101,20 @@ class SampleSet:
         dada2_df = pd.DataFrame(dada2_dicts)
         dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
 
+    def prepare_mothur_set(self, dir_loc, set_name):
+        mothur_set_dir = os.path.join(dir_loc, set_name)
+
+        mothur_dicts = []
+        for s in self.samples_pd.to_dict(orient='records'):
+            mothur_dicts.append(dict(mg_sample=s['fs_name'],
+                R1 = self.wc_config['fastq_file'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
+                R2 = self.wc_config['fastq_file'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2')))
+        if not os.path.exists(mothur_set_dir):
+            os.makedirs(mothur_set_dir)
+
+        mothur_df = pd.DataFrame(mothur_dicts)
+        mothur_df.to_csv(os.path.join(mothur_set_dir, 'stability.files'), columns=['mg_sample', 'R1', 'R2'], sep='\t', index=False, header=False)
+
     def prepare_assembly_set(self, assembler, params, set_name):
         # prepare dataframe
         samples = self.samples_pd[['df', 'fs_name', 'preproc']]
@@ -137,6 +156,40 @@ class SampleSet:
         #     with open(sample_list, 'x') as file:
         #         file.writelines('\n'.join(fastqc_list)) 
 
+    def get_locs_for_result(self, result, preproc=''):
+        result_locs = []
+        strands = ['R1', 'R2']
+
+        if result == 'count':
+            for s in self.samples_pd.to_dict(orient='records'):
+                if preproc == '':
+                    preprocessing = s['preproc']
+                else:
+                    preprocessing = preproc
+                for strand in strands:
+                    result_locs.append(self.wc_config['count_wc'].format(
+                        prefix = s['prefix'].rstrip('\/'),
+                        df = s['df'],
+                        preproc = s['preproc'],
+                        sample = s['fs_name'],
+                        strand = strand
+                    ))
+            return result_locs
+        if result == 'fastqc':
+            for s in self.samples_pd.to_dict(orient='records'):
+                if preproc == '':
+                    preprocessing = s['preproc']
+                else:
+                    preprocessing = preproc
+                for strand in strands:
+                    result_locs.append(self.wc_config['fastqc_zip_wc'].format(
+                        prefix = s['prefix'].rstrip('\/'),
+                        df = s['df'],
+                        preproc = preprocessing,
+                        sample = s['fs_name'],
+                        strand = strand
+                    ))
+            return result_locs
 
     def __str__(self):
         print('Number of samples: ', len(self.samples_pd))

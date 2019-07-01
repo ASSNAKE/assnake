@@ -44,6 +44,8 @@ include: modules + 'maxbin2/maxbin2.py'
 include: modules + 'dada2/dada2.py'
 include: modules + 'coverage/profile.py'
 include: modules + 'multiqc/multiqc.py'
+include: modules + 'preprocessing/gz_operations.py'
+include: modules + 'mothur/mothur.py'
 
 
 

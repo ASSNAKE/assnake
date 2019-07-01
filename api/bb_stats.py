@@ -3,8 +3,8 @@ import numpy as np
 import os
 import yaml
 # from Bio import SeqIO
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
+# import matplotlib.mlab as mlab
+# import matplotlib.pyplot as plt
 
 config = None
 dir_of_this_file = os.path.dirname(os.path.abspath(__file__))

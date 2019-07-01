@@ -50,7 +50,7 @@ class Dataset:
     mp2 = None
     hm2 = None
     
-    def __init__(self, df_dict,preproc = 'longest'):
+    def __init__(self, df_dict, preproc = 'longest'):
         self.fs_prefix = df_dict.get('fs_prefix', '')
         self.df = df_dict.get('df', '')
         self.description = df_dict.get('description', '')

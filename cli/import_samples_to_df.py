@@ -83,6 +83,7 @@ def main():
     parser.add_argument('--prefix', type=str, help='Prefix on file system for dataset')
     parser.add_argument('--df', type=str, help='Name of yor dataset')
     parser.add_argument('--preproc', type=str, default='raw', help='First preprocessing')
+    parser.add_argument('--dry', default=False, action='store_true', help='Only print what is going to happen, without actually doing anything')
     parser.add_argument('--samples', nargs='+', help='List of sample names to import', default = [], required=False)
 
     args = parser.parse_args()
@@ -94,41 +95,45 @@ def main():
     dir_with_reads = os.path.join(args.prefix, args.df, 'reads', args.preproc)
     print(dir_with_reads)
     # check if it doesn't exist
-    if not os.path.isdir(dir_with_reads):
-        os.makedirs(dir_with_reads)
+    if args.dry:
+        print('Creating', dir_with_reads)
+    else:
+        if not os.path.isdir(dir_with_reads):
+            os.makedirs(dir_with_reads)
 
     orig_wc = '{orig_dir}/{sample_file}'
     new_dir_wc = '{reads_dir}/{sample_name}'
     new_file_wc = '{new_dir}/{sample_file}'
+
+    if len(args.samples) == 0:
+        args.samples = [s['sample_name'] for s in samples]
     # CREATE SYMLINKS
     for s in samples:
         if len(args.samples) > 0:
             if s['sample_name'] in args.samples:
+                
                 new_dir = new_dir_wc.format(reads_dir = dir_with_reads, sample_name = s['sample_name'])
-                if not os.path.isdir(new_dir):
-                    os.makedirs(new_dir)
-                    
+                
                 src_r1 = orig_wc.format(orig_dir = args.original_dir, sample_file = s['files']['R1'])
                 dst_r1 = new_file_wc.format(new_dir=new_dir, sample_file=s['renamed_files']['R1'])
 
                 src_r2 = orig_wc.format(orig_dir = args.original_dir, sample_file = s['files']['R2'])
                 dst_r2 = new_file_wc.format(new_dir=new_dir, sample_file=s['renamed_files']['R2'])
 
-                os.symlink(src_r1, dst_r1)
-                os.symlink(src_r2, dst_r2)
-        else:
-            new_dir = new_dir_wc.format(reads_dir = dir_with_reads, sample_name = s['sample_name'])
-            if not os.path.isdir(new_dir):
-                os.makedirs(new_dir)
-                
-            src_r1 = orig_wc.format(orig_dir = args.original_dir, sample_file = s['files']['R1'])
-            dst_r1 = new_file_wc.format(new_dir=new_dir, sample_file=s['renamed_files']['R1'])
+                if args.dry:
+                    print('########', s['sample_name'], '########')
+                    print('  ', new_dir)
+                    print('  ', src_r1, '--->', dst_r1)
+                    print('  ', src_r2, '--->', dst_r2)
+                    print(s)
 
-            src_r2 = orig_wc.format(orig_dir = args.original_dir, sample_file = s['files']['R2'])
-            dst_r2 = new_file_wc.format(new_dir=new_dir, sample_file=s['renamed_files']['R2'])
+                else:
+                    if not os.path.isdir(new_dir):
+                        os.makedirs(new_dir)
+                    os.symlink(src_r1, dst_r1)
+                    os.symlink(src_r2, dst_r2)
 
-            os.symlink(src_r1, dst_r1)
-            os.symlink(src_r2, dst_r2)
+
     
 if __name__ == "__main__":
     main()
