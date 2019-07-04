@@ -4,6 +4,7 @@ import os
 import sys
 import glob
 import fnmatch
+import parse
 
 def find_files(base, pattern):
     """

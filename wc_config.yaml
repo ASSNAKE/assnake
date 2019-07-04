@@ -15,3 +15,5 @@ dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.
 sam_wc: ''
 
 assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
+
+metaphlan2_wc: '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.mp2'

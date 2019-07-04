@@ -47,6 +47,19 @@ rule dada2_derep_infer_pooled:
     conda: 'dada2.yaml'
     wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/infer_pooled_wrapper.py') 
 
+merge_pooled_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/merge_pooled.R')
+rule dada2_merge_pooled:
+    input: 
+        dada_1 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/dadaR1.rds'),
+        dada_2 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/dadaR2.rds'),
+        derep_1 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/derepR1.rds'),
+        derep_2 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/derepR2.rds'),
+    output:
+        mergers = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/mergers_{len}.rds'),
+    conda: 'dada2.yaml'
+    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
+        Rscript {merge_pooled_script} '{input.derep_1}' '{input.derep_2}'  '{input.dada_1}' '{input.dada_2}' '{output.mergers}';''') 
+
 rule dada2_make_seqtab:
     input: ''
     output: ''

@@ -190,6 +190,19 @@ class SampleSet:
                         strand = strand
                     ))
             return result_locs
+        if result == 'mp2':
+            for s in self.samples_pd.to_dict(orient='records'):
+                if preproc == '':
+                    preprocessing = s['preproc']
+                else:
+                    preprocessing = preproc
+                result_locs.append(self.wc_config['metaphlan2_wc'].format(
+                    prefix = s['prefix'].rstrip('\/'),
+                    df = s['df'],
+                    preproc = preprocessing,
+                    sample = s['fs_name'],
+                ))
+            return result_locs
 
     def __str__(self):
         print('Number of samples: ', len(self.samples_pd))
