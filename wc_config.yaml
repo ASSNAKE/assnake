@@ -16,4 +16,4 @@ sam_wc: ''
 
 assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
 
-metaphlan2_wc: '{prefix}/{df}/taxa/{preproc}/mp2__def/{sample}/{sample}.mp2'
+metaphlan2_wc: '{prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.mp2'

@@ -173,9 +173,8 @@ class SampleSet:
                         preproc = s['preproc'],
                         sample = s['fs_name'],
                         strand = strand
-                    ))
-            return result_locs
-        if result == 'fastqc':
+                    )) 
+        elif result == 'fastqc':
             for s in self.samples_pd.to_dict(orient='records'):
                 if preproc == '':
                     preprocessing = s['preproc']
@@ -189,8 +188,7 @@ class SampleSet:
                         sample = s['fs_name'],
                         strand = strand
                     ))
-            return result_locs
-        if result == 'mp2':
+        elif result == 'mp2':
             for s in self.samples_pd.to_dict(orient='records'):
                 if preproc == '':
                     preprocessing = s['preproc']
@@ -201,8 +199,10 @@ class SampleSet:
                     df = s['df'],
                     preproc = preprocessing,
                     sample = s['fs_name'],
+                    version = '__v2.9.12'
                 ))
-            return result_locs
+        print(result_locs)
+        return result_locs
 
     def __str__(self):
         print('Number of samples: ', len(self.samples_pd))

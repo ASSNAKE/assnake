@@ -189,7 +189,14 @@ def load_dfs_from_db(db_loc):
     Mandatory fields: df, prefix
     """
     dfs = {}
-    df_info_locs = glob.glob(db_loc+'/datasets/*/df_info.yaml')
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    config_loc = os.path.join(curr_dir, '../config.yml')
+    with open(config_loc, 'r') as stream:
+        try:
+            config = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    df_info_locs = glob.glob(config['assnake_db']+'/datasets/*/df_info.yaml')
     
     for df_info in df_info_locs:
         with open(df_info, 'r') as stream:
