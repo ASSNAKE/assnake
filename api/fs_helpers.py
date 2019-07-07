@@ -82,8 +82,10 @@ def create_links(dir_with_reads, original_dir, sample):
     src_r2 = orig_wc.format(orig_dir = original_dir, sample_file = sample['files']['R2'])
     dst_r2 = new_file_wc.format(new_dir=new_dir, sample_file=sample['renamed_files']['R2'])
 
-    try:
-        os.symlink(src_r1, dst_r1)
-        os.symlink(src_r2, dst_r2)
-    except:
-        print(sample, 'ERROR')
+    os.symlink(src_r1, dst_r1)
+    os.symlink(src_r2, dst_r2)
+    # try:
+    #     os.symlink(src_r1, dst_r1)
+    #     os.symlink(src_r2, dst_r2)
+    # except:
+    #     print(sample, 'ERROR')

@@ -3,8 +3,8 @@ import glob
 
 import pandas as pd
 import numpy as np
-import bb_stats
-import sample_set
+import api.bb_stats
+# import sample_set
 import yaml
 
 data_dir = "/data6/bio/TFM/pipeline/"
@@ -153,7 +153,7 @@ def human2bytes(s):
 
 
 
-def load_count(prefix, df, preproc, sample, report_bps=False):
+def load_count(prefix, df, preproc, sample, report_bps=False, verbose=False):
     """
     Loads information about read and bp count in paired-end sample.
     """
@@ -175,7 +175,8 @@ def load_count(prefix, df, preproc, sample, report_bps=False):
             if report_bps:
                 count_dict['bps'] += int(line.split(' ')[1])
     except:
-        print('error loading counts: ', sample)
+        if verbose: 
+            print('error loading counts: ', sample)
         if report_bps:
             count_dict.update({'bps': -1})
         return count_dict
@@ -233,15 +234,15 @@ def load_df_from_db(df_name, db_loc=''):
     reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
     preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
     preprocessing = {}
-    for p in preprocs:
-        samples = sample_set.SampleSet()
-        samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
-        samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
-        preprocessing.update({p:samples})
+    # for p in preprocs:
+        # samples = sample_set.SampleSet()
+        # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
+        # samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
+        # preprocessing.update({p:samples})
     df_info.update({"preprocs": preprocessing})
     return df_info
 
-def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False):
+def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False, verbose=False):
     sample_dict = {}
     strands = ['R1', 'R2']
     
@@ -272,7 +273,7 @@ def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False
             'sample':sample,  
             'preproc':final_preproc, 
             #'preprocs':containers, 
-            **load_count(prefix, df, final_preproc, sample)}
+            **load_count(prefix, df, final_preproc, sample, verbose)}
 
 def samples_in_df(df, db_loc):
     df_info = None
