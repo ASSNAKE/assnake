@@ -3,6 +3,7 @@ import pandas as pd
 import api.loaders
 import api.sample_set
 from tabulate import tabulate
+import snakemake
 
 @click.group()
 @click.version_option()
@@ -17,7 +18,15 @@ def cli(ctx):
         except yaml.YAMLError as exc:
             print(exc)
 
-    ctx.obj = config
+    wc_config_loc = os.path.join(dir_of_this_file, 'wc_config.yaml')
+    wc_config = {}
+    with open(wc_config_loc, 'r') as stream:
+        try:
+            wc_config = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    ctx.obj = {'config': config, 'wc_config': wc_config}
     pass #Entry Point
 
 @cli.group()
@@ -42,13 +51,13 @@ def df_list():
 @click.pass_obj
 def create_df(config, fs_prefix, df):
     """Create entry for dataset in database."""
-    dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(config['assnake_db'], 'datasets/*'))]
-
+    assnake_db = os.path.join(config['config']['assnake_db'], 'datasets/*')
+    dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db))]
     if df not in dfs:
         if os.path.isdir(os.path.join(fs_prefix, df)):
             df_info = {'df': df, 'fs_prefix': fs_prefix}
-            os.mkdir(os.path.join(config['assnake_db'], 'datasets/'+df))
-            with open(os.path.join(config['assnake_db'], 'datasets/'+df,'df_info.yaml'), 'w') as info_file:
+            os.mkdir(os.path.join(assnake_db, 'datasets/'+df))
+            with open(os.path.join(assnake_db, 'datasets/'+df,'df_info.yaml'), 'w') as info_file:
                 yaml.dump(df_info, info_file, default_flow_style=False)
             click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
     else:
@@ -103,13 +112,78 @@ def result():
 @click.command()
 @click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--preproc','-p', prompt='Preprocessing to use', help='Preprocessing to use' )
-def request(df, preproc):
+@click.option('--result','-r', prompt='Result you want', help='Preprocessing to use' )
+
+@click.option('--params', help='Parameters id to use', required=False, default = 'def')
+@click.option('--list-name', help='Name of sample set if required by rule')
+
+@click.option('--threads','-t', help='Threads per job', default=4)
+@click.option('--jobs','-j', help='Number of jobs', default=1)
+@click.option('--run/--no-run', default=False)
+@click.pass_obj
+def request(config, df, preproc, result, params, list_name,   threads, jobs, run):
+    """Request result for your samples.\nYou need to provide info defining sample set, or run it from {prefix}/{df}/reads/{preproc} directory"""
+
     ss = api.sample_set.SampleSet()
     df = api.loaders.load_df_from_db(df)
     print(df)
     ss.add_samples(df['fs_prefix'], df['df'], preproc)
-    """Request result for your samples.\nYou need to provide info defining sample set, or run it from {prefix}/{df}/reads/{preproc} directory"""
-    print(ss.samples_pd)
+    click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+
+    res_list = []
+
+    if result == 'multiqc':
+        ss.prepare_fastqc_list_multiqc('R1', preproc)
+        ss.prepare_fastqc_list_multiqc('R2', preproc)
+        multiqc_report_wc = config['wc_config']['multiqc_report']
+
+        res_list = [
+            multiqc_report_wc.format(
+                prefix = df['fs_prefix'],
+                df = df['df'],
+                sample_set = preproc,
+                strand = strand,
+            )
+            for strand in ['R1', 'R2']
+        ]
+
+    elif result=='mp2':
+        res_list = ss.get_locs_for_result(result)
+    elif result == 'dada2-filter-and-trim':
+        res_list = ss.get_locs_for_result(result, params=params)
+    elif result=='dada2-learn-errors':
+        # ss.prepare_dada2_sample_list()
+        if list_name is None:
+            list_name = click.prompt('Please enter name for your dada2 error profile')
+            print(list_name)
+        ss.prepare_dada2_sample_list(list_name)
+        res_list= [(config['wc_config']['dada2_err_wc'].format(
+                dada2_dir = config['config']['dada2_dir'],
+                sample_set = list_name,
+                strand = strand,
+                params=params
+            )) for strand in ['R1', 'R2']]
+        
+
+    
+    curr_dir = os.path.abspath(os.path.dirname(__file__))
+    click.echo(curr_dir)
+    click.echo(jobs)
+
+    status = snakemake.snakemake(os.path.join(curr_dir, './bin/snake/base.py'), 
+        config = dict(assnake_install_dir= os.path.abspath(os.path.dirname(__file__))),    
+        targets=res_list, 
+        printshellcmds=True,
+        dryrun=not run, 
+        configfile=os.path.join(curr_dir, 'config.yml'),
+        drmaa_log_dir = os.path.join(curr_dir, '../pipeline_dev/drmaa_log'),
+        use_conda = True,
+        conda_prefix = os.path.join(curr_dir, '../pipeline_dev/conda'),
+        drmaa=' -V -S /bin/bash -pe make {threads}'.format(threads=threads),
+        cores=jobs, nodes=jobs
+        )
+
+        
 
 result.add_command(request)
 

@@ -76,13 +76,16 @@ class SampleSet:
                 prefix = prefix, 
                 strand = strand,
                 sample_set=set_name)
-            print(sample_list)
+            # print(sample_list)
             
             multiqc_dir = os.path.dirname(sample_list)
             if not os.path.isdir(multiqc_dir):
                 os.makedirs(multiqc_dir)
-            with open(sample_list, 'x') as file:
-                file.writelines('\n'.join(fastqc_list)) 
+            try:
+                with open(sample_list, 'x') as file:
+                    file.writelines('\n'.join(fastqc_list)) 
+            except FileExistsError:
+                print('List already exists')
 
         return fastqc_list
 
@@ -156,10 +159,10 @@ class SampleSet:
         #     with open(sample_list, 'x') as file:
         #         file.writelines('\n'.join(fastqc_list)) 
 
-    def get_locs_for_result(self, result, preproc=''):
+    def get_locs_for_result(self, result, preproc='', params='def'):
         result_locs = []
         strands = ['R1', 'R2']
-
+        print(params)
         if result == 'count':
             for s in self.samples_pd.to_dict(orient='records'):
                 if preproc == '':
@@ -201,7 +204,20 @@ class SampleSet:
                     sample = s['fs_name'],
                     version = '__v2.9.12'
                 ))
-        print(result_locs)
+        elif result == 'dada2-filter-and-trim':
+            for s in self.samples_pd.to_dict(orient='records'):
+                if preproc == '':
+                    preprocessing = s['preproc']
+                else:
+                    preprocessing = preproc
+                result_locs.append(self.wc_config['dada2_fat_wc'].format(
+                    prefix = s['prefix'].rstrip('\/'),
+                    df = s['df'],
+                    preproc = preprocessing,
+                    sample = s['fs_name'],
+                    params = params
+                ))
+        
         return result_locs
 
     def __str__(self):

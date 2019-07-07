@@ -8,8 +8,10 @@ count_wc: '{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.coun
 
 sample_dir_wc:    '{prefix}/{df}/reads/{preproc}/{sample}'
 multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
+multiqc_report: '{prefix}/{df}/multiqc/{sample_set}/{strand}/multiqc_report.html'
 
-dada2_err_wc: '{dada2_dir}/{sample_set}/err{strand}.rds'
+dada2_fat_wc: '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R1.fastq.gz'
+dada2_err_wc: '{dada2_dir}/{sample_set}/{params}/err{strand}.rds'
 dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'
 
 sam_wc: ''

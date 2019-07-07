@@ -2,7 +2,15 @@ import glob
 import os
 import sqlite3
 import datetime
+import yaml
 
+wc_config_loc = os.path.join(config['assnake_install_dir'], 'wc_config.yaml')
+wc_config = {}
+with open(wc_config_loc, 'r') as stream:
+    try:
+        wc_config = yaml.load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
 
 db_loc = '/data6/bio/TFM/asshole/db.sqlite3'
 
