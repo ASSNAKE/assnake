@@ -58,7 +58,7 @@ class SampleSet:
         samples_pd = pd.DataFrame(samples)
         #samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc']
 
-        self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
+        self.samples_pd = pd.concat([self.samples_pd, samples_pd])
         self.reads_info = pd.DataFrame(self.samples_pd['reads'])
 
     def prepare_fastqc_list_multiqc(self, strand, set_name):

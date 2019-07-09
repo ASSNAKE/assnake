@@ -44,6 +44,7 @@ rule dada2_derep_infer_pooled:
         err   = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/err{strand}.rds'),
     output:
         infered = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/dada{strand}.rds'),
+        derep = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/derep{strand}.rds'),
     conda: 'dada2.yaml'
     wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/infer_pooled_wrapper.py') 
 
@@ -56,12 +57,74 @@ rule dada2_merge_pooled:
         derep_2 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/derepR2.rds'),
     output:
         mergers = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/mergers_{len}.rds'),
+    wildcard_constraints:    
+        sample_set="[\w\d_-]+",
+        err_params="[\w\d_-]+"
     conda: 'dada2.yaml'
     shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
         Rscript {merge_pooled_script} '{input.derep_1}' '{input.derep_2}'  '{input.dada_1}' '{input.dada_2}' '{output.mergers}';''') 
 
-rule dada2_make_seqtab:
-    input: ''
-    output: ''
+
+rule dada2_derep_infer_pooled_sub:
+    input: 
+        samples_list = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}', 'samples.tsv'),
+        err   = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/err{strand}.rds'),
+    output:
+        infered = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/dada{strand}.rds'),
+        derep = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/derep{strand}.rds'),
+    wildcard_constraints:    
+        err_params="[\w\d_-]+"
     conda: 'dada2.yaml'
-    wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/make_seqtab_wrapper.py') 
+    wrapper: "file://" + os.path.join(config['assnake_install_dir'], 'modules/dada2/infer_pooled_wrapper.py') 
+
+rule dada2_merge_pooled_sub:
+    input: 
+        dada_1 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/dadaR1.rds'),
+        dada_2 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/dadaR2.rds'),
+        derep_1 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/derepR1.rds'),
+        derep_2 = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/derepR2.rds'),
+    output:
+        mergers = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/mergers_{len}.rds'),
+    conda: 'dada2.yaml'
+    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
+        Rscript {merge_pooled_script} '{input.derep_1}' '{input.derep_2}'  '{input.dada_1}' '{input.dada_2}' '{output.mergers}';''') 
+
+derep_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/derep.R')
+# rule dada2_derep:
+#     input:
+#         samples_list = os.path.join(config['dada2_dir'], '{sample_set}/', 'samples.tsv'),
+#         err   = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/err{strand}.rds'),
+#     output:
+#         derep = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/derep{strand}.rds'),
+#     conda: 'dada2.yaml'
+#     shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
+#         Rscript {derep_script} '{input.samples_list}' '{wildcards.strand}' '{output.derep}';''')
+
+make_seqtab_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/make_seqtab.R')
+rule dada2_make_seqtab:
+    input: mergers = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/mergers_{len}.rds'),
+    output: os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/seqtab_{len}.rds')
+    conda: 'dada2.yaml'
+    wildcard_constraints:    
+        sample_set="[\w\d_-]+",
+        err_params="[\w\d_-]+"
+    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
+        Rscript {make_seqtab_script} '{input.mergers}' '{output}';''') 
+
+seqtab_nochim_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/seqtab_nochim.R')
+rule dada2_nochim:
+    input: '{prefix}/{df}/dada2/{sample_set}/seqtab.rds'
+    output: '{prefix}/{df}/dada2/{sample_set}/seqtab_nochim.rds'
+    conda: 'dada2.yaml'
+    wildcard_constraints:    
+        sample_set="[\w\d_-]+",
+        err_params="[\w\d_-]+"
+    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
+        Rscript {seqtab_nochim_script} '{input}' '{output}';''') 
+
+rule dada2_make_seqtab_sub:
+    input: mergers = os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/mergers_{len}.rds'),
+    output: os.path.join(config['dada2_dir'], '{sample_set}/{err_params}/{sub}/seqtab_{len}.rds')
+    conda: 'dada2.yaml'
+    shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
+        Rscript {make_seqtab_script} '{input.mergers}' '{output}';''') 

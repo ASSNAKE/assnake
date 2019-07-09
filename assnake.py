@@ -49,15 +49,17 @@ def df_list():
 @click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--fs_prefix','-p', prompt='Filesystem prefix', help='Filesystem prefix' )
 @click.pass_obj
-def create_df(config, fs_prefix, df):
+def create_df(config, df, fs_prefix):
     """Create entry for dataset in database."""
-    assnake_db = os.path.join(config['config']['assnake_db'], 'datasets/*')
-    dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db))]
+    assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
+    dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
+    print(df)
+    print(fs_prefix)
     if df not in dfs:
         if os.path.isdir(os.path.join(fs_prefix, df)):
             df_info = {'df': df, 'fs_prefix': fs_prefix}
-            os.mkdir(os.path.join(assnake_db, 'datasets/'+df))
-            with open(os.path.join(assnake_db, 'datasets/'+df,'df_info.yaml'), 'w') as info_file:
+            os.mkdir(os.path.join(config['config']['assnake_db'], 'datasets/'+df))
+            with open(os.path.join(config['config']['assnake_db'], 'datasets/'+df,'df_info.yaml'), 'w') as info_file:
                 yaml.dump(df_info, info_file, default_flow_style=False)
             click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
     else:
@@ -148,6 +150,8 @@ def request(config, df, preproc, result, params, list_name,   threads, jobs, run
         ]
 
     elif result=='mp2':
+        res_list = ss.get_locs_for_result(result)
+    elif result=='fastqc':
         res_list = ss.get_locs_for_result(result)
     elif result == 'dada2-filter-and-trim':
         res_list = ss.get_locs_for_result(result, params=params)
