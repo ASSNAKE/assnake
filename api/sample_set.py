@@ -107,16 +107,14 @@ class SampleSet:
     def prepare_dada2_subset(self, error_list, error_params, subset_name):
         dada2_dicts = []
         fastq_gz_file_wc = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
-        ​
         for s in self.samples_pd.to_dict(orient='records'):
             dada2_dicts.append(dict(mg_sample=s['fs_name'],
             R1 = fastq_gz_file_wc.format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
             R2 = fastq_gz_file_wc.format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2')))
-        ​
-        dada2_set_dir = os.path.join(self.config['dada2_dir'], set_name, error_params, subset_name)
+        dada2_set_dir = os.path.join(self.config['dada2_dir'], error_list, error_params, subset_name)
         if not os.path.exists(dada2_set_dir):
             os.mkdir(dada2_set_dir)
-        ​
+
         dada2_df = pd.DataFrame(dada2_dicts)
         dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
 

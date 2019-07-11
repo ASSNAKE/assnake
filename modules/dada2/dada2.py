@@ -128,3 +128,10 @@ rule dada2_make_seqtab_sub:
     conda: 'dada2.yaml'
     shell: ('''export LANG=en_US.UTF-8;\nexport LC_ALL=en_US.UTF-8;\n
         Rscript {make_seqtab_script} '{input.mergers}' '{output}';''') 
+
+assign_taxa_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/assign_taxa.R')
+rule dada2_assign_taxa:
+    input: '{prefix}/{df}/dada2/{sample_set}/seqtab_nochim.rds'
+    output: '{prefix}/{df}/dada2/{sample_set}/taxa.rds'
+    conda: 'dada2.yaml'
+    shell: ("Rscript {assign_taxa_script} '{input}' '{output}'")

@@ -2,7 +2,7 @@ import scipy.cluster.hierarchy as shc
 
 import plotly
 
-plotly.offline.init_notebook_mode(connected=True)
+plotly.offline.init_notebook_mode()
 import plotly.graph_objs as go
 from matplotlib import colors as mcolors
 import plotly.figure_factory as FF
@@ -255,7 +255,8 @@ def plot_reads_bps(meta, reads=True):
 
     meta = meta.sort_values(feature)
     data = [go.Bar( x=meta['fs_name'], y=meta[feature] )]
-    fig = go.Figure(data=data)
+    layout = go.Layout(margin=go.layout.Margin( b=100 ))
+    fig = go.Figure(data=data, layout= layout)
     plotly.offline.iplot(fig)
     
 def plot_centr(centr, subtitle=''):
@@ -330,4 +331,19 @@ def plot_mds(mds, feature_name, meta, title='MDS', select_by='fs_name'):
 
     fig = go.Figure(data=traces,
                     layout=layout)
+    plotly.offline.iplot(fig)
+
+def plot_reads_count_change(sample_set, first_preproc, second_preproc):
+    df2=sample_set.samples_pd.pivot(index='fs_name', columns='preproc', values='reads')
+    df2['change'] = df2[second_preproc]/df2[first_preproc]
+    df2['diff'] = df2[first_preproc] - df2[second_preproc]
+    df2.sort_values('change', ascending=False)
+    df2 = df2.sort_values(first_preproc, ascending=False)
+    
+    trace1 = go.Bar( x=df2.index, y=df2[second_preproc], name='trimmed' )
+    trace2 = go.Bar( x=df2.index, y=df2['diff'], name='diff' )
+    
+    layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800)
+
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
     plotly.offline.iplot(fig)
