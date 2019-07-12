@@ -135,3 +135,12 @@ rule dada2_assign_taxa:
     output: '{prefix}/{df}/dada2/{sample_set}/taxa.rds'
     conda: 'dada2.yaml'
     shell: ("Rscript {assign_taxa_script} '{input}' '{output}'")
+
+make_tree_script = os.path.join(config['assnake_install_dir'], 'modules/dada2/scripts/make_tree.R')
+rule make_tree:
+    input: '{prefix}/{df}/dada2/{sample_set}/seqtab_nochim.rds'
+    output: tree = '{prefix}/{df}/dada2/{sample_set}/tree.rds',
+        al = '{prefix}/{df}/dada2/{sample_set}/aligment.rds'
+    conda: 'for_tree.yaml'
+    shell: ("Rscript {make_tree_script} '{input}' '{output.tree}' '{output.al}'")
+
