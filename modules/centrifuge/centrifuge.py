@@ -21,7 +21,7 @@ rule centrifuge:
         report =         '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_report.tsv',
         classification = '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_classification.tsv',
         krak =           '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv', 
-    threads:  20
+    threads:  12
     log:       '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/log.txt'
     benchmark: '{prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/benchmark.txt'
     conda: 'env_v1.0.4_beta.yaml'
@@ -30,15 +30,15 @@ rule centrifuge:
 
 rule centrifuge_fasta:
     input: 
-        fa = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa')
+        fa = os.path.join(fna_db_dir,'{path}/{seq_set_id}.fa')
         # params = "params/centr/{params}.json"
     output:
-        report =         os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_report.tsv'),
-        classification = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_classification.tsv'),
-        krak =           os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_krak.tsv'), 
+        report =         os.path.join(fna_db_dir,'{path}/{seq_set_id}_centr__{params}/report.tsv'),
+        classification = os.path.join(fna_db_dir,'{path}/{seq_set_id}_centr__{params}/classification.tsv'),
+        krak =           os.path.join(fna_db_dir,'{path}/{seq_set_id}_centr__{params}/krak.tsv'), 
     threads:  12
-    log:       os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_log.txt')
-    benchmark: os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}__centr__{params}_benchmark.txt')
+    log:       os.path.join(fna_db_dir,'{path}/{seq_set_id}_centr__{params}/log.txt')
+    benchmark: os.path.join(fna_db_dir,'{path}/{seq_set_id}_centr__{params}/benchmark.txt')
     conda: 'env_v1.0.4_beta.yaml'
     shell:
         ('''centrifuge -k 1 --mm --min-hitlen 120 -f -x {CENTRIFUGE_INDEX} -U {input.fa} -p {threads} -S {output.classification} --report-file {output.report} >{log} 2>&1; \n

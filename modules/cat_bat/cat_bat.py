@@ -48,9 +48,9 @@ rule cat_bat_contigs_new:
 
 rule add_names2:
     input:
-        classification = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000_CAT/out.CAT.contig2classification.txt')
+        classification = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{sample_set}/final_contigs__1000_CAT/out.CAT.contig2classification.txt')
     output:
-        names = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000_CAT/contig2classification_names_official.txt')
+        names = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{sample_set}/final_contigs__1000_CAT/contig2classification_names_official.txt')
     conda: 'cat_bat_env.yaml'
     shell: ('''CAT add_names -i {input.classification} -o {output.names} -t {cat_bat_taxa} --only_official''')
 

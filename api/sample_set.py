@@ -247,6 +247,11 @@ class SampleSet:
         
         return result_locs
 
+    def general_taxa(self):
+        samples = self.samples_pd.to_dict(orient='records')
+        taxa = pd.DataFrame(loaders.get_general_taxa_comp_krak_style(samples))
+        taxa.index = taxa['sample']
+        return taxa
     def __str__(self):
         print('Number of samples: ', len(self.samples_pd))
 

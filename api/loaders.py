@@ -636,11 +636,12 @@ def general_taxa_one(s):
         return None
 
 def get_general_taxa_comp_krak_style(samples):
-    loc_wc = pipeline + 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv'
+    loc_wc = '{fs_prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv'
     comp = []
     
     for s in samples:
         loc = loc_wc.format(df = s['df'], 
+                            fs_prefix = s['prefix'],
                             preproc=s['preproc'], 
                             sample = s['fs_name'],
                             params = 'def')
