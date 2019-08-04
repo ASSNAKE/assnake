@@ -123,8 +123,13 @@ example_res = ['fastqc', 'count', 'metaphlan2']
 @click.command()
 @click.option('--df','-d', help='Name of the dataset' )
 @click.option('--preproc','-p', help='Preprocessing to use' )
-@click.option('--results','-r', prompt='Results you want', help='Results you want', default=','.join(example_res), show_default=True,
-              metavar='<results>', type=click.STRING )
+@click.option('--results','-r', 
+                prompt='Results you want', 
+                help='Results you want', 
+                default=','.join(example_res), 
+                show_default=True,
+                metavar='<results>', 
+                type=click.STRING )
 
 @click.option('--params', help='Parameters id to use', required=False, default = 'def')
 @click.option('--list-name', help='Name of sample set if required by rule')
@@ -141,7 +146,8 @@ def request(config, df, preproc, results, params, list_name,   threads, jobs, ru
         df = api.loaders.load_df_from_db(df)
         print(df)
         ss.add_samples(df['fs_prefix'], df['df'], preproc)
-        click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+        click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), 
+                headers='keys', tablefmt='fancy_grid'))
 
     res_list = []
     # split results by ',' and remove whitespace
@@ -165,9 +171,11 @@ def request(config, df, preproc, results, params, list_name,   threads, jobs, ru
         elif result=='mp2':
             res_list = ss.get_locs_for_result(result)
         elif result=='count':
-            res_list = ss.get_locs_for_result(result)
+            res_list += ss.get_locs_for_result(result)
         elif result=='fastqc':
-            res_list = ss.get_locs_for_result(result)
+            res_list += ss.get_locs_for_result(result)
+        elif result=='trimmomatic':
+            res_list += ss.get_locs_for_result(result, params=params)
         elif result == 'dada2-filter-and-trim':
             res_list = ss.get_locs_for_result(result, params=params)
         elif result=='dada2-learn-errors':

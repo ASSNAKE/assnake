@@ -218,6 +218,19 @@ class SampleSet:
                     sample = s['fs_name'],
                     version = '__v2.9.12'
                 ))
+        elif result == 'trimmomatic':
+            for s in self.samples_pd.to_dict(orient='records'):
+                if preproc == '':
+                    preprocessing = s['preproc']
+                else:
+                    preprocessing = preproc
+                result_locs.append(self.wc_config['fastq_gz_file_wc'].format(
+                    prefix = s['prefix'].rstrip('\/'),
+                    df = s['df'],
+                    preproc = preprocessing+'__tmtic_'+params,
+                    sample = s['fs_name'],
+                    strand = 'R1'
+                ))
         elif result == 'dada2-filter-and-trim':
             for s in self.samples_pd.to_dict(orient='records'):
                 if preproc == '':

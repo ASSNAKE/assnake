@@ -209,7 +209,7 @@ def load_dfs_from_db(db_loc):
                 print(exc)
     return dfs
 
-def load_df_from_db(df_name, db_loc=''):
+def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     """
     Returns one dictionary with df info
     """
@@ -234,11 +234,12 @@ def load_df_from_db(df_name, db_loc=''):
     reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
     preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
     preprocessing = {}
-    # for p in preprocs:
-        # samples = sample_set.SampleSet()
-        # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
-        # samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
-        # preprocessing.update({p:samples})
+    if include_preprocs:
+        for p in preprocs:
+            samples = sample_set.SampleSet()
+            samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
+            samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
+            preprocessing.update({p:samples})
     df_info.update({"preprocs": preprocessing})
     return df_info
 

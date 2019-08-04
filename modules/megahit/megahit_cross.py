@@ -1,6 +1,7 @@
 import shutil
 import os
 import pandas as pd
+import api.dataset 
 
 assembly_dir = config['assembly_dir']
 assnake_db = config['assnake_db']
@@ -88,12 +89,12 @@ def megahit_input_from_table(wildcards):
         rr1.append(r_wc_str.format(prefix=wildcards.prefix,
                                     df=s['df'], 
                                     preproc=s['preproc'],
-                                    sample=s['sample'],
+                                    sample=s['fs_name'],
                                     strand='R1'))
         rr2.append(r_wc_str.format(prefix=wildcards.prefix,
                                     df=s['df'], 
                                     preproc=s['preproc'],
-                                    sample=s['sample'],
+                                    sample=s['fs_name'],
                                     strand='R2'))
     return {'F': rr1, 'R': rr2}
 
@@ -113,17 +114,25 @@ rule megahit_from_table:
     conda: 'megahit_env_v1.1.3.yaml'
     wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'modules/megahit/megahit_wrapper.py')
 
+def get_ref(wildcards):
+    fs_prefix = api.dataset.Dataset(wildcards.df).fs_prefix
+    return '{fs_prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa'.format(
+            fs_prefix = fs_prefix, 
+            df = wildcards.df,
+            sample_set = wildcards.sample_set,
+            params = wildcards.params)
 
 rule refine_assemb_results_cross:
     input: 
-        ref = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
+        # ref = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
+        ref = get_ref
     output: 
-        fa =         os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa'),
-        fai =        os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa.fai'),
-        dictionary = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__{min_len}.fa.dict')
+        fa =         os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/final_contigs__{min_len}.fa'),
+        fai =        os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/final_contigs__{min_len}.fa.fai'),
+        dictionary = os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/final_contigs__{min_len}.fa.dict')
     log: 
-        names = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/name_conversions__{min_len}.txt'),
-        ll    = os.path.join(fna_db_dir,'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/reformat_fasta__{min_len}.log')
+        names = os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/name_conversions__{min_len}.txt'),
+        ll    = os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/reformat_fasta__{min_len}.log')
     wildcard_constraints:    
         min_len="[\d_-]+"
     run:

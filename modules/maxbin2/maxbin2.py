@@ -1,56 +1,38 @@
 def get_samples_for_maxbin2_cov(wildcards):
-    bam_wc = '{prefix}/{df}/mapped/bwa__def1/assembly___mh__{params}___{dfs}___{samples}___{preprocs}/final_contigs__1000__no_hum_centr/{sample}/{preproc}/mapped.bb_stats'
+    bam_wc = '{prefix}/{df}/mapped/bwa__{bwa_params}/assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{sample}/{preproc}/mapped.bb_stats'
     ss = wildcards.samples
-    samples = wildcards.samples.split(':')
-    preproc = wildcards.preprocs
+
+    table_wc = '{prefix}/{df}/assembly/mh__{params}/{samples}/sample_set.tsv'
+    r_wc_str = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
+    
+    table = pd.read_csv(table_wc.format(prefix = wildcards.prefix,
+                                        df = wildcards.df,
+                                        params = wildcards.params,
+                                        samples = wildcards.samples),
+                        sep = '\t')
 
     list_of_sample_profiles = []
-    for s in samples:
-        list_of_sample_profiles.append(
-            bam_wc.format(
-                prefix = wildcards.prefix,
-                dfs = wildcards.dfs,
-                samples = ss,
-                preproc = wildcards.preprocs,
-                preprocs = wildcards.preprocs,
-                params = wildcards.params,
-                bwa_params = wildcards.bwa_params,
-                df = wildcards.df,
-                sample = s
-            )
-        )
-    return list_of_sample_profiles
+    for s in table.to_dict(orient='records'):     
+        list_of_sample_profiles.append(bam_wc.format(prefix=wildcards.prefix,
+                                    bwa_params = wildcards.bwa_params,
+                                    params = wildcards.params,
+                                    mod =  wildcards.mod, 
+                                    samples = wildcards.samples,
+                                    df=s['df'], 
+                                    preproc=s['preproc'],
+                                    sample=s['fs_name']))
 
-def get_samples_for_maxbin2(wildcards):
-    bam_wc = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/covs/{sample}.cov'
-    ss = wildcards.samples
-    samples = wildcards.samples.split(':')
-    preproc = wildcards.preprocs
-
-    list_of_sample_profiles = []
-    for s in samples:
-        list_of_sample_profiles.append(
-            bam_wc.format(
-                prefix = wildcards.prefix,
-                dfs = wildcards.dfs,
-                samples = ss,
-                preprocs = wildcards.preprocs,
-                params = wildcards.params,
-                bwa_params = wildcards.bwa_params,
-                df = wildcards.df,
-                sample = s
-            )
-        )
-    return list_of_sample_profiles
+    print(list_of_sample_profiles)
+    return list_of_sample_profiles 
 
 rule prepare_cov_files:
     input: 
-        fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa'),
+        fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}.fa'),
         samples = get_samples_for_maxbin2_cov
     output:
-        done = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/covs/abund_list.txt'
+        done = '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/covs/abund_list.txt'
     params:
-        wd = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/covs/'
+        wd = '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/covs/'
     run:
         outs = [] 
         for s in input.samples:
@@ -62,15 +44,15 @@ rule prepare_cov_files:
             abund.writelines('\n'.join(outs))
 rule maxbin2:
     input:
-        fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs__1000__no_hum_centr.fa'),
-        abund_list = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/covs/abund_list.txt'
+        fa    = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}.fa'),
+        abund_list = '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/covs/abund_list.txt'
     output:
-        done       = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/maxbin2.done'
+        done       = '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/maxbin2.done'
     params:
-        wd         = '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/bins/',
+        wd         = '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/bins/',
         prefix     = 'bin'
-    log:             '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/log.txt'
-    benchmark:       '{prefix}/{df}/maxbin2/bwa__{bwa_params}___assembly___mh__{params}___{dfs}___{samples}___{preprocs}/benchmark.txt'
+    log:             '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/log.txt'
+    benchmark:       '{prefix}/{df}/maxbin2/bwa__{bwa_params}/mh__{params}/{samples}/{mod}/benchmark.txt'
     threads: 40
     conda: 'maxbin2_env.yaml'
     shell: ('''export PERL5LIB="/data6/bio/TFM/pipeline/.snakemake/conda/fcda6b9a/lib/site_perl/5.26.2";\n
