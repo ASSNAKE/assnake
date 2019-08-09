@@ -54,6 +54,7 @@ include: modules + 'coverage/profile.py'
 include: modules + 'multiqc/multiqc.py'
 include: modules + 'preprocessing/gz_operations.py'
 include: modules + 'mothur/mothur.py'
+include: modules + 'trim_galore/trim_galore.py'
 
 
 

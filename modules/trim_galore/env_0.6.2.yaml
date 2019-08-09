@@ -1,0 +1,7 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - trim-galore=0.6.2
+  - pigz

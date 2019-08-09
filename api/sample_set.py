@@ -183,6 +183,7 @@ class SampleSet:
                     preprocessing = s['preproc']
                 else:
                     preprocessing = preproc
+                print(s)
                 for strand in strands:
                     result_locs.append(self.wc_config['count_wc'].format(
                         prefix = s['prefix'].rstrip('\/'),
