@@ -147,25 +147,6 @@ def plotly_heatmap(otu_table, title, groups = None, feature = ''):
                 x=figure['layout']['xaxis']['tickvals'],
                 y=[0]*len(groups),
                 yaxis = 'y3',
-                # colorscale=[
-                #     [0, 'green'], 
-                #     [0.25, 'green'], 
-                    
-                #     [0.25, 'red'], 
-                #     [0.5, 'red'], 
-                    
-                #     [0.5, 'blue'],
-                #     [0.75, 'blue'],
-                    
-                #     [0.75, 'black'],
-                #     [1, 'black']
-                # ],
-                
-                # colorbar = {
-                #     'x':1.1, 
-                #     'tickvals': [0,1,2,3],
-                #     'ticktext': ['Control','CeD','UC', 'CD']
-                #     }
             )]
         figure.add_traces(heatmap)
 
@@ -223,6 +204,9 @@ def plotly_heatmap(otu_table, title, groups = None, feature = ''):
     figure['layout'].update(dict(height=900, width=900))
     plotly.offline.iplot(figure, config={'showLink': True})
     return figure
+
+def heatmap_new(feature_table):
+    return 0
 
 
 def viz_zeroes(otu_table):

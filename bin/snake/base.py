@@ -55,20 +55,17 @@ include: modules + 'multiqc/multiqc.py'
 include: modules + 'preprocessing/gz_operations.py'
 include: modules + 'mothur/mothur.py'
 include: modules + 'trim_galore/trim_galore.py'
+include: modules + 'picrust2/picrust2.py'
 
 
 
 include: snakefiles + "bins.py"
 
 
-include: snakefiles + "bowtie2.py"
-include: snakefiles + "megares.py"
 include: snakefiles + "humann2.py"
 include: snakefiles + "qiime2.py"
 include: snakefiles + "fasta_operations.py"
 
-include: snakefiles + "ariba.py"
-include: snakefiles + "prokka.py"
 
 include: snakefiles + "general.py"
 include: snakefiles + "preprocess.py"

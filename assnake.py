@@ -42,6 +42,7 @@ def df_list():
         df_name = df['df']
         click.echo(click.style(''*2 + df_name + ' '*2, fg='green', bold=True))
         click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
+        click.echo('  Full path: ' + os.path.join(df.get('fs_prefix', ''), df['df']))
         click.echo('  Description: ' + df.get('description', ''))
         click.echo('')
 
