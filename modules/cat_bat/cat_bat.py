@@ -3,14 +3,14 @@ cat_bat_taxa = config['CAT_BAT_TAXA']
 
 rule cat_bat_CAT:
     input:
-        exported = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins.done')
+        exported = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins.done')
     output:
-        done = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/cat_bins.done')
+        done = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/cat_bins.done')
     params:
-        bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins/'),
-        wd = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins_cat/'),
-        prefix = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins_cat/out.BAT'),
-    threads: 12
+        bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins/'),
+        wd = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins_cat/'),
+        prefix = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins_cat/out.BAT'),
+    threads: 24
     conda: 'cat_bat_env.yaml'
     shell: ('''mkdir -p {params.wd}; \n
         CAT bins -b {params.bin_folder} -d {cat_bat_db} -t {cat_bat_taxa} --bin_suffix .fa --out_prefix {params.prefix} -n {threads}; \n
@@ -63,4 +63,18 @@ rule add_names:
     shell: ('''CAT add_names -i {input.classification} -o {output.names} -t {cat_bat_taxa} --only_official''')
 
 
-    
+# rule run_mags_on_prev_run:
+#     input: 
+#         exported = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins.done'),
+#         proteins = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}_CAT/out.CAT.predicted_proteins_clean.faa'),
+#         al       = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}_CAT/out.CAT.alignment.diamond')
+#     output: done = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/cat_bins.done')
+#     params: 
+#         bin_folder = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins/'),
+#         wd         = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins_cat/'),
+#         prefix     = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins_cat/out.BAT'),
+#     threads: 12
+#     conda: 'cat_bat_env.yaml'
+#     shell: 'mkdir -p {params.wd}; \n CAT bins -b {params.bin_folder} -d {cat_bat_db} -t {cat_bat_taxa} \
+#         -p {input.proteins} -a {input.al} \
+#             --bin_suffix .fa --out_prefix {params.prefix};\n touch {output.done} '
