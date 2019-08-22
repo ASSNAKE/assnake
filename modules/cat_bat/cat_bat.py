@@ -54,10 +54,10 @@ rule add_names2:
 
 rule add_names:
     input:
-        done           = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/cat_bins.done'),
-        classification = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins_cat/out.BAT.bin2classification.txt')
+        done           = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/cat_bins.done'),
+        classification = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins_cat/out.BAT.bin2classification.txt')
     output:
-        names = os.path.join(fna_db_dir, 'assembly/mh__{params}/{dfs}/{samples}/{preprocs}/{collection}/all_bins_cat/bin2classification_names_official.txt')
+        names = os.path.join(fna_db_dir, 'assembly/mh__{params}/{df}/{samples}/final_contigs__{mod}/{collection}/all_bins_cat/bin2classification_names_official.txt')
     threads: 12
     conda: 'cat_bat_env.yaml'
     shell: ('''CAT add_names -i {input.classification} -o {output.names} -t {cat_bat_taxa} --only_official''')

@@ -63,6 +63,36 @@ rule metagenome_pipeline_ko:
                        -f {input.ec} \
                        -o {params}; touch {output}'
 
+rule metagenome_pipeline_ec_paramed:
+    input: 
+        ec = '{prefix}/{df}/dada2/{sample_set}/picrust2/EC_predicted.tsv.gz',
+        ma = '{prefix}/{df}/dada2/{sample_set}/picrust2/marker_nsti_predicted.tsv.gz',
+        co = '{prefix}/{df}/dada2/{sample_set}/seqtab_nochim.tsv'
+    output: '{prefix}/{df}/dada2/{sample_set}/picrust2/mg_ec__david1.done'
+    params: '{prefix}/{df}/dada2/{sample_set}/picrust2/EC_metagenome_out__david1'
+    conda: 'picrust2_env.yaml'
+    threads: 20
+    shell: 'metagenome_pipeline.py -i {input.co} \
+                        -m {input.ma} \
+                        -f {input.ec} \
+                        --min_reads 10 \
+                        --min_samples 18 \
+                        -o {params}; touch {output}'
+rule metagenome_pipeline_ko_paramed:
+    input: 
+        ec = '{prefix}/{df}/dada2/{sample_set}/picrust2/KO_predicted.tsv.gz',
+        ma = '{prefix}/{df}/dada2/{sample_set}/picrust2/marker_nsti_predicted.tsv.gz',
+        co = '{prefix}/{df}/dada2/{sample_set}/seqtab_nochim.tsv'
+    output: '{prefix}/{df}/dada2/{sample_set}/picrust2/mg_ko__david1.done'
+    params: '{prefix}/{df}/dada2/{sample_set}/picrust2/KO_metagenome_out__david1'
+    conda: 'picrust2_env.yaml'
+    shell: 'metagenome_pipeline.py -i {input.co} \
+                        -m {input.ma} \
+                        -f {input.ec} \
+                        --min_reads 10 \
+                        --min_samples 18 \
+                        -o {params}; touch {output}'
+
 rule pathway_pipeline:
     input: ec = '{prefix}/{df}/dada2/{sample_set}/picrust2/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz'
     output: done = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways.done'
