@@ -18,5 +18,5 @@ maxN <- as.integer(args[[12]])
 library(dada2)
 
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(truncLenF,truncLenR), trimLeft=c(trimLeftF, trimLeftR),
-              maxN=maxN, maxEE=c(maxEEF,maxEER), truncQ=truncQ, rm.phix=TRUE, compress=TRUE)
+              maxN=maxN, maxEE=c(maxEEF,maxEER), truncQ=truncQ, rm.phix=TRUE, compress=TRUE, minLen = 50)
 print(out)

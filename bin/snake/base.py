@@ -56,6 +56,7 @@ include: modules + 'preprocessing/gz_operations.py'
 include: modules + 'mothur/mothur.py'
 include: modules + 'trim_galore/trim_galore.py'
 include: modules + 'picrust2/picrust2.py'
+include: modules + 'kraken2/kraken2.py'
 
 
 

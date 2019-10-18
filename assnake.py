@@ -50,7 +50,7 @@ def df_list():
 @click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--fs_prefix','-p', prompt='Filesystem prefix', help='Filesystem prefix' )
 @click.pass_obj
-def create_df(config, df, fs_prefix):
+def df_create(config, df, fs_prefix):
     """Create entry for dataset in database."""
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
     dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
@@ -112,7 +112,7 @@ def df_info(config, name, preproc):
 
 dataset.add_command(df_list)
 dataset.add_command(df_info)
-dataset.add_command(create_df)
+dataset.add_command(df_create)
 
 @cli.group()
 def result():
@@ -220,9 +220,14 @@ def request(config, df, preproc, results, params, list_name,   threads, jobs, ru
         cores=jobs, nodes=jobs
         )
 
-        
+@click.command(name='list')
+@click.pass_obj
+def res_list(config):
+    click.echo('results')
 
 result.add_command(request)
+result.add_command(res_list)
+
 
 if __name__ == '__main__':
     cli()

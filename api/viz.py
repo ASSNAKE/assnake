@@ -331,3 +331,19 @@ def plot_reads_count_change(sample_set, first_preproc, second_preproc):
 
     fig = go.Figure(data=[trace1, trace2], layout=layout)
     plotly.offline.iplot(fig)
+
+
+def plot_reads_count_change2(read_table, first_preproc, second_preproc):
+    
+    read_table['change'] = read_table[second_preproc]/read_table[first_preproc]
+    read_table['diff'] = read_table[first_preproc] - read_table[second_preproc]
+    read_table.sort_values('change', ascending=False)
+    read_table = read_table.sort_values(first_preproc, ascending=False)
+    
+    trace1 = go.Bar( x=read_table.index, y=read_table[second_preproc], name=second_preproc)
+    trace2 = go.Bar( x=read_table.index, y=read_table['diff'], name=first_preproc)
+    
+    layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800)
+
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
+    plotly.offline.iplot(fig)
