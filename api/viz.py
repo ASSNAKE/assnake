@@ -333,13 +333,16 @@ def plot_reads_count_change(sample_set, first_preproc, second_preproc):
     plotly.offline.iplot(fig)
 
 
-def plot_reads_count_change2(read_table, first_preproc, second_preproc):
-    
+def plot_reads_count_change2(read_table, first_preproc, second_preproc, sort,number_index_hack=False):
+    read_table.index = read_table.index.map(str)
+
     read_table['change'] = read_table[second_preproc]/read_table[first_preproc]
     read_table['diff'] = read_table[first_preproc] - read_table[second_preproc]
-    read_table.sort_values('change', ascending=False)
-    read_table = read_table.sort_values(first_preproc, ascending=False)
+    # read_table.sort_values(sort, ascending=False)
+    read_table = read_table.sort_values(sort, ascending=False)
     
+    if number_index_hack:
+        read_table.index=read_table.index +'_'
     trace1 = go.Bar( x=read_table.index, y=read_table[second_preproc], name=second_preproc)
     trace2 = go.Bar( x=read_table.index, y=read_table['diff'], name=first_preproc)
     

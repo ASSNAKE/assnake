@@ -93,6 +93,29 @@ rule metagenome_pipeline_ko_paramed:
                         --min_samples 18 \
                         -o {params}; touch {output}'
 
+rule pathway_pipeline_paramed:
+    input: ec = '{prefix}/{df}/dada2/{sample_set}/picrust2/EC_metagenome_out__david1/pred_metagenome_unstrat.tsv.gz'
+    output: done = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways__david1.done',
+        a = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways_out__david1/path_abun_unstrat.tsv.gz',
+    params: pw_out = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways_out__david1',
+        pw_work = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways_working__david1'
+    conda:'picrust2_env.yaml'
+    threads: 20
+    shell: 'pathway_pipeline.py -i {input.ec} \
+                    -o {params.pw_out} \
+                    --intermediate {params.pw_work} \
+                    -p {threads}; touch {output.done}'
+
+rule add_desc_pathway_paramed:
+    input:  
+        a = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways_out__david1/path_abun_unstrat.tsv.gz',
+        d = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways__david1.done'
+    output: '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways_out__david1/path_abun_unstrat_descrip.tsv.gz'
+    conda:'picrust2_env.yaml'
+    shell: 'add_descriptions.py -i {input.a} -m METACYC \
+                    -o {output}'
+
+
 rule pathway_pipeline:
     input: ec = '{prefix}/{df}/dada2/{sample_set}/picrust2/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz'
     output: done = '{prefix}/{df}/dada2/{sample_set}/picrust2/pathways.done'
