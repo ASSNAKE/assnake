@@ -2,7 +2,7 @@ import yaml
 import os
 import glob
 import pandas as pd
-import api.loaders as loaders
+import assnake.api.loaders as loaders
 
 class SampleSet:
     """
@@ -16,14 +16,14 @@ class SampleSet:
     wc_config = {}
     config = {}
 
-    wc_config_loc = os.path.join(dir_of_this_file, '../wc_config.yaml')
+    wc_config_loc = os.path.join(dir_of_this_file, '../../snakemake/wc_config.yaml')
     with open(wc_config_loc, 'r') as stream:
         try:
             wc_config = yaml.load(stream)
         except yaml.YAMLError as exc:
             print(exc)
 
-    config_loc = os.path.join(dir_of_this_file, '../config.yml')
+    config_loc = os.path.join(dir_of_this_file, '../../snakemake/config.yml')
     with open(config_loc, 'r') as stream:
         try:
             config = yaml.load(stream)

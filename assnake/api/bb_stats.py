@@ -8,7 +8,7 @@ import yaml
 
 config = None
 dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-cofig_loc = os.path.join(dir_of_this_file, '../config.yml')
+cofig_loc = os.path.join(dir_of_this_file, '../../snakemake/config.yml')
 with open(cofig_loc, 'r') as stream:
     try:
         config = yaml.load(stream)

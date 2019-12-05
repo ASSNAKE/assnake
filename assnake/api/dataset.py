@@ -1,4 +1,4 @@
-import api.sample_set
+from assnake.api.sample_set import SampleSet
 import os, glob, yaml, time
 import pandas as pd
 
@@ -6,6 +6,7 @@ class Dataset:
 
     df = '' # name on file system
     fs_prefix = '' # prefix on file_system
+    full_path = ''
     sample_sets = {} # Dict of sample sets, one for each preprocessing
 
     sources = None
@@ -18,7 +19,7 @@ class Dataset:
 
         # read config file
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        config_loc = os.path.join(curr_dir, '../config.yml')
+        config_loc = os.path.join(curr_dir, '../../snakemake/config.yml')
         with open(config_loc, 'r') as stream:
             try:
                 config = yaml.load(stream)
@@ -33,6 +34,7 @@ class Dataset:
                 if 'df' in info:
                     self.df =  info['df']
                     self.fs_prefix =  info['fs_prefix']
+                    self.full_path = os.path.join(self.fs_prefix, self.df)
             except yaml.YAMLError as exc:
                 print(exc)
 
@@ -41,9 +43,9 @@ class Dataset:
         preprocessing = {}
 
         end = time.time()
-        print(end - start)
+        # print(end - start)
         for p in preprocs:
-            samples = api.sample_set.SampleSet()
+            samples = SampleSet()
             samples.add_samples(self.fs_prefix, self.df, p)
             samples = samples.samples_pd[['preproc', 'df', 'prefix', 'fs_name', 'reads']].to_dict(orient='records')
             preprocessing.update({p:samples})
@@ -79,10 +81,19 @@ class Dataset:
         self.meta = meta
 
         end = time.time()
-        print(end - start)
+        # print(end - start)
 
     def __str__(self):
         return self.df + '\n' + self.fs_prefix +'\n' + str(self.sample_sets)
+
+    def __repr__(self):
+        preprocessing_info = ''
+        preprocs = list(self.sample_sets.keys())
+        for preproc in preprocs:
+            preprocessing_info = preprocessing_info + 'Samples in ' + preproc + ' - ' + str(len(self.sample_sets[preproc])) + '\n'
+        return 'Dataset name: ' + self.df + '\n' + \
+            'Filesystem prefix: ' + self.fs_prefix +'\n' + \
+            'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
 
     def to_dict(self):
         return {

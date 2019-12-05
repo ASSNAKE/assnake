@@ -3,7 +3,7 @@ import glob
 
 import pandas as pd
 import numpy as np
-import api.bb_stats
+import assnake.api.bb_stats
 # import sample_set
 import yaml
 
