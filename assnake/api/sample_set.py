@@ -6,7 +6,11 @@ import assnake.api.loaders as loaders
 
 class SampleSet:
     """
-    Class that agglomerates samles and provides convinience functions for different tasks.
+    Class that agglomerates samples and provides convinience functions for different tasks, 
+    such as constructing list of desired results locations, or preparing lists of files for rules.
+    
+    Attributes:
+        samples_pd (:obj:`pandas.DataFrame`): Pandas DataFrame with information about samples
     """
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,46 +23,61 @@ class SampleSet:
     wc_config_loc = os.path.join(dir_of_this_file, '../../snakemake/wc_config.yaml')
     with open(wc_config_loc, 'r') as stream:
         try:
-            wc_config = yaml.load(stream)
+            wc_config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
 
     config_loc = os.path.join(dir_of_this_file, '../../snakemake/config.yml')
     with open(config_loc, 'r') as stream:
         try:
-            config = yaml.load(stream)
+            config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
 
         
-    def add_samples(self, prefix, df, preproc, samples = [], do_not_add = [], pattern = ''):
+    def add_samples(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
+        '''
+        This function is used to add samples into the SampleSet.
+
+        Args:
+            fs_prefix: Prefix of the dataset on filesystem
+            df: Name od the dataset
+            preproc: Preprocessing you want to use
+            samples_to_add: List of sample names to add
+            do_not_add: list of sample names NOT to add
+            pattern: samples must match this pattern to be included. This is in format of python .format() method.
+        '''
         samples = []
-        fs_names = [f.split('/')[-1] for f in 
-            glob.glob(self.wc_config['sample_dir_wc'].format(
-                prefix=prefix, 
+        fastq_gz_file_loc = self.wc_config['fastq_gz_file_wc'].format(
+                fs_prefix=fs_prefix, 
                 df=df, 
                 preproc=preproc, 
-                sample = '*'))]
+                strand='R1',
+                sample = '*')
+        fs_names = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
 
         if pattern != '':
             fs_names = [f.split('/')[-1] for f in 
-            glob.glob(self.wc_config['sample_dir_wc'].format(prefix=prefix, df=df, preproc=preproc, sample = pattern))]
+            glob.glob(self.wc_config['sample_dir_wc'].format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample = pattern))]
 
-        if len(samples) > 0:
-            for s in samples:
+        sample_dir_wc = self.wc_config['sample_dir_wc']
+        fastq_gz_file_wc = self.wc_config['fastq_gz_file_wc']
+        count_wc = self.wc_config['count_wc']
+        if len(samples_to_add) > 0:
+            for s in samples_to_add:
                 if s in fs_names:
-                    samples.append(loaders.load_sample(prefix, df, preproc, s))
+                    samples.append(loaders.load_sample(fs_prefix, df, preproc, s,
+                        sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, count_wc=count_wc))
         else:
             for fs_name in fs_names:
                 if not (fs_name in do_not_add):
-                    sample = loaders.load_sample(prefix, df, preproc, fs_name)
-                    sample.update({'prefix': prefix})
-                    samples.append(sample)     
+                    samples.append(loaders.load_sample(fs_prefix, df, preproc, fs_name,
+                        sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, count_wc=count_wc))
 
         samples_pd = pd.DataFrame(samples)
         #samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc']
 
-        self.samples_pd = pd.concat([self.samples_pd, samples_pd])
+        self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
         self.reads_info = pd.DataFrame(self.samples_pd['reads'])
 
     def prepare_fastqc_list_multiqc(self, strand, set_name):
@@ -185,13 +204,15 @@ class SampleSet:
                     preprocessing = preproc
                 print(s)
                 for strand in strands:
+                    print(self.wc_config['count_wc'])
                     result_locs.append(self.wc_config['count_wc'].format(
-                        prefix = s['prefix'].rstrip('\/'),
+                        fs_prefix = s['fs_prefix'].rstrip('\/'),
                         df = s['df'],
                         preproc = s['preproc'],
                         sample = s['fs_name'],
                         strand = strand
                     )) 
+                    # print(result_locs)
         elif result == 'fastqc':
             for s in self.samples_pd.to_dict(orient='records'):
                 if preproc == '':
@@ -199,8 +220,10 @@ class SampleSet:
                 else:
                     preprocessing = preproc
                 for strand in strands:
+                    print(self.wc_config['fastqc_zip_wc'])
+                    print(s)
                     result_locs.append(self.wc_config['fastqc_zip_wc'].format(
-                        prefix = s['prefix'].rstrip('\/'),
+                        fs_prefix = s['fs_prefix'].rstrip('\/'),
                         df = s['df'],
                         preproc = preprocessing,
                         sample = s['fs_name'],

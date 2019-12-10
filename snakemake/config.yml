@@ -1,12 +1,14 @@
 # DIRECTORIES
 assembly_dir: '/data6/bio/TFM/assembly'
-assnake_db: '/data5/bio/databases/assnake'
+assnake_db: '/data11/bio/databases/ASSNAKE'
 fna_db_dir: '/data5/bio/databases/fna/'
 run_dir: ''
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
-conda_prefix: '/data4/bio/fedorov/assnake_conda/'
-assnake_install_dir: '/data4/bio/fedorov/assnake_dev'
+assnake_install_dir: '/data4/bio/fedorov/assnake_0.9.0/snakemake'
 dada2_dir: '/data6/bio/TFM/dada2'
+
+conda_dir: '/data4/bio/fedorov/pipeline_dev/conda'
+drmaa_log_dir: '/data4/bio/fedorov/pipeline_dev/drmaa_log'
 
 # TEST DATASET
 test_df_prefix: '/data6/bio/TFM/datasets'

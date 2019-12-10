@@ -1,7 +1,7 @@
 import shutil
 import os
 import pandas as pd
-import api.dataset 
+import assnake.api.dataset 
 
 assembly_dir = config['assembly_dir']
 assnake_db = config['assnake_db']

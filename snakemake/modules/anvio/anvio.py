@@ -1,4 +1,4 @@
-import api.loaders
+import assnake.api.loaders
 
 anvi_dir = 'data/anvi/'
 ANVI = config['anvio.bin']

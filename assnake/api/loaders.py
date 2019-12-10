@@ -7,25 +7,25 @@ import assnake.api.bb_stats
 # import sample_set
 import yaml
 
-data_dir = "/data6/bio/TFM/pipeline/"
-DF_DIR = data_dir + 'datasets/{df}/'
-SAMPLE_DIR = DF_DIR + 'reads/{preproc}/{sample}'
-FQGZ_LOC = SAMPLE_DIR +  '/{sample}_{strand}.fastq.gz'
-COUNT_LOC = SAMPLE_DIR + '/profile/{sample}_{strand}.count'
+# data_dir = "/data6/bio/TFM/pipeline/"
+# DF_DIR = data_dir + 'datasets/{df}/'
+# SAMPLE_DIR = DF_DIR + 'reads/{preproc}/{sample}'
+# FQGZ_LOC = SAMPLE_DIR +  '/{sample}_{strand}.fastq.gz'
+# COUNT_LOC = SAMPLE_DIR + '/profile/{sample}_{strand}.count'
 
-SAMPLES_META_LOC = DF_DIR + '{df}_samples.tsv'
-SOURCES_META_LOC = DF_DIR + '{df}_sources.tsv'
+# SAMPLES_META_LOC = DF_DIR + '{df}_samples.tsv'
+# SOURCES_META_LOC = DF_DIR + '{df}_sources.tsv'
 
-pipeline = '/data6/bio/TFM/pipeline/'
+# pipeline = '/data6/bio/TFM/pipeline/'
 
 
-DF_DIR_PREFIX = '{prefix}/{df}/'
-SAMPLE_DIR_PREFIX = DF_DIR_PREFIX + 'reads/{preproc}/{sample}'
-FQGZ_LOC_PREFIX = SAMPLE_DIR_PREFIX +  '/{sample}_{strand}.fastq.gz'
-COUNT_LOC_PREFIX = SAMPLE_DIR_PREFIX + '/profile/{sample}_{strand}.count'
+# DF_DIR_PREFIX = '{prefix}/{df}/'
+# SAMPLE_DIR_PREFIX = DF_DIR_PREFIX + 'reads/{preproc}/{sample}'
+# FQGZ_LOC_PREFIX = SAMPLE_DIR_PREFIX +  '/{sample}_{strand}.fastq.gz'
+# COUNT_LOC_PREFIX = SAMPLE_DIR_PREFIX + '/profile/{sample}_{strand}.count'
 
-SAMPLES_META_LOC = DF_DIR_PREFIX + '{df}_samples.tsv'
-SOURCES_META_LOC = DF_DIR_PREFIX + '{df}_sources.tsv'
+# SAMPLES_META_LOC = DF_DIR_PREFIX + '{df}_samples.tsv'
+# SOURCES_META_LOC = DF_DIR_PREFIX + '{df}_sources.tsv'
 
 ## {{{ http://code.activestate.com/recipes/578019/ (r15)
 
@@ -153,13 +153,13 @@ def human2bytes(s):
 
 
 
-def load_count(prefix, df, preproc, sample, report_bps=False, verbose=False):
+def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, count_wc=''):
     """
     Loads information about read and bp count in paired-end sample.
     """
     strands = ['R1', 'R2']
-    count_loc1 = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strands[0])
-    count_loc2 = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strands[1])
+    count_loc1 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand=strands[0])
+    count_loc2 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand=strands[1])
     
     count_dict = {'reads': -1}
 
@@ -191,10 +191,10 @@ def load_dfs_from_db(db_loc):
     """
     dfs = {}
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(curr_dir, '../config.yml')
+    config_loc = os.path.join(curr_dir, '../../snakemake/config.yml')
     with open(config_loc, 'r') as stream:
         try:
-            config = yaml.load(stream)
+            config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
     df_info_locs = glob.glob(config['assnake_db']+'/datasets/*/df_info.yaml')
@@ -202,7 +202,7 @@ def load_dfs_from_db(db_loc):
     for df_info in df_info_locs:
         with open(df_info, 'r') as stream:
             try:
-                info = yaml.load(stream)
+                info = yaml.load(stream, Loader=yaml.FullLoader)
                 if 'df' in info:
                     dfs.update({info['df']: info})
             except yaml.YAMLError as exc:
@@ -214,7 +214,7 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     Returns one dictionary with df info
     """
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(curr_dir, '../config.yml')
+    config_loc = os.path.join(curr_dir, '../../snakemake/config.yml')
     with open(config_loc, 'r') as stream:
         try:
             config = yaml.load(stream)
@@ -243,7 +243,13 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     df_info.update({"preprocs": preprocessing})
     return df_info
 
-def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False, verbose=False):
+def load_sample(fs_prefix, df, preproc, sample,
+                report_bps=False, report_size=False, verbose=False,
+                sample_dir_wc = '', fastq_gz_file_wc = '', count_wc=''):
+    '''
+    Loads all necessary info about given sample from file system.
+    '''
+    # Init start values
     sample_dict = {}
     strands = ['R1', 'R2']
     
@@ -251,15 +257,18 @@ def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False
     size = 0
     containers = []
     preprocs = []
+
+
+    # Now select what preprocessing we want to use
     if preproc == 'longest':
         preprocs = [p.split('/')[-2] for p in 
-                    glob.glob(SAMPLE_DIR_PREFIX.format(prefix=prefix, df=df, preproc='*', sample=sample))]
+                    glob.glob(fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc='*', sample=sample, strand='R1'))]
     else:
         preprocs = [p.split('/')[-2] for p in 
-                    glob.glob(SAMPLE_DIR_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample))]
+                    glob.glob(fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand='R1'))]
     for p in preprocs:
-        r1 = FQGZ_LOC_PREFIX.format(prefix=prefix, df=df, preproc=p, sample=sample, strand=strands[0])
-        r2 = FQGZ_LOC_PREFIX.format(prefix=prefix, df=df, preproc=p, sample=sample, strand=strands[1])
+        r1 = fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=p, sample=sample, strand=strands[0])
+        r2 = fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=p, sample=sample, strand=strands[1])
 
         if os.path.isfile(r1) and os.path.isfile(r2):
             containers.append(p)
@@ -268,13 +277,13 @@ def load_sample(prefix, df, preproc, sample, report_bps=False, report_size=False
                 if report_size:
                     size = os.path.getsize(r1) + os.path.getsize(r2)
                     sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
-
     return {'df':df, 
             'fs_name':sample, 
             'sample':sample,  
             'preproc':final_preproc, 
+            'fs_prefix': fs_prefix,
             #'preprocs':containers, 
-            **load_count(prefix, df, final_preproc, sample, verbose)}
+            **load_count(fs_prefix, df, final_preproc, sample, verbose, count_wc=count_wc)}
 
 def samples_in_df(df, db_loc):
     df_info = None
@@ -313,27 +322,27 @@ def load_mg_samples_in_df_fs(db_loc, df):
     return samples
 
 
-def load_mg_files(prefix, df, preproc, sample):
-    strands = ['R1', 'R2']
-    files = []
+# def load_mg_files(prefix, df, preproc, sample):
+#     strands = ['R1', 'R2']
+#     files = []
     
-    for strand in strands:
-        count = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strand)
-        fqgz = FQGZ_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strand)
+#     for strand in strands:
+#         count = COUNT_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strand)
+#         fqgz = FQGZ_LOC_PREFIX.format(prefix=prefix, df=df, preproc=preproc, sample=sample, strand=strand)
         
-        reads = -1
-        bps = -1
-        size = 0
-        try:
-            with open(count, 'r') as f:
-                line = f.readline().rstrip()
-                reads = int(line.split(' ')[0])
-                bps = int(line.split(' ')[1])
-        except:
-            print('error: ' + sample)
+#         reads = -1
+#         bps = -1
+#         size = 0
+#         try:
+#             with open(count, 'r') as f:
+#                 line = f.readline().rstrip()
+#                 reads = int(line.split(' ')[0])
+#                 bps = int(line.split(' ')[1])
+#         except:
+#             print('error: ' + sample)
                 
-        files.append({'reads': reads, 'bps': bps, 'size': os.path.getsize(fqgz), 'strand': strand})
-    return files
+#         files.append({'reads': reads, 'bps': bps, 'size': os.path.getsize(fqgz), 'strand': strand})
+#     return files
 
 def mg_samples_for_df_fs(prefix, df):
     

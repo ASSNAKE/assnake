@@ -1,8 +1,8 @@
 rule count:
     input: 
-        r1 = "{fs_prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz",
+        r1 = wc_config['fastq_gz_file_wc']
     output: 
-        r1 = "{fs_prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}.count"
+        r1 = wc_config['count_wc']
     wildcard_constraints:    
         df="[\w\d_-]+"
     run:

@@ -1,7 +1,7 @@
-import click, sys, os, glob, yaml
+import click, sys, os, glob, yaml, shutil
 import pandas as pd
-import api.loaders
-import api.sample_set
+import assnake.api.loaders
+import assnake.api.sample_set
 from tabulate import tabulate
 import snakemake
 
@@ -10,34 +10,82 @@ import snakemake
 @click.pass_context
 def cli(ctx):
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(dir_of_this_file, 'config.yml')
+    config_loc = os.path.join(dir_of_this_file, '../snakemake/config.yml')
+
+    # print(config_loc)
+    if not os.path.isfile(config_loc):
+        print("You need to init your installation! Iw won't take long. Just run assnake init start")
+        exit()
+    # else:
+    #     print("we found default config file")
+
     config = {}
     with open(config_loc, 'r') as stream:
         try:
-            config = yaml.load(stream)
+            config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
 
-    wc_config_loc = os.path.join(dir_of_this_file, 'wc_config.yaml')
+    wc_config_loc = os.path.join(dir_of_this_file, '../snakemake/wc_config.yaml')
     wc_config = {}
     with open(wc_config_loc, 'r') as stream:
         try:
-            wc_config = yaml.load(stream)
+            wc_config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
 
     ctx.obj = {'config': config, 'wc_config': wc_config}
     pass #Entry Point
 
+@cli.group(name='init')
+def init_group():
+    """Commands to init the ASSNAKE"""
+    pass
+
+@click.command(name='start')
+# @click.option('--config_location','-c', prompt='Desired location of the config file', help='Desired location of the config file' )
+def init_start():
+    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+    config_loc = os.path.join(dir_of_this_file, '../snakemake/config.yml')
+
+    config = {}
+    with open(config_loc, 'r') as stream:
+        try:
+            config = yaml.load(stream, Loader=yaml.FullLoader)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    # if not os.path.isdir(config_location):
+    #     print(config_location)
+    #     os.makedirs(config_location, exist_ok=True)
+
+    # with open(os.path.join(config_location, 'config.yml'), 'w') as config_file:
+    #     written_config = yaml.dump(config, config_file)
+
+    assnake_db = click.prompt('Please, enter desired location of the ASSNAKE database')
+    config['assnake_db'] = assnake_db
+    config['assnake_install_dir'] = os.path.join(os.path.dirname(dir_of_this_file), 'snakemake')
+    
+    with open(config_loc, 'w') as config_file:
+        written_config = yaml.dump(config, config_file)
+
+    # shutil.copyfile(config_loc, os.path.join(config_location, 'config.yml'))
+
+init_group.add_command(init_start)
+
 @cli.group()
 def dataset():
     """Commands to work with datasets"""
     pass
 
-@click.command()
+@click.command(name='list')
 def df_list():
     """List datasets in database"""
-    dfs = api.loaders.load_dfs_from_db('')
+    dfs = assnake.api.loaders.load_dfs_from_db('')
+    if len(list(dfs.keys())) == 0:
+        click.echo('No datasets in your system yet!\nYou can create one by running\n' + 
+            click.style('  assnake dataset create  ', bg='blue', fg='white', bold=True))
+
     for df in dfs.values():
         df_name = df['df']
         click.echo(click.style(''*2 + df_name + ' '*2, fg='green', bold=True))
@@ -46,7 +94,7 @@ def df_list():
         click.echo('  Description: ' + df.get('description', ''))
         click.echo('')
 
-@click.command()
+@click.command(name='create')
 @click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--fs_prefix','-p', prompt='Filesystem prefix', help='Filesystem prefix' )
 @click.pass_obj
@@ -59,14 +107,14 @@ def df_create(config, df, fs_prefix):
     if df not in dfs:
         if os.path.isdir(os.path.join(fs_prefix, df)):
             df_info = {'df': df, 'fs_prefix': fs_prefix}
-            os.mkdir(os.path.join(config['config']['assnake_db'], 'datasets/'+df))
+            os.makedirs(os.path.join(config['config']['assnake_db'], 'datasets/'+df), exist_ok=True)
             with open(os.path.join(config['config']['assnake_db'], 'datasets/'+df,'df_info.yaml'), 'w') as info_file:
                 yaml.dump(df_info, info_file, default_flow_style=False)
             click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
     else:
         click.secho('Duplicate name!', fg='red')
 
-@click.command()
+@click.command(name ='info')
 @click.option('--name','-n', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--preproc','-p', help='Show samples for preprocessing', required=False)
 @click.pass_obj
@@ -74,7 +122,7 @@ def df_info(config, name, preproc):
     """View info for the specific dataset"""
     print(preproc)
 
-    dfs = api.loaders.load_dfs_from_db('')
+    dfs = assnake.api.loaders.load_dfs_from_db('')
     df_info = dfs[name]
     click.echo(click.style(''*2 + df_info['df'] + ' '*2, fg='green', bold=True))
     click.echo('Filesystem prefix: ' + df_info.get('fs_prefix', ''))
@@ -92,7 +140,8 @@ def df_info(config, name, preproc):
     preprocessing = {}
     all_samples = []
     for p in preprocs:
-        samples = api.sample_set.SampleSet()
+        print(p)
+        samples = assnake.api.sample_set.SampleSet()
         samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
         all_samples += (list(samples.samples_pd['fs_name']))
         samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
@@ -124,6 +173,13 @@ example_res = ['fastqc', 'count', 'metaphlan2']
 @click.command()
 @click.option('--df','-d', help='Name of the dataset' )
 @click.option('--preproc','-p', help='Preprocessing to use' )
+@click.option('--samples-to-add','-r', 
+                help='Samples from dataset to process', 
+                default=','.join(['ERR1', 'ERR2']), 
+                show_default=True,
+                metavar='<samples_to_add>', 
+                type=click.STRING )
+
 @click.option('--results','-r', 
                 prompt='Results you want', 
                 help='Results you want', 
@@ -139,14 +195,14 @@ example_res = ['fastqc', 'count', 'metaphlan2']
 @click.option('--jobs','-j', help='Number of jobs', default=1)
 @click.option('--run/--no-run', default=False)
 @click.pass_obj
-def request(config, df, preproc, results, params, list_name,   threads, jobs, run):
+def request(config, df, preproc, samples_to_add, results, params, list_name,   threads, jobs, run):
     """Request result for your samples.\nYou need to provide info defining sample set, or run it from {prefix}/{df}/reads/{preproc} directory"""
+    samples_to_add = [c.strip() for c in samples_to_add.split(',')]
 
-    ss = api.sample_set.SampleSet()
+    ss = assnake.api.sample_set.SampleSet()
     if df is not None:
-        df = api.loaders.load_df_from_db(df)
-        print(df)
-        ss.add_samples(df['fs_prefix'], df['df'], preproc)
+        df = assnake.api.loaders.load_df_from_db(df)
+        ss.add_samples(df['fs_prefix'], df['df'], preproc, samples_to_add)
         click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), 
                 headers='keys', tablefmt='fancy_grid'))
 
@@ -207,15 +263,15 @@ def request(config, df, preproc, results, params, list_name,   threads, jobs, ru
     click.echo(jobs)
 
     status = snakemake.snakemake(os.path.join(curr_dir, './bin/snake/base.py'), 
-        config = dict(assnake_install_dir= os.path.abspath(os.path.dirname(__file__))),    
+        # config = config['wc_config'],    
         targets=res_list, 
         printshellcmds=True,
         dryrun=not run, 
-        configfile=os.path.join(curr_dir, 'config.yml'),
-        drmaa_log_dir = os.path.join(curr_dir, '../pipeline_dev/drmaa_log'),
+        configfiles=[os.path.join(curr_dir, '../snakemake/config.yml')],
+        drmaa_log_dir = config['config']['drmaa_log_dir'],
         use_conda = True,
         latency_wait = 120,
-        conda_prefix = os.path.join(curr_dir, '../pipeline_dev/conda'),
+        conda_prefix = config['config']['conda_dir'],
         drmaa=' -V -S /bin/bash -pe make {threads}'.format(threads=threads),
         cores=jobs, nodes=jobs
         )
