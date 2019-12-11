@@ -217,7 +217,7 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     config_loc = os.path.join(curr_dir, '../../snakemake/config.yml')
     with open(config_loc, 'r') as stream:
         try:
-            config = yaml.load(stream)
+            config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
 
@@ -225,7 +225,7 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     df_info = {}
     with open(df_info_loc, 'r') as stream:
         try:
-            info = yaml.load(stream)
+            info = yaml.load(stream, Loader=yaml.FullLoader)
             if 'df' in info:
                 df_info =  info
         except yaml.YAMLError as exc:
@@ -291,7 +291,7 @@ def samples_in_df(df, db_loc):
     
     with open(df_info_loc, 'r') as stream:
         try:
-            df_info = (yaml.load(stream))
+            df_info = (yaml.load(stream, Loader=yaml.FullLoader))
         except yaml.YAMLError as exc:
             print(exc)
                        
@@ -304,7 +304,7 @@ def load_mg_samples_in_df_fs(db_loc, df):
     
     with open(df_info_loc, 'r') as stream:
         try:
-            df_info = (yaml.load(stream))
+            df_info = (yaml.load(stream, Loader=yaml.FullLoader))
         except yaml.YAMLError as exc:
             print(exc)
                        
@@ -492,14 +492,14 @@ def load_mp2_old(prefix, samples, level='s__', org='Bacteria', index_by = 'fs_na
     return mp2_combined
 
 
-def load_mp2_new(samples, version = 'v2.9.12', params = 'def'):
+def load_mp2_new(samples, version = '__v2.9.12', params = 'def'):
     if not isinstance(samples, list):
         samples = samples.to_dict(orient='records')
-    mp2_wc = '{prefix}/{df}/taxa/{preproc}/mp2__{params}__{version}/{sample}/{sample}.mp2'
+    mp2_wc = '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.mp2'
     mp2_all = []
     for s in samples:
         mp2_loc = mp2_wc.format(
-            prefix = s['prefix'].rstrip('\/'),
+            fs_prefix = s['fs_prefix'].rstrip('\/'),
             df = s['df'],
             preproc = s['preproc'],
             sample = s['fs_name'],

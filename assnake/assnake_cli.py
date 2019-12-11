@@ -120,7 +120,6 @@ def df_create(config, df, fs_prefix):
 @click.pass_obj
 def df_info(config, name, preproc):
     """View info for the specific dataset"""
-    print(preproc)
 
     dfs = assnake.api.loaders.load_dfs_from_db('')
     df_info = dfs[name]
@@ -140,7 +139,6 @@ def df_info(config, name, preproc):
     preprocessing = {}
     all_samples = []
     for p in preprocs:
-        print(p)
         samples = assnake.api.sample_set.SampleSet()
         samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
         all_samples += (list(samples.samples_pd['fs_name']))
@@ -175,8 +173,7 @@ example_res = ['fastqc', 'count', 'metaphlan2']
 @click.option('--preproc','-p', help='Preprocessing to use' )
 @click.option('--samples-to-add','-r', 
                 help='Samples from dataset to process', 
-                default=','.join(['ERR1', 'ERR2']), 
-                show_default=True,
+                default='', 
                 metavar='<samples_to_add>', 
                 type=click.STRING )
 
@@ -197,12 +194,15 @@ example_res = ['fastqc', 'count', 'metaphlan2']
 @click.pass_obj
 def request(config, df, preproc, samples_to_add, results, params, list_name,   threads, jobs, run):
     """Request result for your samples.\nYou need to provide info defining sample set, or run it from {prefix}/{df}/reads/{preproc} directory"""
-    samples_to_add = [c.strip() for c in samples_to_add.split(',')]
-
+    if samples_to_add == '':
+        samples_to_add = []
+    else:
+        samples_to_add = [c.strip() for c in samples_to_add.split(',')]
+    print(samples_to_add)
     ss = assnake.api.sample_set.SampleSet()
     if df is not None:
         df = assnake.api.loaders.load_df_from_db(df)
-        ss.add_samples(df['fs_prefix'], df['df'], preproc, samples_to_add)
+        ss.add_samples(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
         click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), 
                 headers='keys', tablefmt='fancy_grid'))
 
@@ -259,8 +259,8 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
 
     
     curr_dir = os.path.abspath(os.path.dirname(__file__))
-    click.echo(curr_dir)
-    click.echo(jobs)
+    click.echo('Current dir: ' + curr_dir)
+    click.echo('Number of jobs torun in parallel: ' + str(jobs))
 
     status = snakemake.snakemake(os.path.join(curr_dir, './bin/snake/base.py'), 
         # config = config['wc_config'],    

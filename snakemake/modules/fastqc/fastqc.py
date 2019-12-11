@@ -1,15 +1,15 @@
 rule fastqc:
     input: wc_config['fastq_gz_file_wc']
     output: 
-        zipped="{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}_fastqc.zip"
+        zipped=wc_config['fastqc_zip_wc']
     params: 
         out="{fs_prefix}/{df}/profile/{preproc}/{sample}/",
-        zip_out="{fs_prefix}/{df}/reads/{preproc}/{sample}/profile/fastqc"
+        zip_out="{fs_prefix}/{df}/profile/{preproc}/{sample}/fastqc"
     log: "{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}.log"
     threads: 6
     conda: 'env_v0.11.8.yaml'
-    shell: ('''export PERL5LIB='';\nfastqc -t {threads} -o {params.zip_out} {input} >{log} 2>&1; \n
-          unzip -o {output.zipped} -d {params.zip_out}''')
+    shell: ('''export PERL5LIB='';\nfastqc -t {threads} -o {params.out} {input} >{log} 2>&1; \n
+          unzip -o {output.zipped} -d {params.out}''')
         #save_to_db(config['task_id'], rule, str(input), str(output.zipped), 'RUN SUCCESSFUL')
 
 rule fastqc_nogroup:

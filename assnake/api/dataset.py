@@ -22,7 +22,7 @@ class Dataset:
         config_loc = os.path.join(curr_dir, '../../snakemake/config.yml')
         with open(config_loc, 'r') as stream:
             try:
-                config = yaml.load(stream)
+                config = yaml.load(stream, Loader=yaml.FullLoader)
             except yaml.YAMLError as exc:
                 print(exc)
 
@@ -30,7 +30,7 @@ class Dataset:
         df_info_loc = config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)
         with open(df_info_loc, 'r') as stream:
             try:
-                info = yaml.load(stream)
+                info = yaml.load(stream, Loader=yaml.FullLoader)
                 if 'df' in info:
                     self.df =  info['df']
                     self.fs_prefix =  info['fs_prefix']

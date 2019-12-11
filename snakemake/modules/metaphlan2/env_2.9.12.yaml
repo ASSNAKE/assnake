@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - metaphlan2
+  - metaphlan2==2.9.12

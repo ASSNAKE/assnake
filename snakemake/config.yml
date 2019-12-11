@@ -7,8 +7,8 @@ cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
 assnake_install_dir: '/data4/bio/fedorov/assnake_0.9.0/snakemake'
 dada2_dir: '/data6/bio/TFM/dada2'
 
-conda_dir: '/data4/bio/fedorov/pipeline_dev/conda'
-drmaa_log_dir: '/data4/bio/fedorov/pipeline_dev/drmaa_log'
+conda_dir: '/data11/bio/databases/ASSNAKE/conda'
+drmaa_log_dir: '/data11/bio/databases/ASSNAKE/drmaa_log'
 
 # TEST DATASET
 test_df_prefix: '/data6/bio/TFM/datasets'

@@ -8,7 +8,7 @@ wc_config_loc = os.path.join(config['assnake_install_dir'], 'wc_config.yaml')
 wc_config = {}
 with open(wc_config_loc, 'r') as stream:
     try:
-        wc_config = yaml.load(stream)
+        wc_config = yaml.load(stream, Loader=yaml.FullLoader)
     except yaml.YAMLError as exc:
         print(exc)
 
