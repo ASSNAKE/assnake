@@ -38,12 +38,12 @@ fastqc.bin: '/data6/bio/TFM/soft/FastQC/fastqc'
 
 bbduk: '/data6/bio/TFM/soft/bioinf/mapping/bbmap-38.34/bbduk.sh'
 
-bbmap.bin: '/home/fedorov/tools/bbmap/bbmap.sh'
+# bbmap.bin: '/home/fedorov/tools/bbmap/bbmap.sh'
 
-bowtie2.bin: /srv/common/bin/bowtie2
-bowtie2-build.bin: /srv/common/bin/bowtie2-build
-bowtie2.additional.params: -k 1 
-bowtie2.threads: '20'
+# bowtie2.bin: /srv/common/bin/bowtie2
+# bowtie2-build.bin: /srv/common/bin/bowtie2-build
+# bowtie2.additional.params: -k 1 
+# bowtie2.threads: '20'
 
 
 

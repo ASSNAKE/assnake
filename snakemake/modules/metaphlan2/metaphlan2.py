@@ -2,7 +2,7 @@ rule metaphlan2:
     input:
         r1 = wc_config['fastq_gz_R1_wc'],
         r2 = wc_config['fastq_gz_R2_wc']
-    output:
+    output: 
         o = wc_config['mp2_out']
     params:
         b =  wc_config['mp2_aligment'],

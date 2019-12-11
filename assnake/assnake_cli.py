@@ -139,8 +139,8 @@ def df_info(config, name, preproc):
     preprocessing = {}
     all_samples = []
     for p in preprocs:
-        samples = assnake.api.sample_set.SampleSet()
-        samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
+        samples = assnake.api.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
+        # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
         all_samples += (list(samples.samples_pd['fs_name']))
         samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
         # click.secho(p + ' ' + str(len(samples)) + ' samples')
@@ -199,10 +199,11 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
     else:
         samples_to_add = [c.strip() for c in samples_to_add.split(',')]
     print(samples_to_add)
-    ss = assnake.api.sample_set.SampleSet()
+    ss = None
     if df is not None:
         df = assnake.api.loaders.load_df_from_db(df)
-        ss.add_samples(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
+        # assnake.api.sample_set.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
+        ss = assnake.api.sample_set.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
         click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), 
                 headers='keys', tablefmt='fancy_grid'))
 
