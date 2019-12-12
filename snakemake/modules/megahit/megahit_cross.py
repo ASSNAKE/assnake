@@ -40,7 +40,7 @@ def megahit_input_from_table(wildcards):
 rule megahit_from_table:
     input:
         unpack(megahit_input_from_table),
-        table      = '{fs_prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv',
+        table      = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/sample_set.tsv',
         params=os.path.join(config['assnake_db'], "params/megahit/{params}.json")
     output:
         out_fa     = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs.fa',

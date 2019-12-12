@@ -332,5 +332,46 @@ result.add_command(request)
 result.add_command(res_list)
 
 
+class ComplexCLI(click.MultiCommand):
+
+    def list_commands(self, ctx):
+        rv = []
+        for filename in os.listdir('/data4/bio/fedorov/assnake_0.9.0/assnake/commands'):
+            if filename.endswith('.py') and \
+               filename.startswith('cmd_'):
+                rv.append(filename[4:-3])
+                print(filename)
+        rv.sort()
+        return rv
+
+    def get_command(self, ctx, name):
+        try:
+            if sys.version_info[0] == 2:
+                name = name.encode('ascii', 'replace')
+            print('assnake.commands.cmd_' + name)
+            mod = __import__('assnake.commands.cmd_' + name,
+                             None, None, ['cli'])
+        except ImportError as error:
+            print('import_error')
+            print(error.__class__.__name__ + ": ")
+            return
+        return mod.cli
+
+@click.command(cls=ComplexCLI)
+# @pass_environment
+@click.pass_obj
+def complex_gr(config):
+    click.echo('results')
+    pass
+
+
+
+@cli.group(name='test')
+def test_group():
+    pass
+
+result.add_command(complex_gr)
+
+
 if __name__ == '__main__':
     cli()
