@@ -45,9 +45,9 @@ class Dataset:
         end = time.time()
         # print(end - start)
         for p in preprocs:
-            samples = SampleSet()
-            samples.add_samples(self.fs_prefix, self.df, p)
-            samples = samples.samples_pd[['preproc', 'df', 'prefix', 'fs_name', 'reads']].to_dict(orient='records')
+            samples = SampleSet(self.fs_prefix, self.df, p)
+            print(samples.samples_pd)
+            samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']].to_dict(orient='records')
             preprocessing.update({p:samples})
         self.sample_sets = preprocessing
         

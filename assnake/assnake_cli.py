@@ -225,7 +225,53 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
                 )
                 for strand in ['R1', 'R2']
             ]
+        elif result == 'megahit':
+            # check for prepared sample sets
+            prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
+            click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
+            for i, pset in enumerate(prepared_sets):
+                name = pset.split('/')[-2]
+                run_info = pset.split('/')[-3]
+                click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
 
+            selected_sets = []
+            while click.confirm('Do you want to process any sets?'):
+                value = click.prompt('Please, enter set number', type=int)
+                if value+1 > len(prepared_sets):
+                    click.echo(click.style('NO SUCH SAMPLE SET',fg='red'))
+                else:
+                    selected_sets.append(value)
+                    click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
+            min_len = click.prompt('Please, enter minimum contig lenth', type=int)
+
+            for ss in selected_sets:
+                res_list += [prepared_sets[ss].replace('sample_set.tsv', 'final_contigs__{min_len}.fa'.format(min_len=min_len))]
+        elif result=='metabat2':
+            mb2 = '{fs_prefix}/{df}/metabat2/bwa__0.7.17__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/metabat2.done'
+
+            # prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
+            # click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
+            # for i, pset in enumerate(prepared_sets):
+            #     name = pset.split('/')[-2]
+            #     run_info = pset.split('/')[-3]
+            #     click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
+
+            # selected_sets = []
+            # while click.confirm('Do you want to process any sets?'):
+            #     value = click.prompt('Please, enter set number', type=int)
+            #     if value+1 > len(prepared_sets):
+            #         click.echo(click.style('NO SUCH SAMPLE SET',fg='red'))
+            #     else:
+            #         selected_sets.append(value)
+            #         click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
+            # min_len = click.prompt('Please, enter minimum contig lenth', type=int)
+
+            # for ss in selected_sets:
+            #     name = pset.split('/')[-2]
+            #     name = 'p136'
+            #     res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=1000)]
+            name = 'p136'
+            res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=1000)]
         elif result=='mp2':
             res_list = ss.get_locs_for_result(result)
         elif result=='count':

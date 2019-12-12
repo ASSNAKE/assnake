@@ -21,7 +21,7 @@ dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.
 sam_wc: ''
 
 assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
-
+final_contigs_wc: '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{mod}.fa'
 
 mp2_out:      '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.mp2'
 mp2_aligment: '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.b2'

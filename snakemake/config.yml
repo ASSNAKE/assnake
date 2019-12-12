@@ -7,9 +7,12 @@ cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
 assnake_install_dir: '/data4/bio/fedorov/assnake_0.9.0/snakemake'
 dada2_dir: '/data6/bio/TFM/dada2'
 
+bwa_index_dir: ''
+
 conda_dir: '/data11/bio/databases/ASSNAKE/conda'
 drmaa_log_dir: '/data11/bio/databases/ASSNAKE/drmaa_log'
 
+debug: True
 # TEST DATASET
 test_df_prefix: '/data6/bio/TFM/datasets'
 test_df_name: 'mg_test'

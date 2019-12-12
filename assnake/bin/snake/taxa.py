@@ -1,10 +1,4 @@
-METAPHLAN2 = config['METAPHLAN2']
-MPA_PKL = config['MetaPhlAn2']['mpa_v20_m200']
-BOWTIE2DB = config['MetaPhlAn2']['BOWTIE2DB']
-BOWTIE2 = config['bowtie2.bin']
 
-CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
-CENTRIFUGE_INDEX = config["centrifuge"]["index"]
 
 rule kraken:
     input:

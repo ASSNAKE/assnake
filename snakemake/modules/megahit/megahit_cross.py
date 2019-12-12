@@ -8,90 +8,28 @@ assnake_db = config['assnake_db']
 fna_db_dir = config['fna_db_dir']
 
 
-def megahit_input(wildcards):
-    """
-    Parses output file and determines which fastq files to take. 
-
-    Example output file: 
-    ./assembly/mh__def/mg_test+FHM/p136C:p136N+DFM_002_F1_S9--TFM_001_F1-2_S2:TFM_003_F1-3_S7/raw+imp--imp__tmtic_def1/final_contigs.fa
-
-    Datasets are delimeted with `+`, preprocessings with `--` and samples with `:`
-    :param wildcards:
-    :return:
-    """
-    r_wc_str = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
-    
-    # Reconstruct dict
-    dfs = wildcards.dfs.split('+')
-    preprocs_by_df = wildcards.preprocs.split('+')
-    samples_by_df = wildcards.samples.split('+')
-    rrr = []
-    
-    rr1 = []
-    rr2 = []
-    for i, df in enumerate(dfs):
-        rrr.append({df:[]})
-        pr = preprocs_by_df[i].split('--')
-        samps_by_df_preproc = samples_by_df[i].split('--')
-        for j, p in enumerate(pr):
-            rrr[i][df].append({p:[]})
-            samps = samps_by_df_preproc[j].split(':')
-            for s in samps:
-                rrr[i][df][j][p].append(s)
-                
-                prefix = ''
-                with open (assnake_db+'/datasets/'+df+'/df_info.yaml', 'r') as df_info:
-                    for line in df_info:
-                        line = line.split(' ')
-                        if line[0] == 'fs_prefix:':
-                            prefix = line[1].replace("'", '').strip()
-                        
-                rr1.append(r_wc_str.format(prefix=prefix,df=df, preproc=p,sample=s,strand='R1'))
-                rr2.append(r_wc_str.format(prefix=prefix,df=df, preproc=p,sample=s,strand='R2'))
-    return {'F': rr1, 'R': rr2}
-        
-
-rule run_megahit_cross:
-    input: 
-        unpack(megahit_input)
-    output: 
-        out_fa = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
-    params:
-        out_folder = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/assemb/'
-    threads: 24
-    log: assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/log.txt'
-    run:
-        reads1 = ",".join(input.F)
-        reads2 = ",".join(input.R)
-        if os.path.exists(params.out_folder) and os.path.isdir(params.out_folder):
-            shutil.rmtree(params.out_folder)
-            #os.makedirs(params.out_folder)
-        shell('{config[megahit.bin]} -1 {reads1} -2 {reads2} --min-contig-len 850 -o {params.out_folder} -t {threads}  >{log} 2>&1')
-        fc_loc = params.out_folder+'final.contigs.fa'
-        shell('cp {fc_loc} {output.out_fa}')
-
-
 def megahit_input_from_table(wildcards):
     """
     Reads table with samples, returns dict with reads
     """
-    table_wc = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv'
-    r_wc_str = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
+    table_wc = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/sample_set.tsv'
+    r_wc_str = '{fs_prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz'
     
-    table = pd.read_csv(table_wc.format(prefix = wildcards.prefix,
+    table = pd.read_csv(table_wc.format(fs_prefix = wildcards.fs_prefix,
                                         df = wildcards.df,
                                         params = wildcards.params,
                                         sample_set = wildcards.sample_set),
                         sep = '\t')
+    print(table)
     rr1 = []
     rr2 = []                        
     for s in table.to_dict(orient='records'):     
-        rr1.append(r_wc_str.format(prefix=wildcards.prefix,
+        rr1.append(r_wc_str.format(fs_prefix=wildcards.fs_prefix,
                                     df=s['df'], 
                                     preproc=s['preproc'],
                                     sample=s['fs_name'],
                                     strand='R1'))
-        rr2.append(r_wc_str.format(prefix=wildcards.prefix,
+        rr2.append(r_wc_str.format(fs_prefix=wildcards.fs_prefix,
                                     df=s['df'], 
                                     preproc=s['preproc'],
                                     sample=s['fs_name'],
@@ -102,21 +40,21 @@ def megahit_input_from_table(wildcards):
 rule megahit_from_table:
     input:
         unpack(megahit_input_from_table),
-        table      = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv',
+        table      = '{fs_prefix}/{df}/assembly/mh__{params}/{sample_set}/sample_set.tsv',
         params=os.path.join(config['assnake_db'], "params/megahit/{params}.json")
     output:
-        out_fa     = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa',
-        params = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/params.json'
+        out_fa     = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs.fa',
+        params     = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/params.json'
     params:
-        out_folder = '{prefix}/{df}/assembly/mh__{params}/{sample_set}/assembly/'
-    threads: 24
-    log: '{prefix}/{df}/assembly/mh__{params}/{sample_set}/log.txt'
-    conda: 'megahit_env_v1.1.3.yaml'
+        out_folder = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/assembly/'
+    threads: 12
+    log: '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/log.txt'
+    conda: 'megahit_env_v1.2.9.yaml'
     wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'modules/megahit/megahit_wrapper.py')
 
 def get_ref(wildcards):
     fs_prefix = api.dataset.Dataset(wildcards.df).fs_prefix
-    return '{fs_prefix}/{df}/assembly/mh__{params}/{sample_set}/final_contigs.fa'.format(
+    return '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs.fa'.format(
             fs_prefix = fs_prefix, 
             df = wildcards.df,
             sample_set = wildcards.sample_set,
@@ -124,16 +62,15 @@ def get_ref(wildcards):
 
 rule refine_assemb_results_cross:
     input: 
-        # ref = assembly_dir+'/mh__{params}/{dfs}/{samples}/{preprocs}/final_contigs.fa'
-        ref = get_ref
+        ref = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs.fa'
     output: 
-        fa =         os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/final_contigs__{min_len}.fa'),
-        fai =        os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/final_contigs__{min_len}.fa.fai'),
-        dictionary = os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/final_contigs__{min_len}.fa.dict')
+        fa =         '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.fa',
+        fai =        '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.fa.fai',
+        dictionary = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.fa.dict'
     log: 
-        names = os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/name_conversions__{min_len}.txt'),
-        ll    = os.path.join(fna_db_dir,'assembly/mh__{params}/{df}/{sample_set}/reformat_fasta__{min_len}.log')
-    wildcard_constraints:    
+        names = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.txt',
+        ll    = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.log'
+    wildcard_constraints:
         min_len="[\d_-]+"
     run:
         shell('echo -e "INFO: Filtering contigs < {wildcards.min_len}bp and simplifying names"')
