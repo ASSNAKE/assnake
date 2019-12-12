@@ -4,6 +4,7 @@ import assnake.api.loaders
 import assnake.api.sample_set
 from tabulate import tabulate
 import snakemake
+import assnake.commands.dataset_commands as dataset_commands
 
 @click.group()
 @click.version_option()
@@ -78,88 +79,9 @@ def dataset():
     """Commands to work with datasets"""
     pass
 
-@click.command(name='list')
-def df_list():
-    """List datasets in database"""
-    dfs = assnake.api.loaders.load_dfs_from_db('')
-    if len(list(dfs.keys())) == 0:
-        click.echo('No datasets in your system yet!\nYou can create one by running\n' + 
-            click.style('  assnake dataset create  ', bg='blue', fg='white', bold=True))
-
-    for df in dfs.values():
-        df_name = df['df']
-        click.echo(click.style(''*2 + df_name + ' '*2, fg='green', bold=True))
-        click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
-        click.echo('  Full path: ' + os.path.join(df.get('fs_prefix', ''), df['df']))
-        click.echo('  Description: ' + df.get('description', ''))
-        click.echo('')
-
-@click.command(name='create')
-@click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
-@click.option('--fs_prefix','-p', prompt='Filesystem prefix', help='Filesystem prefix' )
-@click.pass_obj
-def df_create(config, df, fs_prefix):
-    """Create entry for dataset in database."""
-    assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
-    dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
-    print(df)
-    print(fs_prefix)
-    if df not in dfs:
-        if os.path.isdir(os.path.join(fs_prefix, df)):
-            df_info = {'df': df, 'fs_prefix': fs_prefix}
-            os.makedirs(os.path.join(config['config']['assnake_db'], 'datasets/'+df), exist_ok=True)
-            with open(os.path.join(config['config']['assnake_db'], 'datasets/'+df,'df_info.yaml'), 'w') as info_file:
-                yaml.dump(df_info, info_file, default_flow_style=False)
-            click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
-    else:
-        click.secho('Duplicate name!', fg='red')
-
-@click.command(name ='info')
-@click.option('--name','-n', prompt='Name of the dataset', help='Name of the dataset' )
-@click.option('--preproc','-p', help='Show samples for preprocessing', required=False)
-@click.pass_obj
-def df_info(config, name, preproc):
-    """View info for the specific dataset"""
-
-    dfs = assnake.api.loaders.load_dfs_from_db('')
-    df_info = dfs[name]
-    click.echo(click.style(''*2 + df_info['df'] + ' '*2, fg='green', bold=True))
-    click.echo('Filesystem prefix: ' + df_info.get('fs_prefix', ''))
-    click.echo('Full path: ' + os.path.join(df_info.get('fs_prefix', ''), name))
-    click.echo('Description: ' + df_info.get('description', ''))
-    
-    mg_samples_loc = os.path.join(config['config']['assnake_db'], 'datasets', df_info['df'], 'mg_samples.tsv')
-
-    if os.path.isfile(mg_samples_loc):
-        click.echo(tabulate(pd.read_csv(mg_samples_loc, sep='\t'), headers='keys', tablefmt='fancy_grid'))
-
-    reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-    preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
-    preprocs.sort()
-    preprocessing = {}
-    all_samples = []
-    for p in preprocs:
-        samples = assnake.api.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
-        # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
-        all_samples += (list(samples.samples_pd['fs_name']))
-        samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
-        # click.secho(p + ' ' + str(len(samples)) + ' samples')
-        preprocessing.update({p:samples})
-
-    click.echo('\nTotal samples: ' + str(len(set(all_samples))) + '\n')
-
-
-    for key, value in preprocessing.items():
-        click.echo('Samples in ' + click.style(key, bold=True) + ': ' + str(len(value)))
-    if preproc is not None:
-        samples_pd = pd.DataFrame(preprocessing[preproc])
-        # print(samples_pd)
-        click.echo(tabulate(samples_pd.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
-
-
-dataset.add_command(df_list)
-dataset.add_command(df_info)
-dataset.add_command(df_create)
+dataset.add_command(dataset_commands.df_list)
+dataset.add_command(dataset_commands.df_info)
+dataset.add_command(dataset_commands.df_create)
 
 @cli.group()
 def result():
@@ -235,13 +157,11 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
                 click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
 
             selected_sets = []
-            while click.confirm('Do you want to process any sets?'):
-                value = click.prompt('Please, enter set number', type=int)
-                if value+1 > len(prepared_sets):
-                    click.echo(click.style('NO SUCH SAMPLE SET',fg='red'))
-                else:
-                    selected_sets.append(value)
-                    click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
+            sel_sets_str = click.prompt('Please, enter sets you want to assemble, comma separated. You can also type all, to select all sets', type=str)
+            sel_sets_str = sel_sets_str.replace(' ', '')
+            if sel_sets_str != 'all':
+                selected_sets = [int(s) for s in sel_sets_str.split(',')] 
+            click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
             min_len = click.prompt('Please, enter minimum contig lenth', type=int)
 
             for ss in selected_sets:
@@ -249,29 +169,49 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
         elif result=='metabat2':
             mb2 = '{fs_prefix}/{df}/metabat2/bwa__0.7.17__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/metabat2.done'
 
-            # prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
-            # click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
-            # for i, pset in enumerate(prepared_sets):
-            #     name = pset.split('/')[-2]
-            #     run_info = pset.split('/')[-3]
-            #     click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
+            prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
+            click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
+            for i, pset in enumerate(prepared_sets):
+                name = pset.split('/')[-2]
+                run_info = pset.split('/')[-3]
+                click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
 
-            # selected_sets = []
-            # while click.confirm('Do you want to process any sets?'):
-            #     value = click.prompt('Please, enter set number', type=int)
-            #     if value+1 > len(prepared_sets):
-            #         click.echo(click.style('NO SUCH SAMPLE SET',fg='red'))
-            #     else:
-            #         selected_sets.append(value)
-            #         click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
-            # min_len = click.prompt('Please, enter minimum contig lenth', type=int)
+            selected_sets = []
+            sel_sets_str = click.prompt('Please, enter sets you want to assemble, comma separated. You can also type all, to select all sets', type=str)
+            sel_sets_str = sel_sets_str.replace(' ', '')
+            if sel_sets_str != 'all':
+                selected_sets = [int(s) for s in sel_sets_str.split(',')] 
+            else: 
+                selected_sets = list(range(0,len(prepared_sets)))
+            click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
+            min_len = click.prompt('Please, enter minimum contig lenth', type=int)
 
-            # for ss in selected_sets:
-            #     name = pset.split('/')[-2]
-            #     name = 'p136'
-            #     res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=1000)]
-            name = 'p136'
-            res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=1000)]
+            for ss in selected_sets:
+                name = prepared_sets[ss].split('/')[-2]
+                res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=min_len)]
+        elif result=='maxbin2':
+            mb2 = '{fs_prefix}/{df}/maxbin2/bwa__0.7.17__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/maxbin2.done'
+
+            prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
+            click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
+            for i, pset in enumerate(prepared_sets):
+                name = pset.split('/')[-2]
+                run_info = pset.split('/')[-3]
+                click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
+
+            selected_sets = []
+            sel_sets_str = click.prompt('Please, enter sets you want to assemble, comma separated. You can also type all, to select all sets', type=str)
+            sel_sets_str = sel_sets_str.replace(' ', '')
+            if sel_sets_str != 'all':
+                selected_sets = [int(s) for s in sel_sets_str.split(',')] 
+            else: 
+                selected_sets = list(range(0,len(prepared_sets)))
+            click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
+            min_len = click.prompt('Please, enter minimum contig lenth', type=int)
+
+            for ss in selected_sets:
+                name = prepared_sets[ss].split('/')[-2]
+                res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=min_len)]
         elif result=='mp2':
             res_list = ss.get_locs_for_result(result)
         elif result=='count':

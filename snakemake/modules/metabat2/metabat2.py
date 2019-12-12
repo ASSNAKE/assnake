@@ -54,7 +54,6 @@ def get_samples_for_metabat(wildcards):
                                     preproc=s['preproc'],
                                     sample=s['fs_name']))
 
-    print(list_of_sample_profiles)
     return list_of_sample_profiles
 
 rule jgi_sum_depth:
@@ -83,7 +82,7 @@ rule metabat2_new:
         bin_b = '{fs_prefix}/{df}/metabat2/bwa__{version}__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/bins/',
     log:        '{fs_prefix}/{df}/metabat2/bwa__{version}__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/log.txt'
     benchmark:  '{fs_prefix}/{df}/metabat2/bwa__{version}__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/benchmark.txt'
-    threads: 20
+    threads: 12
     conda: 'metabat2_env.yaml'
     shell: ('''cd {params.wd}; \n
             (metabat2 -t {threads} -i {input.fa} -a {input.depth} -o {params.bin_d}) >{log} 2>&1; \n
