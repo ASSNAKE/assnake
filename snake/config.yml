@@ -4,7 +4,7 @@ assnake_db: '/data11/bio/databases/ASSNAKE'
 fna_db_dir: '/data5/bio/databases/fna/'
 run_dir: ''
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
-assnake_install_dir: '/data4/bio/fedorov/assnake_0.9.0/snakemake'
+assnake_install_dir: '/data4/bio/fedorov/assnake_0.9.0/snake'
 dada2_dir: '/data6/bio/TFM/dada2'
 
 bwa_index_dir: ''

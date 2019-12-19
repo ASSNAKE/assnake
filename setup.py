@@ -8,6 +8,6 @@ setup(name='assnake',
     ],
     entry_points='''
         [console_scripts]
-        assnake=assnake.assnake_cli:cli
+        assnake=assnake.assnake_cli:main
     ''',
     )

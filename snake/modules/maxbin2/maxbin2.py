@@ -55,7 +55,7 @@ rule maxbin2:
     benchmark:       '{fs_prefix}/{df}/maxbin2/bwa__{version}__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/benchmark.txt'
     threads: 12
     conda: 'maxbin2_env.yaml'
-    shell: ('''export PERL5LIB="/data6/bio/TFM/pipeline/.snakemake/conda/fcda6b9a/lib/site_perl/5.26.2";\n
+    shell: ('''export PERL5LIB="/data6/bio/TFM/pipeline/.snake/conda/fcda6b9a/lib/site_perl/5.26.2";\n
         mkdir -p {params.wd}; \n
         cd {params.wd}; \n
         (run_MaxBin.pl -contig {input.fa} -out {params.prefix} -abund_list {input.abund_list} -thread {threads}) >{log} 2>&1; \n

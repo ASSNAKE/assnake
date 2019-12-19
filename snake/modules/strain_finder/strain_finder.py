@@ -95,6 +95,6 @@ rule sf:
         otu_out = '{prefix}/{df}/StrainFinder/bwa__{params}/{preproc}/{samples}/res/{org}.otu',
         log = '{prefix}/{df}/StrainFinder/bwa__{params}/{preproc}/{samples}/res/{org}.log'
     conda: 'python_env.yaml'
-    shell: ('''conda activate /data6/bio/TFM/pipeline/.snakemake/conda/caf26b02;\n
+    shell: ('''conda activate /data6/bio/TFM/pipeline/.snake/conda/caf26b02;\n
         which python2.7; \n
-        /data6/bio/TFM/pipeline/.snakemake/conda/3dfdbd67/bin/python {config[assnake_install_dir]}/modules/strain_finder/scripts/StrainFinder.py --aln {input.aln} -N 5 --max_reps 10 --dtol 1 --ntol 2 --max_time 3600 --converge  --em_out {output.em_out} --otu_out {output.otu_out} --log {output.log} --n_keep 3 --force_update --merge_out --msg''')
+        /data6/bio/TFM/pipeline/.snake/conda/3dfdbd67/bin/python {config[assnake_install_dir]}/modules/strain_finder/scripts/StrainFinder.py --aln {input.aln} -N 5 --max_reps 10 --dtol 1 --ntol 2 --max_time 3600 --converge  --em_out {output.em_out} --otu_out {output.otu_out} --log {output.log} --n_keep 3 --force_update --merge_out --msg''')

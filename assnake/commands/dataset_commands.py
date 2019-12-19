@@ -42,7 +42,7 @@ def df_create(config, df, fs_prefix):
         click.secho('Duplicate name!', fg='red')
 
 @click.command(name ='info')
-@click.option('--name','-n', prompt='Name of the dataset', help='Name of the dataset' )
+@click.option('--name','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--preproc','-p', help='Show samples for preprocessing', required=False)
 @click.pass_obj
 def df_info(config, name, preproc):

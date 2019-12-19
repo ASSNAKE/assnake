@@ -19,7 +19,7 @@ class Dataset:
 
         # read config file
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        config_loc = os.path.join(curr_dir, '../../snakemake/config.yml')
+        config_loc = os.path.join(curr_dir, '../../snake/config.yml')
         with open(config_loc, 'r') as stream:
             try:
                 config = yaml.load(stream, Loader=yaml.FullLoader)

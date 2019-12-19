@@ -5,7 +5,7 @@ import click, sys, os, glob, yaml
 @click.pass_context
 def cli(ctx):
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(dir_of_this_file, '../snakemake/config.yml')
+    config_loc = os.path.join(dir_of_this_file, '../snake/config.yml')
     config = {}
     with open(config_loc, 'r') as stream:
         try:

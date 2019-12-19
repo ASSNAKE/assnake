@@ -20,14 +20,14 @@ class SampleSet:
 
     # ==Do we really need this here?==
     wc_config = {}
-    wc_config_loc = os.path.join(dir_of_this_file, '../../snakemake/wc_config.yaml')
+    wc_config_loc = os.path.join(dir_of_this_file, '../../snake/wc_config.yaml')
     with open(wc_config_loc, 'r') as stream:
         try:
             wc_config = yaml.load(stream, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
             print(exc)
     config = {}
-    config_loc = os.path.join(dir_of_this_file, '../../snakemake/config.yml')
+    config_loc = os.path.join(dir_of_this_file, '../../snake/config.yml')
     with open(config_loc, 'r') as stream:
         try:
             config = yaml.load(stream, Loader=yaml.FullLoader)
@@ -200,7 +200,6 @@ class SampleSet:
                 else:
                     preprocessing = preproc
                 for strand in strands:
-                    print(self.wc_config['count_wc'])
                     result_locs.append(self.wc_config['count_wc'].format(
                         fs_prefix = s['fs_prefix'].rstrip('\/'),
                         df = s['df'],
@@ -216,7 +215,6 @@ class SampleSet:
                 else:
                     preprocessing = preproc
                 for strand in strands:
-                    print(self.wc_config['fastqc_zip_wc'])
                     result_locs.append(self.wc_config['fastqc_zip_wc'].format(
                         fs_prefix = s['fs_prefix'].rstrip('\/'),
                         df = s['df'],

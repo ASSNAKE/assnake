@@ -30,7 +30,7 @@ task_id=task_id, rule_name=rule_name, in_list=in_list, out_list=out_list, status
     
     
 snakefiles = './'
-modules    = '../../../snakemake/modules/'
+modules    = '../../../snake/modules/'
 
 include: modules + 'metaphlan2/metaphlan2.py'
 include: modules + 'megahit/megahit_cross.py'

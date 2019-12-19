@@ -4,14 +4,19 @@ import assnake.api.loaders
 import assnake.api.sample_set
 from tabulate import tabulate
 import snakemake
+from click.testing import CliRunner
+from sys import argv
+
 import assnake.commands.dataset_commands as dataset_commands
 
 @click.group()
 @click.version_option()
 @click.pass_context
 def cli(ctx):
+
+
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(dir_of_this_file, '../snakemake/config.yml')
+    config_loc = os.path.join(dir_of_this_file, '../snake/config.yml')
 
     # print(config_loc)
     if not os.path.isfile(config_loc):
@@ -27,7 +32,7 @@ def cli(ctx):
         except yaml.YAMLError as exc:
             print(exc)
 
-    wc_config_loc = os.path.join(dir_of_this_file, '../snakemake/wc_config.yaml')
+    wc_config_loc = os.path.join(dir_of_this_file, '../snake/wc_config.yaml')
     wc_config = {}
     with open(wc_config_loc, 'r') as stream:
         try:
@@ -47,7 +52,7 @@ def init_group():
 # @click.option('--config_location','-c', prompt='Desired location of the config file', help='Desired location of the config file' )
 def init_start():
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(dir_of_this_file, '../snakemake/config.yml')
+    config_loc = os.path.join(dir_of_this_file, '../snake/config.yml')
 
     config = {}
     with open(config_loc, 'r') as stream:
@@ -74,7 +79,7 @@ def init_start():
 
 init_group.add_command(init_start)
 
-@cli.group()
+@cli.group(chain=True)
 def dataset():
     """Commands to work with datasets"""
     pass
@@ -120,7 +125,7 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
         samples_to_add = []
     else:
         samples_to_add = [c.strip() for c in samples_to_add.split(',')]
-    print(samples_to_add)
+    # print(samples_to_add)
     ss = None
     if df is not None:
         df = assnake.api.loaders.load_df_from_db(df)
@@ -254,7 +259,7 @@ def request(config, df, preproc, samples_to_add, results, params, list_name,   t
         targets=res_list, 
         printshellcmds=True,
         dryrun=not run, 
-        configfiles=[os.path.join(curr_dir, '../snakemake/config.yml')],
+        configfiles=[os.path.join(curr_dir, '../snake/config.yml')],
         drmaa_log_dir = config['config']['drmaa_log_dir'],
         use_conda = True,
         latency_wait = 120,
@@ -280,7 +285,10 @@ class ComplexCLI(click.MultiCommand):
             if filename.endswith('.py') and \
                filename.startswith('cmd_'):
                 rv.append(filename[4:-3])
-                print(filename)
+        for filename in os.listdir('/data4/bio/fedorov/assnake_0.9.0/snake/modules/fastqc'):
+            if filename.endswith('.py') and \
+               filename.startswith('cmd_'):
+                rv.append(filename[4:-3])
         rv.sort()
         return rv
 
@@ -288,20 +296,23 @@ class ComplexCLI(click.MultiCommand):
         try:
             if sys.version_info[0] == 2:
                 name = name.encode('ascii', 'replace')
-            print('assnake.commands.cmd_' + name)
             mod = __import__('assnake.commands.cmd_' + name,
                              None, None, ['cli'])
         except ImportError as error:
             print('import_error')
             print(error.__class__.__name__ + ": ")
-            return
+            print(name)
+            mod = __import__('snake.modules.fastqc.cmd_' + name,
+                             None, None, ['cli'])
+            
+            return mod.cli
         return mod.cli
 
-@click.command(cls=ComplexCLI)
+@click.group(cls=ComplexCLI, chain = True)
 # @pass_environment
 @click.pass_obj
 def complex_gr(config):
-    click.echo('results')
+    click.echo('complex_gr')
     pass
 
 
@@ -310,8 +321,13 @@ def complex_gr(config):
 def test_group():
     pass
 
-result.add_command(complex_gr)
+test_group.add_command(complex_gr)
 
-
-if __name__ == '__main__':
+def main():
+    print('======IN MAIN===========')
+    print(argv[:])
+    try:
+        print(argv[:].index('run'))
+    except:
+        print('nnn')
     cli()
