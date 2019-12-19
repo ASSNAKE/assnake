@@ -3,7 +3,7 @@ import assnake.api.sample_set
 from tabulate import tabulate
 import click
 
-@click.command('fastqc', short_help='Fastqc - quality control checks on raw sequence data')
+@click.command('count', short_help='Count number of reads and basepairs in fastq file')
 
 @click.option('--df','-d', help='Name of the dataset', required=True )
 @click.option('--preproc','-p', help='Preprocessing to use' )
@@ -22,7 +22,7 @@ def cli(config, df, preproc, samples_to_add):
 
     click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), 
         headers='keys', tablefmt='fancy_grid'))
-    res_list = ss.get_locs_for_result('fastqc')
+    res_list = ss.get_locs_for_result('count')
     if config.get('requests', None) is None:
         config['requests'] = res_list
     else:

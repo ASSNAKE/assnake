@@ -1,4 +1,3 @@
-#!/bin/bash
 fix_base_count() {
     local counts=($(cat))
     echo "${counts[0]} $((${counts[1]} - ${counts[0]}))"

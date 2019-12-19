@@ -242,7 +242,7 @@ class SampleSet:
                 else:
                     preprocessing = preproc
                 result_locs.append(self.wc_config['fastq_gz_file_wc'].format(
-                    prefix = s['prefix'].rstrip('\/'),
+                    fs_prefix = s['fs_prefix'].rstrip('\/'),
                     df = s['df'],
                     preproc = preprocessing+'__tmtic_'+params,
                     sample = s['fs_name'],

@@ -36,6 +36,11 @@ def tmtic_params(params_loc):
     if(len(hcrop.keys()) > 0):
         slw_str = 'HEADCROP:{length} '
         params_str += slw_str.format(**hcrop)
+
+    crop = params_dict.pop('CROP')
+    if(len(hcrop.keys()) > 0):
+        slw_str = 'CROP:{length} '
+        params_str += slw_str.format(**hcrop)
     
     return params_str
 

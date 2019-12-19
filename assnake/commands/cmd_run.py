@@ -2,7 +2,7 @@ import click, os, snakemake
 # from assnake.assnake_cli import pass_environment
 
 
-@click.command('snake', short_help='Runs snakemake for requested results')
+@click.command('run', short_help='Runs snakemake for requested results')
 
 @click.option('--threads','-t', help='Threads per job', default=4)
 @click.option('--jobs','-j', help='Number of jobs', default=1)
@@ -12,7 +12,6 @@ import click, os, snakemake
 
 def cli(config, threads, jobs, run):
     
-    print(config['requests'])
     click.echo('RUN SNAKEMAKE')
 
     curr_dir = os.path.abspath(os.path.dirname(__file__))
