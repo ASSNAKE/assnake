@@ -13,17 +13,12 @@ import assnake.commands.dataset_commands as dataset_commands
 @click.version_option()
 @click.pass_context
 def cli(ctx):
-
-
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     config_loc = os.path.join(dir_of_this_file, '../snake/config.yml')
 
-    # print(config_loc)
     if not os.path.isfile(config_loc):
         print("You need to init your installation! Iw won't take long. Just run assnake init start")
         exit()
-    # else:
-    #     print("we found default config file")
 
     config = {}
     with open(config_loc, 'r') as stream:
@@ -41,7 +36,7 @@ def cli(ctx):
             print(exc)
 
     ctx.obj = {'config': config, 'wc_config': wc_config}
-    pass #Entry Point
+    pass 
 
 @cli.group(name='init')
 def init_group():
@@ -91,6 +86,7 @@ dataset.add_command(dataset_commands.df_create)
 class ComplexCLI(click.MultiCommand):
 
     def list_commands(self, ctx):
+
         rv = []
         for filename in os.listdir('/data4/bio/fedorov/assnake_0.9.0/assnake/commands'):
             if filename.endswith('.py') and \
@@ -105,7 +101,7 @@ class ComplexCLI(click.MultiCommand):
                filename.startswith('cmd_'):
                 rv.append(module +'/'+filename[4:-3])
 
-        # print( rv)
+        print( rv)
         # rv.sort()
         return rv
 
@@ -117,7 +113,7 @@ class ComplexCLI(click.MultiCommand):
             except ImportError as error:
                 print('import_error')
                 print(error.__class__.__name__ + ": ", name)
-                return
+                return None
             return mod.cli
         else:
             try:
@@ -127,116 +123,52 @@ class ComplexCLI(click.MultiCommand):
                 mod = __import__(mod_wc.format(module = module, command_name = command_name),
                                 None, None, ['cli'])
             except ImportError as error:
-                print('import_error')
+                print('=import_error=')
                 print(error.__class__.__name__ + ": ", name)
 
-                return
+                return None
             return mod.cli
         
 
 @cli.group()
 def result():
-    """Commands to work with results"""
     pass
 
-# def request(config, df, preproc, samples_to_add, results, params, list_name,   threads, jobs, run):
+@result.command('prepare_set_for_assembly')
+@click.option('--df', '-d')
+@click.option('--preproc','-p', help='Preprocessing to use' )
+@click.option('--samples-to-add','-s', 
+                help='Samples from dataset to process', 
+                default='', 
+                metavar='<samples_to_add>', 
+                type=click.STRING )
+@click.option('--set_name','-n', help='Name of your sample set' )
 
-#     for result in results:
-#         if result == 'multiqc':
-#             ss.prepare_fastqc_list_multiqc('R1', preproc)
-#             ss.prepare_fastqc_list_multiqc('R2', preproc)
-#             multiqc_report_wc = config['wc_config']['multiqc_report']
 
-#             res_list = [
-#                 multiqc_report_wc.format(
-#                     prefix = df['fs_prefix'],
-#                     df = df['df'],
-#                     sample_set = preproc,
-#                     strand = strand,
-#                 )
-#                 for strand in ['R1', 'R2']
-#             ]
-#         elif result == 'megahit':
-#             # check for prepared sample sets
-#             
-#         elif result=='metabat2':
-#             mb2 = '{fs_prefix}/{df}/metabat2/bwa__0.7.17__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/metabat2.done'
+def prepare_set_for_assembly(df, preproc, samples_to_add,set_name):
+    print(df)
+    print(preproc)
+    print(samples_to_add)
+    samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
+    df = assnake.api.loaders.load_df_from_db(df)
+    ss = assnake.api.sample_set.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
 
-#             prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
-#             click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
-#             for i, pset in enumerate(prepared_sets):
-#                 name = pset.split('/')[-2]
-#                 run_info = pset.split('/')[-3]
-#                 click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
+    click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc', 'df']].sort_values('reads'), 
+        headers='keys', tablefmt='fancy_grid'))
 
-#             selected_sets = []
-#             sel_sets_str = click.prompt('Please, enter sets you want to assemble, comma separated. You can also type all, to select all sets', type=str)
-#             sel_sets_str = sel_sets_str.replace(' ', '')
-#             if sel_sets_str != 'all':
-#                 selected_sets = [int(s) for s in sel_sets_str.split(',')] 
-#             else: 
-#                 selected_sets = list(range(0,len(prepared_sets)))
-#             click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
-#             min_len = click.prompt('Please, enter minimum contig lenth', type=int)
+    set_dir = os.path.join(df['fs_prefix'], df['df'], 'assembly', set_name)
+    os.makedirs(set_dir, exist_ok=True)
 
-#             for ss in selected_sets:
-#                 name = prepared_sets[ss].split('/')[-2]
-#                 res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=min_len)]
-#         elif result=='maxbin2':
-#             mb2 = '{fs_prefix}/{df}/maxbin2/bwa__0.7.17__{params}/mh__v1.2.9__def/{df}/{sample_set}/final_contigs__{mod}/maxbin2.done'
+    set_loc = os.path.join(set_dir, 'sample_set.tsv')
+    ss.samples_pd[['df', 'preproc', 'fs_name']].to_csv(set_loc, sep='\t', index=False)
 
-#             prepared_sets = glob.glob(os.path.join(df['fs_prefix'],df['df'],'assembly/*/*/sample_set.tsv'))
-#             click.echo('We found ' + str(len(prepared_sets)) + ' prepared sets:')
-#             for i, pset in enumerate(prepared_sets):
-#                 name = pset.split('/')[-2]
-#                 run_info = pset.split('/')[-3]
-#                 click.echo(click.style(str(i), bold = True) + ' ' + run_info + ' ' + name)
-
-#             selected_sets = []
-#             sel_sets_str = click.prompt('Please, enter sets you want to assemble, comma separated. You can also type all, to select all sets', type=str)
-#             sel_sets_str = sel_sets_str.replace(' ', '')
-#             if sel_sets_str != 'all':
-#                 selected_sets = [int(s) for s in sel_sets_str.split(',')] 
-#             else: 
-#                 selected_sets = list(range(0,len(prepared_sets)))
-#             click.echo(click.style('Selected sets: ' + str(set(selected_sets)), fg='green'))
-#             min_len = click.prompt('Please, enter minimum contig lenth', type=int)
-
-#             for ss in selected_sets:
-#                 name = prepared_sets[ss].split('/')[-2]
-#                 res_list += [mb2.format(fs_prefix=df['fs_prefix'],df=df['df'], params='def',sample_set=name, mod=min_len)]
-        
-#         elif result == 'dada2-filter-and-trim':
-#             res_list = ss.get_locs_for_result(result, params=params)
-#         elif result=='dada2-learn-errors':
-#             # ss.prepare_dada2_sample_list()
-#             if list_name is None:
-#                 list_name = click.prompt('Please enter name for your dada2 error profile')
-#                 print(list_name)
-#             if df is not None:
-#                 ss.prepare_dada2_sample_list(list_name)
-#                 res_list= [(config['wc_config']['dada2_err_wc'].format(
-#                         dada2_dir = config['config']['dada2_dir'],
-#                         sample_set = list_name,
-#                         strand = strand,
-#                         params=params
-#                     )) for strand in ['R1', 'R2']]
-#             else:
-#                 res_list= [(config['wc_config']['dada2_err_wc'].format(
-#                         dada2_dir = config['config']['dada2_dir'],
-#                         sample_set = list_name,
-#                         strand = strand,
-#                         params=params
-#                     )) for strand in ['R1', 'R2']]
-        
-
-@click.group(cls=ComplexCLI, chain = True)
-# @pass_environment
+@click.group(cls=ComplexCLI, chain = True, help = 'Used to request and run results')
 @click.pass_obj
 def request(config):
     pass
 
 result.add_command(request)
+
 
 
 def main():

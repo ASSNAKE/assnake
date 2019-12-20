@@ -62,14 +62,14 @@ def get_ref(wildcards):
 
 rule refine_assemb_results_cross:
     input: 
-        ref = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs.fa'
+        ref = '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{params}/{sample_set}/final_contigs.fa'
     output: 
-        fa =         '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.fa',
-        fai =        '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.fa.fai',
-        dictionary = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.fa.dict'
+        fa =         '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{params}/{sample_set}/final_contigs__{min_len}.fa',
+        fai =        '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{params}/{sample_set}/final_contigs__{min_len}.fa.fai',
+        dictionary = '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{params}/{sample_set}/final_contigs__{min_len}.fa.dict'
     log: 
-        names = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.txt',
-        ll    = '{fs_prefix}/{df}/assembly/mh__v1.2.9__{params}/{sample_set}/final_contigs__{min_len}.log'
+        names = '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{params}/{sample_set}/final_contigs__{min_len}.txt',
+        ll    = '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{params}/{sample_set}/final_contigs__{min_len}.log'
     wildcard_constraints:
         min_len="[\d_-]+"
     run:

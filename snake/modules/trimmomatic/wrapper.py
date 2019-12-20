@@ -38,9 +38,9 @@ def tmtic_params(params_loc):
         params_str += slw_str.format(**hcrop)
 
     crop = params_dict.pop('CROP')
-    if(len(hcrop.keys()) > 0):
+    if(len(crop.keys()) > 0):
         slw_str = 'CROP:{length} '
-        params_str += slw_str.format(**hcrop)
+        params_str += slw_str.format(**crop)
     
     return params_str
 

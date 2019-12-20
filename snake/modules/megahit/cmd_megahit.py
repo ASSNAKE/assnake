@@ -7,8 +7,8 @@ import assnake.api.sample_set
 def cli():
     pass
 
-@click.command('mh', short_help='Start the assembler')
-@click.option('--df','-d', help='Name of the dataset', required=True )
+@cli.command('mh', short_help='Start the assembler')
+@click.option('--df','-d', help='Name of the dataset')
 @click.pass_obj
 
 def mh(config, df):
@@ -32,4 +32,5 @@ def mh(config, df):
     for ss in selected_sets:
         res_list += [prepared_sets[ss].replace('sample_set.tsv', 'final_contigs__{min_len}.fa'.format(min_len=min_len))]
 
-cli.add_command(mh)
+# cli.add_command(mh)
+
