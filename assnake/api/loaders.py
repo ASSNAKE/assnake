@@ -507,9 +507,12 @@ def load_mp2_new(samples, version = '__v2.9.12', params = 'def'):
             params = params
         )
         if os.path.isfile(mp2_loc):
-            mp2 = pd.read_csv(mp2_loc, sep='\t', header = [2])
-            mp2['fs_name']=s['fs_name']
-            mp2_all.append(mp2)
+            try:
+                mp2 = pd.read_csv(mp2_loc, sep='\t', header = [2])
+                mp2['fs_name']=s['fs_name']
+                mp2_all.append(mp2)
+            except:
+                print('ERROR LOADING:', mp2_loc)
 
     mp2_all = pd.concat(mp2_all)
     mp2_all = mp2_all.pivot(index='fs_name', columns = '#clade_name', values = 'relative_abundance')
@@ -692,10 +695,10 @@ def get_general_taxa_comp_krak_style(samples):
     
     for s in samples:
         loc = loc_wc.format(df = s['df'], 
-                            fs_prefix = s['prefix'],
+                            fs_prefix = s['fs_prefix'],
                             preproc=s['preproc'], 
                             sample = s['fs_name'],
-                            params = 'def')
+                            params = 'def1')
         if os.path.isfile(loc):
             try:
                 centr_krak = pd.read_csv(loc, sep='\t', header=None)

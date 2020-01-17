@@ -61,3 +61,33 @@ def tax_glom(taxa_counts, rank='Phylum', include_na = True, index = 'simple_long
         agg_counts = agg_counts.set_index(ranks, inplace=False)
     
     return agg_counts
+
+def single_level_from_mp2_table(tax_table, rank = 'g__', ranks = ['k__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__', 't__']):
+    """
+    Takes metaphlan2 style table with all taxonomic levels included, like
+    k__Archaea; k__Archaea|p__Euryarchaeota; etc., and desired taxonomic level as input, returns feature table 
+    with only selected taxonomic level features.
+
+    Args:
+        tax_table (:obj:`pandas.DataFrame`): DataFrame with counts and full taxonomic information. Samples are columns. 
+        rank (str): Rank level at wich we want to agglomerate data
+        levels (list(str)): List with all ranks present in table
+    Returns:
+        tax_table_pruned (:obj:`pandas.DataFrame`): 
+    """
+
+    ind = ranks.index(rank)
+    columns = tax_table.columns
+    cols = []
+    for col in columns:
+        if not (ranks[ind] in col and ranks[ind+1] not in col):
+            cols.append(col)
+    if rank == 'k__':
+        cols.remove('UNKNOWN')
+    mp2_all_order = tax_table.drop(cols, axis=1)
+    mp2_all_order = mp2_all_order.fillna(0)
+
+    mm = mp2_all_order.div(mp2_all_order.sum(axis=1), axis=0)
+    mm = mm.fillna(0).T
+
+    return mm

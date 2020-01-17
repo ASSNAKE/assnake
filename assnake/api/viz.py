@@ -333,20 +333,30 @@ def plot_reads_count_change(sample_set, first_preproc, second_preproc):
     plotly.offline.iplot(fig)
 
 
-def plot_reads_count_change2(read_table, first_preproc, second_preproc, sort,number_index_hack=False):
+def plot_reads_count_change2(read_table, preprocs, sort, title = 'Reads number', trace_names = [], number_index_hack=False):
+    """
+    This function plots bar chart with reads lost on each preprocessing step.
+
+    Args:
+        read_table (:obj:`pandas.DataFrame`): DataFrame with columns with number of reads for each sample on every preprocessing step
+        preprocs (list[str]): List of preprocessings in called order
+        sort (list[str]): Sort by this variable
+    """
     read_table.index = read_table.index.map(str)
-
-    read_table['change'] = read_table[second_preproc]/read_table[first_preproc]
-    read_table['diff'] = read_table[first_preproc] - read_table[second_preproc]
-    # read_table.sort_values(sort, ascending=False)
     read_table = read_table.sort_values(sort, ascending=False)
-    
-    if number_index_hack:
-        read_table.index=read_table.index +'_'
-    trace1 = go.Bar( x=read_table.index, y=read_table[second_preproc], name=second_preproc)
-    trace2 = go.Bar( x=read_table.index, y=read_table['diff'], name=first_preproc)
-    
-    layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800)
 
-    fig = go.Figure(data=[trace1, trace2], layout=layout)
+    if len(trace_names) == 0:
+        trace_names = preprocs
+        
+    prev_preproc = preprocs[0]
+    traces = []
+    for p in preprocs[1:]:
+        read_table['diff_'+prev_preproc+'--'+p] = read_table[prev_preproc] - read_table[p]
+        traces.append(go.Bar(x=read_table.index, y=read_table['diff_'+prev_preproc+'--'+p], name='diff_'+prev_preproc+'--'+p))
+        prev_preproc = p
+
+    traces.append(go.Bar( x=read_table.index, y=read_table[preprocs[-1]], name=preprocs[-1]))
+
+    layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800, title = title)
+    fig = go.Figure(data=traces, layout=layout)
     plotly.offline.iplot(fig)

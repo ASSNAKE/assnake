@@ -46,7 +46,7 @@ def get_samples_from_dir(loc, modify_name = None):
     samples_list = []
     ext = '.fastq.gz'
     end_variants = [{'name': 'normal', 'strands': {'R1': '_R1', 'R2': '_R2'}},
-                    {'name': 'ILLUMINA_1', 'strands': {'R1': '_L001_R1_001', 'R2': '_L001_R2_001'}},
+                    # {'name': 'ILLUMINA_1', 'strands': {'R1': '_L001_R1_001', 'R2': '_L001_R2_001'}},
                     {'name': 'ILLUMINA', 'strands': {'R1': '_R1_001', 'R2': '_R2_001'}},
                     {'name': 'SRA', 'strands': {'R1': '_1', 'R2': '_2'}}]
 

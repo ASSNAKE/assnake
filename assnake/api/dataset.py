@@ -46,8 +46,11 @@ class Dataset:
         # print(end - start)
         for p in preprocs:
             samples = SampleSet(self.fs_prefix, self.df, p)
-            print(samples.samples_pd)
-            samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']].to_dict(orient='records')
+            # print(samples.samples_pd)
+            if len(samples.samples_pd):
+                samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']].to_dict(orient='records')
+            else:
+                break
             preprocessing.update({p:samples})
         self.sample_sets = preprocessing
         

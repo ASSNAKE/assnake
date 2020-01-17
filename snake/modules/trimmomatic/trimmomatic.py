@@ -13,6 +13,8 @@ rule tmtic:
         u2=wc_config['fastq_gz_tmtic_unpaired2_wc']
     log: "{fs_prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}.log"
     threads: 8
+    wildcard_constraints:    
+        params="[\w\d_-]+",
     conda: 'env_0.38.yaml'
     wrapper: "file://"+os.path.join(config['assnake_install_dir'], 'modules/trimmomatic/wrapper.py')
         
