@@ -3,13 +3,13 @@ from os.path import exists
 from glob import glob
 import json
 
-JAVA = config['java.bin']
+# JAVA = config['java.bin']
 
-FASTQC = config['fastqc.bin']
+# FASTQC = config['fastqc.bin']
 
-TRIMMOMATIC = config['trimmomatic']['bin']
+# TRIMMOMATIC = config['trimmomatic']['bin']
 
-BBDUK = config['bbduk']
+# BBDUK = config['bbduk']
 rule bbduk_rm_aaa:
     input:
         f="{prefix}/{df}/reads/{preproc}/{sample}/{sample}_R1.fastq.gz",

@@ -34,8 +34,7 @@ def df_create(config, df, fs_prefix):
         exit()
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
     dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
-    print(df)
-    print(fs_prefix)
+
     if df not in dfs:
         if os.path.isdir(os.path.join(fs_prefix, df)):
             df_info = {'df': df, 'fs_prefix': fs_prefix}

@@ -90,5 +90,4 @@ include: snakefiles + "general.py"
 include: snakefiles + "preprocess.py"
 include: snakefiles + "taxa.py"
 include: snakefiles + "download.py"
-include: snakefiles + "find_fungi.py"
     

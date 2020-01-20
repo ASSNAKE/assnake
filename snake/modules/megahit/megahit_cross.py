@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import assnake.api.dataset 
 
-assembly_dir = config['assembly_dir']
+# assembly_dir = config['assembly_dir']
 assnake_db = config['assnake_db']
 fna_db_dir = config['fna_db_dir']
 

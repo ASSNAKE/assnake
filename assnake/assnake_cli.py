@@ -105,15 +105,18 @@ dataset.add_command(dataset_commands.df_create)
 class ComplexCLI(click.MultiCommand):
 
     def list_commands(self, ctx):
+        dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+        dir_for_commands = os.path.join(dir_of_this_file, 'commands')
+        dir_for_snake_modules = os.path.join(dir_of_this_file, '../snake/modules/*/cmd_*.py')
 
         rv = []
-        for filename in os.listdir('/data4/bio/fedorov/assnake_0.9.0/assnake/commands'):
+        for filename in os.listdir(dir_for_commands):
             if filename.endswith('.py') and \
                filename.startswith('cmd_'):
                 rv.append(filename[4:-3])
 
 
-        for full in glob.glob('/data4/bio/fedorov/assnake_0.9.0/snake/modules/*/cmd_*.py'):
+        for full in glob.glob(dir_for_snake_modules):
             filename = full.split('/')[-1]
             module = full.split('/')[-2]
             if filename.endswith('.py') and \

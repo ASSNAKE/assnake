@@ -1,8 +1,8 @@
 import assnake.api.loaders
 
 anvi_dir = 'data/anvi/'
-ANVI = config['anvio.bin']
-CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
+# ANVI = config['anvio.bin']
+# CENTRIFUGE_FOLDER = config["centrifuge"]["bin"]
 CENTRIFUGE_INDEX = config["centrifuge"]["index"]
 fna_db_dir= config['fna_db_dir']
 

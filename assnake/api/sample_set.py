@@ -3,6 +3,7 @@ import os
 import glob
 import pandas as pd
 import assnake.api.loaders as loaders
+import assnake.utils
 
 class SampleSet:
     """
@@ -12,7 +13,6 @@ class SampleSet:
     Attributes:
         samples_pd (:obj:`pandas.DataFrame`): Pandas DataFrame with information about samples
     """
-    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
     # prefix, df, preproc, fs_name
     samples_pd = pd.DataFrame(columns=['df', 'fs_name', 'preproc', 'reads', 'sample'])
@@ -24,7 +24,7 @@ class SampleSet:
 
     
     def __init__(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
-        self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)
+        dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
         wc_config_loc = os.path.join(dir_of_this_file, '../../snake/wc_config.yaml')
         with open(wc_config_loc, 'r') as stream:
@@ -34,12 +34,10 @@ class SampleSet:
                 print(exc)
 
         
-        config_loc = os.path.join(dir_of_this_file, '../../snake/config.yml')
-        with open(config_loc, 'r') as stream:
-            try:
-                self.config = yaml.load(stream, Loader=yaml.FullLoader)
-            except yaml.YAMLError as exc:
-                print(exc)
+        self.config = assnake.utils.load_config_file()
+        self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)
+
+
 
         
     def add_samples(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
