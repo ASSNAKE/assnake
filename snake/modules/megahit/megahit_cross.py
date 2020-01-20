@@ -76,10 +76,10 @@ rule refine_assemb_results_cross:
         shell('echo -e "INFO: Filtering contigs < {wildcards.min_len}bp and simplifying names"')
         shell("{config[anvio.bin]}anvi-script-reformat-fasta {input.ref} -o {output.fa} --min-len {wildcards.min_len} --simplify-names --report {log.names} > {log.ll} 2>&1")
         shell('echo -e "INFO: Done filtering contigs < {wildcards.min_len} and simplifying names!"')
-        shell('''echo -e "INFO: Creating fai and dict files for reference" \n
-                {config[samtools.bin]} faidx {output.fa} \n
-                {config[java.bin]} \
-                    -jar {config[picard.jar]} CreateSequenceDictionary \
-                        REFERENCE={output.fa} \
-                        OUTPUT={output.dictionary} \n
-                echo -e "\nINFO: Done creating fai and dict files for reference!"''')
+        # shell('''echo -e "INFO: Creating fai and dict files for reference" \n
+        #         {config[samtools.bin]} faidx {output.fa} \n
+        #         {config[java.bin]} \
+        #             -jar {config[picard.jar]} CreateSequenceDictionary \
+        #                 REFERENCE={output.fa} \
+        #                 OUTPUT={output.dictionary} \n
+        #         echo -e "\nINFO: Done creating fai and dict files for reference!"''')

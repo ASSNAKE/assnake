@@ -20,22 +20,27 @@ class SampleSet:
 
     # ==Do we really need this here?==
     wc_config = {}
-    wc_config_loc = os.path.join(dir_of_this_file, '../../snake/wc_config.yaml')
-    with open(wc_config_loc, 'r') as stream:
-        try:
-            wc_config = yaml.load(stream, Loader=yaml.FullLoader)
-        except yaml.YAMLError as exc:
-            print(exc)
     config = {}
-    config_loc = os.path.join(dir_of_this_file, '../../snake/config.yml')
-    with open(config_loc, 'r') as stream:
-        try:
-            config = yaml.load(stream, Loader=yaml.FullLoader)
-        except yaml.YAMLError as exc:
-            print(exc)
 
+    
     def __init__(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
         self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)
+
+        wc_config_loc = os.path.join(dir_of_this_file, '../../snake/wc_config.yaml')
+        with open(wc_config_loc, 'r') as stream:
+            try:
+                self.wc_config = yaml.load(stream, Loader=yaml.FullLoader)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        
+        config_loc = os.path.join(dir_of_this_file, '../../snake/config.yml')
+        with open(config_loc, 'r') as stream:
+            try:
+                self.config = yaml.load(stream, Loader=yaml.FullLoader)
+            except yaml.YAMLError as exc:
+                print(exc)
+
         
     def add_samples(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
         '''

@@ -6,17 +6,17 @@ import yaml
 # import matplotlib.mlab as mlab
 # import matplotlib.pyplot as plt
 
-config = None
-dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-cofig_loc = os.path.join(dir_of_this_file, '../../snake/config.yml')
-with open(cofig_loc, 'r') as stream:
-    try:
-        config = yaml.load(stream, Loader=yaml.FullLoader)
-    except yaml.YAMLError as exc:
-        print(exc)
+# config = None
+# dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+# cofig_loc = os.path.join(dir_of_this_file, '../../snake/config.yml')
+# with open(cofig_loc, 'r') as stream:
+#     try:
+#         config = yaml.load(stream, Loader=yaml.FullLoader)
+#     except yaml.YAMLError as exc:
+#         print(exc)
 
-ASSNAKE_DB = config.get('assnake_db')
-FNA_DB_DIR= config['fna_db_dir']
+# ASSNAKE_DB = config.get('assnake_db')
+# FNA_DB_DIR= config['fna_db_dir']
 
 
 ####------DATA LOADERS------####

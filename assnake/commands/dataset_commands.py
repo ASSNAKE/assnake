@@ -21,12 +21,17 @@ def df_list():
         click.echo('  Description: ' + df.get('description', ''))
         click.echo('')
 
+
 @click.command(name='create')
 @click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
-@click.option('--fs_prefix','-p', prompt='Filesystem prefix', help='Filesystem prefix' )
+@click.option('--fs_prefix','-f', prompt='Filesystem prefix', help='Filesystem prefix. This MUST be ABSOLUTE path' )
 @click.pass_obj
 def df_create(config, df, fs_prefix):
-    """Create entry for dataset in database."""
+    """Register your dataset inside ASSNAKE!\n
+    You can use it in interactive mode."""
+    if fs_prefix[0] != '/':
+        click.echo('THIS IS NOT AN ABSOLUTE PATH!!!')
+        exit()
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
     dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
     print(df)

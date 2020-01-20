@@ -8,71 +8,90 @@ from click.testing import CliRunner
 from sys import argv
 
 import assnake.commands.dataset_commands as dataset_commands
+import assnake.commands.init as commands_init
+import configparser
+import shutil
+import pprint
+
+from assnake.utils import read_yaml
 
 @click.group()
 @click.version_option()
 @click.pass_context
 def cli(ctx):
+    """\b
+   ___    ____   ____   _  __   ___    __ __   ____
+  / _ |  / __/  / __/  / |/ /  / _ |  / //_/  / __/
+ / __ | _\ \   _\ \   /    /  / __ | / ,<    / _/  
+/_/ |_|/___/  /___/  /_/|_/  /_/ |_|/_/|_|  /___/
+
+
+\b  
+O---o Welcome to the Assnake, Traveller!
+ O-o  If you found yorself here, 
+  O   than you are exploring the land of the MICROBIOME.
+ o-O  Here you can find weapons and spells
+o---O that will help you to analyse your data.
+O---o The tools that are presented here 
+ O-o  are for metagenomics studies on ILLUMINA data.
+  O   You can check quality and preprocess your data, 
+ o-O  assemble it, map, bin the contigs, 
+o---O make taxonomic annotations, functional annotations,
+O---o
+ O-o  and work with 16s rRNA data.
+  O
+ o-O
+o---O
+
+\b
+Please, feel free to check out all the commands. 
+Please, read the help messages and if you have any questions, 
+write me directly on my email fedorov.de@gmail.com, 
+or create an issue or PR on GitHub.
+\b
+Start by initializing ASSNAKE with
+assnake init command
+\b
+Here is it how it goes.
+Somewhere on your filesystem you create a folder, and put your reads inside the ./<your_folder>/reads/raw folder.
+<your_folder> is also the name of the Dataset, so choose wisely!
+Than register yor dataset in the assnake with
+assnake dataset create
+
+    
+    """
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(dir_of_this_file, '../snake/config.yml')
+    config_internal = configparser.ConfigParser()
+    config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
+    config_loc = config_internal['GENERAL']['config_loc']
 
     if not os.path.isfile(config_loc):
         print("You need to init your installation! Iw won't take long. Just run assnake init start")
         exit()
+    else:
+        # click.echo('We found config at ' + config_loc)
+        pass
 
-    config = {}
-    with open(config_loc, 'r') as stream:
-        try:
-            config = yaml.load(stream, Loader=yaml.FullLoader)
-        except yaml.YAMLError as exc:
-            print(exc)
-
+    config = read_yaml(config_loc)
     wc_config_loc = os.path.join(dir_of_this_file, '../snake/wc_config.yaml')
-    wc_config = {}
-    with open(wc_config_loc, 'r') as stream:
-        try:
-            wc_config = yaml.load(stream, Loader=yaml.FullLoader)
-        except yaml.YAMLError as exc:
-            print(exc)
+    wc_config = read_yaml(wc_config_loc)
 
     ctx.obj = {'config': config, 'wc_config': wc_config}
     pass 
 
+
+
 @cli.group(name='init')
 def init_group():
-    """Commands to init the ASSNAKE"""
+    """Commands to initialize the ASSNAKE\n
+    \bYou need to configure where assnake will store it's data and download databases.
+    Assnake has internal configuration file 
+    """
     pass
 
-@click.command(name='start')
-# @click.option('--config_location','-c', prompt='Desired location of the config file', help='Desired location of the config file' )
-def init_start():
-    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = os.path.join(dir_of_this_file, '../snake/config.yml')
 
-    config = {}
-    with open(config_loc, 'r') as stream:
-        try:
-            config = yaml.load(stream, Loader=yaml.FullLoader)
-        except yaml.YAMLError as exc:
-            print(exc)
 
-    # if not os.path.isdir(config_location):
-    #     print(config_location)
-    #     os.makedirs(config_location, exist_ok=True)
-
-    # with open(os.path.join(config_location, 'config.yml'), 'w') as config_file:
-    #     written_config = yaml.dump(config, config_file)
-
-    assnake_db = click.prompt('Please, enter desired location of the ASSNAKE database')
-    config['assnake_db'] = assnake_db
-    config['assnake_install_dir'] = os.path.join(os.path.dirname(dir_of_this_file), 'snakemake')
-    
-    with open(config_loc, 'w') as config_file:
-        written_config = yaml.dump(config, config_file)
-
-    # shutil.copyfile(config_loc, os.path.join(config_location, 'config.yml'))
-
-init_group.add_command(init_start)
+init_group.add_command(commands_init.init_start)
 
 @cli.group(chain=True)
 def dataset():
@@ -180,3 +199,31 @@ def main():
     # except:
     #     print('no run in index')
     cli()
+
+
+    #     1 - Quality Control
+    #     FastQC - Check quality of your reads
+    #     Trimmomatic 
+    #     Remove human reads with bbmap
+    #     Filter reads by minimum length
+    #     MultiQC
+    # 2 - Assembly
+    #     Megahit
+    #     Spades (need to include parameters parser)
+    # 3 - Taxonomic Annotation
+    #     Metaphlan2
+    #     Centrifuge
+    #     Kraken (Rewrite needed)
+    # 4 - Functional Annotation
+    #     Humann2 (Conflict with current metaphlan version!!)
+    # 5 - Binning
+    #     MaxBin 2
+    #     MetaBat 2
+    # 6 - 16S
+    #     Dada2
+    #     Picrust 2
+
+# ╔═╗╔═╗╔═╗╔╗╔╔═╗╦╔═╔═╗
+# ╠═╣╚═╗╚═╗║║║╠═╣╠╩╗║╣ 
+# ╩ ╩╚═╝╚═╝╝╚╝╩ ╩╩ ╩╚═╝
+# \b

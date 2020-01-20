@@ -43,9 +43,10 @@ rule metaspades:
         table      = '{fs_prefix}/{df}/assembly/{sample_set}/sample_set.tsv',
         params=os.path.join(config['assnake_db'], "params/metaspades/v3.14.0/{params}.json")
     output: 
-        done = '{fs_prefix}/{df}/assembly/{sample_set}/metaspades__v3.14.0__{params}/done.txt'
+        final_contigs = '{fs_prefix}/{df}/assembly/{sample_set}/metaspades__v3.14.0__{params}/final_contigs.fa'
     params: 
-        out_folder = '{fs_prefix}/{df}/assembly/{sample_set}/metaspades__v3.14.0__{params}/assembly' 
+        out_folder = '{fs_prefix}/{df}/assembly/{sample_set}/metaspades__v3.14.0__{params}/assembly',
+        contigs = '{fs_prefix}/{df}/assembly/{sample_set}/metaspades__v3.14.0__{params}/assembly/contigs.fasta' 
     log: '{fs_prefix}/{df}/assembly/{sample_set}/metaspades__v3.14.0__{params}/log.txt'
     conda: 'metaspades_env.yaml'
     threads: 20

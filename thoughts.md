@@ -10,7 +10,7 @@ If we choose custom commands:
 1. + We can control everything precisely and we can add as many native click arguments to the command as we want, including all the parameters and anything rule specific.
 2. + It makes the architecture even more modular 
 3. - We loose points in terms of uniformity of the system
-4. - How the fuck will we request multiple results in one run? Even something basic as metaphlan2 + fastqc + count? The workaround would be to first construct the snakemake file with all the code we need to get the results and than run it. Sounds like a viable option and this way we can add as many datasets samples and resukts as we want, no limitations what so ever. Sound like a viable option. This snakemake file can be even modified by hand. But where to store this file? Inside the assnake database dir? In the run folder even maybe? Or can we run multiple commands (chain commands)? Well we can chain commands easily indeed. Shit, the problem is that snakemake is called at the end of the command...
+4. - How the fuck will we request multiple results in one run? Even something basic as metaphlan2 + fastqc + count? The workaround would be to first construct the snakemake file with all the code we need to get the results and than run it. Sounds like a viable option and this way we can add as many datasets samples and results as we want, no limitations what so ever. Sound like a viable option. This snakemake file can be even modified by hand. But where to store this file? Inside the assnake database dir? In the run folder even maybe? Or can we run multiple commands (chain commands)? Well we can chain commands easily indeed. Shit, the problem is that snakemake is called at the end of the command...
 This issue is solved by putting all the results inside the global config variable. At the end of the chained commands we should call that special command that runs everything. How to check the order of the chained commands?
 
 well okay fastqc implemented and it works as expected (pretty much)
@@ -32,3 +32,7 @@ Study is the most top level object and can include unlimited datasets of differe
 Dataset object
 SampleSet object - this object can include arbitrary amount of samples from any datasets, but most commonly ot is used to combine representative samples for one dataset. 
 SequencingRun object
+
+
+# 17.01.2020
+Back again to the organisation of the plugin architecture
