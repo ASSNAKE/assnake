@@ -1,6 +1,4 @@
-import yaml
-import os
-import glob
+import yaml, os, pkg_resources, glob
 import pandas as pd
 import assnake.api.loaders as loaders
 import assnake.utils
@@ -26,13 +24,21 @@ class SampleSet:
     def __init__(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
         dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
-        wc_config_loc = os.path.join(dir_of_this_file, '../../snake/wc_config.yaml')
+        wc_config_loc = os.path.join(dir_of_this_file, '../snake/wc_config.yaml')
         with open(wc_config_loc, 'r') as stream:
             try:
                 self.wc_config = yaml.load(stream, Loader=yaml.FullLoader)
             except yaml.YAMLError as exc:
                 print(exc)
 
+        discovered_plugins = {
+            entry_point.name: entry_point.load()
+            for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
+        }
+        for module_name, module_class in discovered_plugins.items():
+            for wc_config in module_class.wc_configs:
+                if wc_config is not None:
+                    self.wc_config.update(wc_config)
         
         self.config = assnake.utils.load_config_file()
         self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)

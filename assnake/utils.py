@@ -15,6 +15,10 @@ def get_internal_config():
     config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
     return config_internal
 
+def load_wc_config():
+    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+    return(read_yaml(os.path.join(dir_of_this_file,'./snake/wc_config.yaml')))
+
 def load_config_file():
     config_internal = get_internal_config()
     config_loc = config_internal['GENERAL']['config_loc']

@@ -72,7 +72,7 @@ assnake dataset create
         pass
     else:
         config = read_yaml(config_loc)
-        wc_config = read_yaml(os.path.join(dir_of_this_file, '../../snake/wc_config.yaml'))
+        wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
 
         ctx.obj = {'config': config, 'wc_config': wc_config}
 
@@ -140,7 +140,8 @@ discovered_plugins = {
     for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
 }
 for module_name, module_class in discovered_plugins.items():
-    request.add_command(module_class.invocation_commands[0])
+    for cmd in module_class.invocation_commands:
+        request.add_command(cmd)
 request.add_command(run)
 
 

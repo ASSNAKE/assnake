@@ -47,9 +47,14 @@ Well some core is essential anyway, we need to know how we store fastq.gz files 
 Plugins are working! First draft ready.
 How small should we break the modules? 
 
-VARIANT 1
-Huge `core` modules with everything we need in one package.
-VARIANT 2
-Smaller modules like `preprocessing` `taxonomy` `assembly`
-VARIANT 3
-Tiny modules - one tool one module.
+* VARIANT 1 - Huge `core` modules with everything we need in one package.
+* VARIANT 2 - Smaller modules like `preprocessing` `taxonomy` `assembly`
+* VARIANT 3 - Tiny modules - one tool one module.
+
+Ok so variant 2 selected. Now another big (and I hope the last) question - what to do with wc_config?
+Oh no, there are more questions:
+1. What to do with `wc_config`? - decided to compile on the fly
+    * Compile it on the fly. We compile base snakemake file anyway on each invocation, concatenating some dicts should not matter that much.
+    * Compile it through command and writing to disk once, and that's all. This requires user to manually update installation once they add new module which may lead to frustration. 
+2. What to do with rules that need absolute path's to their scripts? Write to config again on the fly?
+3. What to do with database download?

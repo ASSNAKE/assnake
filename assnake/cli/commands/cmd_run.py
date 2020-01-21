@@ -1,5 +1,5 @@
 import click, os, snakemake
-from assnake.utils import get_config_loc
+from assnake.utils import get_config_loc, load_config_file
 # from assnake.assnake_cli import pass_environment
 
 
@@ -14,7 +14,7 @@ from assnake.utils import get_config_loc
 
 def run(config, threads, jobs, drmaa, run):
     
-    click.echo('RUN SNAKEMAKE')
+    click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')
 
     curr_dir = os.path.abspath(os.path.dirname(__file__))
     # click.echo('Current dir: ' + curr_dir)
@@ -23,11 +23,12 @@ def run(config, threads, jobs, drmaa, run):
     if drmaa:
         drmaa_param=' -V -S /bin/bash -pe make {threads}'.format(threads=threads)
 
-    status = snakemake.snakemake(os.path.join(curr_dir, '../bin/snake/base.py'), 
+    status = snakemake.snakemake(os.path.join(curr_dir, '../../snake/snake_base.py'), 
         # config = config['wc_config'],    
         targets=config['requests'], 
         printshellcmds=True,
         dryrun=not run, 
+        # config = load_config_file(),
         configfiles=[get_config_loc()],
         drmaa_log_dir = config['config']['drmaa_log_dir'],
         use_conda = True,

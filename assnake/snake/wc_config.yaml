@@ -1,36 +1,29 @@
 fastq_gz_file_wc: '{fs_prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz'
 fastq_gz_R1_wc: '{fs_prefix}/{df}/reads/{preproc}/{sample}_R1.fastq.gz'
 fastq_gz_R2_wc: '{fs_prefix}/{df}/reads/{preproc}/{sample}_R2.fastq.gz'
-
-fastq_gz_tmtic_R1_wc: '{fs_prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}_R1.fastq.gz'
-fastq_gz_tmtic_R2_wc: '{fs_prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}_R2.fastq.gz'
-fastq_gz_tmtic_S_wc: '{fs_prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}_S.fastq.gz'
-fastq_gz_tmtic_unpaired1_wc: '{fs_prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}_R1_unpaired.fastq'
-fastq_gz_tmtic_unpaired2_wc: '{fs_prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}_R2_unpaired.fastq'
-
-rm_hm_bbmap: '{fs_prefix}/{df}/reads/{preproc}__rmhum_bbmap/{sample}_R1.fastq.gz'
-
 fastq_file:       '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq'
 md5_fastq_gz:     '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}.md5'
 
-# fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'
-fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{strand}_fastqc.zip'
-count_wc: '{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}.count'
-
 sample_dir_wc:    '{fs_prefix}/{df}/reads/{preproc}/{sample}'
-multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
-multiqc_report: '{prefix}/{df}/multiqc/{sample_set}/{strand}/multiqc_report.html'
 
-dada2_fat_wc: '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R1.fastq.gz'
-dada2_err_wc: '{dada2_dir}/{sample_set}/{params}/err{strand}.rds'
-dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'
 
-sam_wc: ''
+# # fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'
+# fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{strand}_fastqc.zip'
 
-assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
-final_contigs_wc: '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{assembler_params}/{sample_set}/final_contigs__{mod}.fa'
+# multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
+# multiqc_report: '{prefix}/{df}/multiqc/{sample_set}/{strand}/multiqc_report.html'
 
-mp2_out:      '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.mp2'
-mp2_aligment: '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.b2'
-mp2_log:      '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/log.txt'
-mp2_time:     '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/time.txt'
+# dada2_fat_wc: '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R1.fastq.gz'
+# dada2_err_wc: '{dada2_dir}/{sample_set}/{params}/err{strand}.rds'
+# dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'
+
+# sam_wc: ''
+
+# assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
+# final_contigs_wc: '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{assembler_params}/{sample_set}/final_contigs__{mod}.fa'
+
+
+
+
+
+# rm_hm_bbmap: '{fs_prefix}/{df}/reads/{preproc}__rmhum_bbmap/{sample}_R1.fastq.gz'

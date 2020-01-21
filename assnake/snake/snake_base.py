@@ -1,24 +1,30 @@
-import glob
-import os
-import sqlite3
-import datetime
-import yaml
-import pkg_resources
+import glob, os, pkg_resources, time
+import assnake.utils
 
 
-wc_config_loc = os.path.join(config['assnake_install_dir'], 'wc_config.yaml')
-wc_config = {}
-with open(wc_config_loc, 'r') as stream:
-    try:
-        wc_config = yaml.load(stream, Loader=yaml.FullLoader)
-    except yaml.YAMLError as exc:
-        print(exc)
+wc_config = assnake.utils.load_wc_config()
 
+start = time.time()
+
+# Discover plugins
 discovered_plugins = {
     entry_point.name: entry_point.load()
     for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
 }
 
+# We need to update wc_config first
 for module_name, module_class in discovered_plugins.items():
-    include: os.path.join(module_class.install_dir, module_class.snakefiles[0])
+    config.update({module_name:module_class.install_dir})
+    for wc_conf in module_class.wc_configs:
+        if wc_conf is not None:
+            wc_config.update(wc_conf)
 
+# and now include all the stuff
+for module_name, module_class in discovered_plugins.items():
+    for snakefile in module_class.snakefiles:
+        include: os.path.join(module_class.install_dir, snakefile)
+
+
+end = time.time()
+if config['debug']:
+    print('Time to include plugins: ', end-start)
