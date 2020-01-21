@@ -1,4 +1,0 @@
-id	short_name	result_type	description
-0bc990f0-3fd2-4edc-9d9d-a67c3640d61a	reads_qc	Quality Control	Check quality of your data
-38f01676-e6ca-4779-811f-a26a43e8926c	taxonomy	Taxonomic Profiling	Generate taxonomic profiles for your data
-fe5687a5-42de-4b47-aa2e-00e81f8fd3ea	preprocessing	Data Preprocessing	Preprocess you data

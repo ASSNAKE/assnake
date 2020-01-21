@@ -42,3 +42,14 @@ So I rewrote the configuration part, wrote proper initialization script.
 What about plugins and stuff?
 Should we have some `core` metagenomic part? Or should everything be isolated?
 Well some core is essential anyway, we need to know how we store fastq.gz files at least. What should be included in core? 
+
+# 21.01.2020
+Plugins are working! First draft ready.
+How small should we break the modules? 
+
+VARIANT 1
+Huge `core` modules with everything we need in one package.
+VARIANT 2
+Smaller modules like `preprocessing` `taxonomy` `assembly`
+VARIANT 3
+Tiny modules - one tool one module.

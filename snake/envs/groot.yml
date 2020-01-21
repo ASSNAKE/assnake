@@ -1,8 +1,0 @@
-name: groot
-channels:
-  - ursky
-  - bioconda
-  - conda-forge
-  - defaults
-dependencies:
-  - groot=0.8.3
