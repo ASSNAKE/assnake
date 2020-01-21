@@ -15,6 +15,10 @@ import pprint
 
 from assnake.utils import read_yaml
 
+import pkg_resources
+
+
+
 @click.group()
 @click.version_option()
 @click.pass_context
@@ -61,22 +65,24 @@ assnake dataset create
     
     """
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_internal = configparser.ConfigParser()
-    config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
-    config_loc = config_internal['GENERAL']['config_loc']
+    config_loc = assnake.utils.get_config_loc()
 
     if not os.path.isfile(config_loc):
-        print("You need to init your installation! Iw won't take long. Just run assnake init start")
-        exit()
-    else:
-        # click.echo('We found config at ' + config_loc)
         pass
+    else:
+        config = read_yaml(config_loc)
+        wc_config_loc = os.path.join(dir_of_this_file, '../snake/wc_config.yaml')
+        wc_config = read_yaml(wc_config_loc)
 
-    config = read_yaml(config_loc)
-    wc_config_loc = os.path.join(dir_of_this_file, '../snake/wc_config.yaml')
-    wc_config = read_yaml(wc_config_loc)
+        ctx.obj = {'config': config, 'wc_config': wc_config}
 
-    ctx.obj = {'config': config, 'wc_config': wc_config}
+    discovered_plugins = {
+        entry_point.name: entry_point.load()
+        for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
+    }
+    print(discovered_plugins)
+    print(discovered_plugins['kraken2'].name)
+    print(discovered_plugins['kraken2'].install_dir)
     pass 
 
 
@@ -96,6 +102,7 @@ init_group.add_command(commands_init.init_start)
 @cli.group(chain=True)
 def dataset():
     """Commands to work with datasets"""
+    assnake.utils.check_if_assnake_is_initialized()
     pass
 
 dataset.add_command(dataset_commands.df_list)
@@ -154,6 +161,7 @@ class ComplexCLI(click.MultiCommand):
 
 @cli.group()
 def result():
+    assnake.utils.check_if_assnake_is_initialized()
     pass
 
 @result.command('prepare_set_for_assembly')

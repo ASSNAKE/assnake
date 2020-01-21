@@ -1,4 +1,4 @@
-import yaml, configparser, os
+import yaml, configparser, os, click
 
 def read_yaml(file_location):
     yaml_file = {}
@@ -9,22 +9,28 @@ def read_yaml(file_location):
         except yaml.YAMLError as exc:
             print(exc)
 
-def load_config_file():
+def get_internal_config():
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     config_internal = configparser.ConfigParser()
     config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
+    return config_internal
+
+def load_config_file():
+    config_internal = get_internal_config()
     config_loc = config_internal['GENERAL']['config_loc']
     return(read_yaml(config_loc))
 
 def get_config_loc():
-    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_internal = configparser.ConfigParser()
-    config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
+    config_internal = get_internal_config()
     return(config_internal['GENERAL']['config_loc'])
 
 
-
-
+def check_if_assnake_is_initialized():
+    if not os.path.isfile(get_config_loc()):
+        click.secho("You need to init your installation!", fg='red', bold=True)
+        click.echo("Don't worry, it won't take long.")
+        click.echo('Just run ' + click.style('assnake init start', bg='blue'))
+        exit()
 
 
 

@@ -35,4 +35,10 @@ SequencingRun object
 
 
 # 17.01.2020
-Back again to the organisation of the plugin architecture
+Back again to the organization of the plugin architecture
+
+# 20.01.2020
+So I rewrote the configuration part, wrote proper initialization script. 
+What about plugins and stuff?
+Should we have some `core` metagenomic part? Or should everything be isolated?
+Well some core is essential anyway, we need to know how we store fastq.gz files at least. What should be included in core? 

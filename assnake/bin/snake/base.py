@@ -3,6 +3,8 @@ import os
 import sqlite3
 import datetime
 import yaml
+import pkg_resources
+
 
 wc_config_loc = os.path.join(config['assnake_install_dir'], 'wc_config.yaml')
 wc_config = {}
@@ -31,6 +33,15 @@ task_id=task_id, rule_name=rule_name, in_list=in_list, out_list=out_list, status
     
 snakefiles = './'
 modules    = '../../../snake/modules/'
+
+discovered_plugins = {
+    entry_point.name: entry_point.load()
+    for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
+}
+print(discovered_plugins)
+print(discovered_plugins['kraken2'].name)
+print(discovered_plugins['kraken2'].install_dir)
+print(discovered_plugins['kraken2'].snakefiles)
 
 # == MAPPING ==
 include: modules + 'bwa/bwa.py'
