@@ -342,7 +342,7 @@ def plot_reads_count_change2(read_table, preprocs, sort, title = 'Reads number',
         preprocs (list[str]): List of preprocessings in called order
         sort (list[str]): Sort by this variable
     """
-    read_table.index = read_table.index.map(str)
+    read_table.index = read_table.index.map(str) +'_'
     read_table = read_table.sort_values(sort, ascending=False)
 
     if len(trace_names) == 0:

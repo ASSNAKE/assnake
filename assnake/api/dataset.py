@@ -1,6 +1,7 @@
 from assnake.api.sample_set import SampleSet
 import os, glob, yaml, time
 import pandas as pd
+from assnake.utils import load_config_file
 
 class Dataset:
 
@@ -17,14 +18,7 @@ class Dataset:
     def __init__(self, df):
         start = time.time()
 
-        # read config file
-        curr_dir = os.path.dirname(os.path.abspath(__file__))
-        config_loc = os.path.join(curr_dir, '../../snake/config.yml')
-        with open(config_loc, 'r') as stream:
-            try:
-                config = yaml.load(stream, Loader=yaml.FullLoader)
-            except yaml.YAMLError as exc:
-                print(exc)
+        config = load_config_file()
 
         # read df info
         df_info_loc = config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)

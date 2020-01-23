@@ -5,6 +5,7 @@ fastq_file:       '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fast
 md5_fastq_gz:     '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}.md5'
 
 sample_dir_wc:    '{fs_prefix}/{df}/reads/{preproc}/{sample}'
+count_wc: '{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}.count'
 
 
 # # fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'

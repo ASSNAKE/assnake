@@ -56,5 +56,17 @@ Oh no, there are more questions:
 1. What to do with `wc_config`? - decided to compile on the fly
     * Compile it on the fly. We compile base snakemake file anyway on each invocation, concatenating some dicts should not matter that much.
     * Compile it through command and writing to disk once, and that's all. This requires user to manually update installation once they add new module which may lead to frustration. 
-2. What to do with rules that need absolute path's to their scripts? Write to config again on the fly?
+2. What to do with rules that need absolute path's to their scripts? Write to config again on the fly? - yes, just adding `module-name: install-dir`
 3. What to do with database download?
+
+# 22.01.2020
+Another question - how to init rules that store their parameters in the database? We can run post-install script, but what if assnake db is not yet configured? But first of all we need to carry default parameters with the distribution package an copy them to the database. Maybe use something like md5 hash sum on params?
+
+1. ASSNAKE DB is configured already - simply run post-install script on module installation. - DONE
+2. ASSNAKE DB is not configured - configure it and call post-install scripts from modules in `assnake init start` method. TODO
+
+Now what to do with fucking databases? Let's take metaphlan2 as an example.
+The problem with metaphlan2 is that it needs bowtie2 to build it's database and we need to be able to call it. It is installed with the metaphlan2 and generating more environments is a bad option given that we already generate a TON of envs... On the other hand bowtie2 env is not that large..
+Another solution would be to download database somewhere `tar` file that would be. We set the location of this file and than we create the rule that will build index. Sounds legit.
+
+Okay when and how should we configure databases? Let's export init scripts for tools where users will provide path to where they want to store the database. 

@@ -7,7 +7,7 @@ def fill_and_write_config(assnake_db):
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     assnake_install_dir = (dir_of_this_file.replace('assnake/commands', 'snake'))
 
-    config_template_loc = os.path.join(dir_of_this_file, '../../../snake/config_template.yml')
+    config_template_loc = os.path.join(dir_of_this_file, '../../snake/config_template.yml')
     config_template = read_yaml(config_template_loc)
 
     config_location = os.path.join(assnake_db, 'config.yaml')

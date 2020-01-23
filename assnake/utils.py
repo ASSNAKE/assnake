@@ -35,6 +35,7 @@ def check_if_assnake_is_initialized():
         click.echo("Don't worry, it won't take long.")
         click.echo('Just run ' + click.style('assnake init start', bg='blue'))
         exit()
+        
 
 
 
