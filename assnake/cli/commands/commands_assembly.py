@@ -1,3 +1,7 @@
+#
+#
+#
+
 import click, os
 @click.command('prepare_set_for_assembly')
 @click.option('--df', '-d')
@@ -26,3 +30,4 @@ def prepare_set_for_assembly(df, preproc, samples_to_add,set_name):
 
     set_loc = os.path.join(set_dir, 'sample_set.tsv')
     ss.samples_pd[['df', 'preproc', 'fs_name']].to_csv(set_loc, sep='\t', index=False)
+

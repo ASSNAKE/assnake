@@ -1,7 +1,8 @@
 import click, sys, os, glob, yaml, configparser
 
-from assnake.utils import read_yaml, get_config_loc, get_internal_config
+from assnake.utils import read_yaml, get_config_loc, get_internal_config, graph_of_calls
 
+#@graph_of_calls('fill_n_write_config.png')
 def fill_and_write_config(assnake_db):
     config_internal = get_internal_config()
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
@@ -66,6 +67,8 @@ def fill_and_write_config(assnake_db):
 @click.option('--fna_db_dir','-c', type=click.Path(), 
     # prompt='Directory for your fasta files', 
     help='This is the place, were all the fasta goes.' )
+
+#@graph_of_calls('cli_start_init.png')
 def init_start(config_location, assnake_db, fna_db_dir):
     config_loc = get_config_loc()
     
@@ -87,9 +90,9 @@ def init_start(config_location, assnake_db, fna_db_dir):
         click.echo('We found configuration file at ' + click.style(config_loc, bg='blue'))
         reset_config = click.confirm('  Would you like to reset?')
         if reset_config:
+            click.echo('As you wish')
             config_internal = get_internal_config()
             dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
             config_internal['GENERAL']['config_loc'] = 'None'
             with open(os.path.join(dir_of_this_file, './../config_internal.ini'), 'w') as configfile:
                 config_internal.write(configfile)
-        

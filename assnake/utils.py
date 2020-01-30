@@ -1,4 +1,6 @@
 import yaml, configparser, os, click
+from pycallgraph import PyCallGraph
+from pycallgraph.output import GraphvizOutput
 
 def read_yaml(file_location):
     yaml_file = {}
@@ -35,8 +37,17 @@ def check_if_assnake_is_initialized():
         click.echo("Don't worry, it won't take long.")
         click.echo('Just run ' + click.style('assnake init start', bg='blue'))
         exit()
-        
 
+# decorator to saving graph of calls of the function
+def graph_of_calls(image2safe):
+    def real_decorator(function):
+        def wrapper(*args, **kwargs):
+            graphviz = GraphvizOutput()
+            graphviz.output_file = image2safe
+            with PyCallGraph(output=graphviz):
+                function(*args, **kwargs)
+        return wrapper
+    return real_decorator
 
 
 

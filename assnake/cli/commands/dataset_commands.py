@@ -1,3 +1,7 @@
+#
+# Perform assnake dataset [create/info/list] commands
+#
+
 import click, sys, os, glob, yaml, shutil
 import pandas as pd
 import assnake.api.loaders
@@ -5,6 +9,10 @@ import assnake.api.sample_set
 from tabulate import tabulate
 import snakemake
 
+
+#---------------------------------------------------------------------------------------
+#                                     LIST
+#---------------------------------------------------------------------------------------
 @click.command(name='list')
 def df_list():
     """List datasets in database"""
@@ -20,8 +28,14 @@ def df_list():
         click.echo('  Full path: ' + os.path.join(df.get('fs_prefix', ''), df['df']))
         click.echo('  Description: ' + df.get('description', ''))
         click.echo('')
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
+
+
+#---------------------------------------------------------------------------------------
+#                                   CREATE
+#---------------------------------------------------------------------------------------
 @click.command(name='create')
 @click.option('--df','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--fs_prefix','-f', prompt='Filesystem prefix', help='Filesystem prefix. This MUST be ABSOLUTE path' )
@@ -35,6 +49,11 @@ def df_create(config, df, fs_prefix):
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
     dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
 
+    # click.prompt('Add another property?')
+    # click.prompt('Name of property:')
+    # click.prompt('Value of property:')
+
+
     if df not in dfs:
         if os.path.isdir(os.path.join(fs_prefix, df)):
             df_info = {'df': df, 'fs_prefix': fs_prefix}
@@ -46,7 +65,13 @@ def df_create(config, df, fs_prefix):
             click.secho('We were unable to find')
     else:
         click.secho('Duplicate name!', fg='red')
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+
+
+#---------------------------------------------------------------------------------------
+#                                   INFO
+#---------------------------------------------------------------------------------------
 @click.command(name ='info')
 @click.option('--name','-d', prompt='Name of the dataset', help='Name of the dataset' )
 @click.option('--preproc','-p', help='Show samples for preprocessing', required=False)
@@ -55,7 +80,18 @@ def df_info(config, name, preproc):
     """View info for the specific dataset"""
 
     dfs = assnake.api.loaders.load_dfs_from_db('')
-    df_info = dfs[name]
+    try:
+        df_info = dfs[name]
+    except:
+        click.echo('Can`t reach database with such name')
+        avail_dfs = ''
+        for i,item in enumerate(dfs.keys()):
+            avail_dfs+= '{}. {} \t'.format(i+1,item)
+
+        if avail_dfs == '':
+            avail_dfs = 'NA'
+        click.echo('Available: '+ avail_dfs)
+        exit(2)
     click.echo(click.style(''*2 + df_info['df'] + ' '*2, fg='green', bold=True))
     click.echo('Filesystem prefix: ' + df_info.get('fs_prefix', ''))
     click.echo('Full path: ' + os.path.join(df_info.get('fs_prefix', ''), name))
@@ -88,3 +124,4 @@ def df_info(config, name, preproc):
         samples_pd = pd.DataFrame(preprocessing[preproc])
         # print(samples_pd)
         click.echo(tabulate(samples_pd.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

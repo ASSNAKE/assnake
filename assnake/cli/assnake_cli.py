@@ -14,15 +14,25 @@ import configparser
 import shutil
 import pprint
 
-from assnake.utils import read_yaml
+from assnake.utils import read_yaml, graph_of_calls
 
 import pkg_resources
 
+#import stuff for flow graph
+from pycallgraph import PyCallGraph
+from pycallgraph.output import GraphvizOutput
 
+
+
+
+#---------------------------------------------------------------------------------------
+#                                    CLI  initialization
+#---------------------------------------------------------------------------------------
 
 @click.group()
 @click.version_option()
 @click.pass_context
+@graph_of_calls('cli_cli.png')
 def cli(ctx):
     """\b
    ___    ____   ____   _  __   ___    __ __   ____
@@ -65,18 +75,28 @@ assnake dataset create
 
     
     """
+
+
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     config_loc = assnake.utils.get_config_loc()
 
     if not os.path.isfile(config_loc):
-        pass
+            pass
     else:
         config = read_yaml(config_loc)
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
 
         ctx.obj = {'config': config, 'wc_config': wc_config}
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
+
+
+
+
+#---------------------------------------------------------------------------------------
+#                                  assnake  INIT ***  group
+#---------------------------------------------------------------------------------------
 
 @cli.group(name='init')
 def init_group():
@@ -85,8 +105,17 @@ def init_group():
     Assnake has internal configuration file 
     """
     pass
-init_group.add_command(commands_init.init_start)
 
+# Add start command (assnake init start) from assnake.cli.commands.init.py (./cli/commands/init.py)
+init_group.add_command(commands_init.init_start)
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+
+
+#---------------------------------------------------------------------------------------
+#                                  assnake  DATASET ***  group
+#---------------------------------------------------------------------------------------
 @cli.group(chain=True)
 def dataset():
     """Commands to work with datasets"""
@@ -95,26 +124,49 @@ def dataset():
 dataset.add_command(dataset_commands.df_list)
 dataset.add_command(dataset_commands.df_info)
 dataset.add_command(dataset_commands.df_create)
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+
+
+
+
+
+
+#---------------------------------------------------------------------------------------
+#                                  assnake  RESULT ***  group
+#---------------------------------------------------------------------------------------
 @cli.group()
 def result():
     """Commands to analyze your data"""
     assnake.utils.check_if_assnake_is_initialized()
 
+
+#define command `assnake result REQUEST`
 @click.group(chain = True, help = 'Used to request and run results')
 @click.pass_obj
 def request(config):
     pass
 
+# adding defined programm
 result.add_command(request)
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+
+
+
+# Creating set of entry points, i.e. plugins
 discovered_plugins = {
     entry_point.name: entry_point.load()
     for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
 }
+
+# updating request group with
 for module_name, module_class in discovered_plugins.items():
     for cmd in module_class.invocation_commands:
         request.add_command(cmd)
+
+
+# add run command to request group
 request.add_command(run)
 
 
