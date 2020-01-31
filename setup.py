@@ -9,7 +9,7 @@ setup(name='assnake',
     url = 'https://github.com/Fedorov113/assnake',   # Provide either the link to your github or to your website
     packages=find_packages(),
     install_requires=[
-        'Click', 'pyyaml', 'pandas', 'tabulate', 'snakemake', 'drmaa'
+        'Click', 'pyyaml', 'pandas', 'tabulate', 'snakemake', 'drmaa', 'parse' #parse was used in fs_helpers import
     ],
     entry_points='''
         [console_scripts]
