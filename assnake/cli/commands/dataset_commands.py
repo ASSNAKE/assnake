@@ -12,8 +12,7 @@ import importlib
 from assnake.utils import pathizer, dict_norm_print
 import snakemake
 
-
-
+# some util
 def show_av_dict(dfs):
     '''
     print out available datasets from dict of db's (assnake.api.loaders.load_dfs_from_db(''))
@@ -55,6 +54,7 @@ def df_list():
 # ---------------------------------------------------------------------------------------
 #                                   CREATE
 # ---------------------------------------------------------------------------------------
+# TODO rel path 
 @click.command(name='create')
 @click.option('--df', '-d', prompt='Name of the dataset', help='Name of the dataset')
 @click.option('--fs_prefix', '-f', prompt='Filesystem prefix', help='Filesystem prefix. This MUST be ABSOLUTE path')
@@ -159,35 +159,45 @@ def df_info(config, name, preproc):
 # ---------------------------------------------------------------------------------------
 # DONE decide if we need either d and t or proceed both arguments as one and automatically choose path or not
 @click.command(name='import-reads')
-@click.option('--source', '-r', prompt='Location of the source dataset.',
-              help='Location of the source dataset. Absolute path required.', type=click.Path())
-@click.option('--dataset', '-d', help='Assnake dataset name', required=False)
-@click.option('--target', '-t', help='Location of the target directory. Absolute path required.', required=False,
+@click.option('--reads', '-r', prompt='Location of the reads source dataset.',
+              help='Location of the reads dataset.', type=click.Path())
+@click.option('--dataset', '-d', help='Assnake dataset name. If -t is not specified', required=False)
+@click.option('--target', '-t', help='Location of the target directory. If -d is not specified.', required=False,
               type=click.Path())
 @click.option('--sample_set', '-s', help='Comma-divided list of samples of interest', required=False)
-@click.option('--sample_list', '-l', help='Absolute path to file with line by line samples of interest', required=False,
+@click.option('--sample_list', '-l', help='Location of file with line by line samples of interest', required=False,
               type=click.Path())
 @click.option('--copy', help='If is set, hard copying will be used instead of symbolic links ', is_flag=True)
 @click.pass_obj
-def df_import_reads(config, source, dataset, target, sample_set, sample_list, copy):
+def df_import_reads(config, reads, dataset, target, sample_set, sample_list, copy):
     """
-    Import reads from collective file to individual files directory
+    Import reads from directory to assnake dataset. Currently local text files are supported. The --target argument
+    point to location (relative or absolute) of assnake dataset in your file system. Please, pay attention,
+    that -t and -d  arguments are excclusive for each over -- specify only one of them -- as well as -s and -l.
+    With -s `sample_1,sample_2,...,sample_n` notation is implied (no whitespaces between sample names)
     """
+    # This is cli wrapping over create_links from fs_helpers
+
+
+    # stuff about presence of arguments
     arg_d = not bool(dataset is None)
     arg_t = not bool(target is None)
     arg_s = not bool(sample_set is None)
     arg_l = not bool(sample_list is None)
 
-
+    #check if samples arguments are ok
     if arg_l & arg_s:
         click.secho('Collision tends to be observed. Please, specify either list of samples in prompt or in file',
                     err=True)
         exit(1)
+
+    # check if destination args are ok
     if not (arg_d ^ arg_t):
         click.secho('Please, specify either database (-d) or absolute path (-t)', err=True)
         exit(1)
     importlib.reload(fs_helpers)
 
+    # some stuffff to ensure correctness of source and destination (how philosophical)
     if arg_d:
         try:
             df_info = assnake.api.loaders.load_df_from_db(dataset)
@@ -209,7 +219,8 @@ def df_import_reads(config, source, dataset, target, sample_set, sample_list, co
     #     splitted[2] = (1 if len(splitted) == 3 else a)
     #     return new_name_wc.format(splitted[1], splitted[2])
 
-    dicts = fs_helpers.get_samples_from_dir(source)
+    # Bla bla about simple list and simple file checking and proceeding
+    dicts = fs_helpers.get_samples_from_dir(reads)
     sample_names = {d['sample_name'] for d in dicts}
     if arg_s:
         samples_of_interest = sample_set.split(',')
@@ -220,14 +231,17 @@ def df_import_reads(config, source, dataset, target, sample_set, sample_list, co
                 samples_of_interest = ls_file.readlines()
         else:
             click.secho("Provided sample-list file couldn't be detected", err=True)
-
     else:
         samples_of_interest = sample_names
+
+    # Such a mess! check if specified samples are in directory
     if (arg_s or arg_l) and (len(set(samples_of_interest) - {d['sample_name'] for d in dicts}) != 0):
         click.secho("Warning! Samples, been specified, are not in reads file", err=True)
         click.confirm('Continue?', abort=True)
     if copy:
         click.secho("Please, keep in mind, that hard copying may take plenty of time")
+
+    # Here the logic -- just call create_links
     for d in dicts:
         if d['sample_name'] in samples_of_interest:
-            fs_helpers.create_links(source, target, d, hard=copy)
+            fs_helpers.create_links(reads, target, d, hard=copy)

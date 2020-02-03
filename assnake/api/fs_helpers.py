@@ -27,7 +27,6 @@ def get_sample_dict_from_dir(loc, sample_name, variant, ext, modify_name=lambda 
     :return:
     '''
     # DONE в 1 строчку
-
     sample_name = modify_name(sample_name)
     temp_samples_dict = {'sample_name': sample_name,
                          'files': {'R1': '', 'R2': '', 'S': []},
@@ -40,14 +39,14 @@ def get_sample_dict_from_dir(loc, sample_name, variant, ext, modify_name=lambda 
         if len(st_file) == 1:
             # DONE переписать через format
             stripped = st_file[0].replace(variant['strands'][strand] + ext, '')
-            stripped += '{sample_name}_{stard}{ext}'.format(sample_name=sample_name, strand=strand, ext=ext)
+            stripped += '{sample_name}_{strand}{ext}'.format(sample_name=sample_name, strand=strand, ext=ext)
             temp_samples_dict['renamed_files'][strand] = stripped
             temp_samples_dict['files'][strand] = st_file[0]
 
     return temp_samples_dict
 
 
-def get_samples_from_dir(loc, modify_name=None):
+def get_samples_from_dir(loc, modify_name= lambda arg: arg):
     """
     Searches for samples in loc. Sample should contain R1 and R2
     :param loc: location on filesystem where we should search
