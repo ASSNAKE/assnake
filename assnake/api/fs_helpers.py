@@ -4,6 +4,7 @@ import os
 import sys
 import glob
 import fnmatch
+from shutil import copy2
 import parse
 from assnake.api.loaders import load_dfs_from_db
 
@@ -79,11 +80,12 @@ def get_samples_from_dir(loc, modify_name=None):
 
 # TODO везде документацию,
 # DONE все класть {fs_prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz
-def create_links(dir_with_reads, original_dir, sample):
+def create_links(dir_with_reads, original_dir, sample, hard=False):
     """
     :param dir_with_reads:  куда класть
     :param original_dir: откуда
     :param sample: dictionary от get samples dict from dir
+    :param hard: if hard copying is needed or symbolic is sufficient  (False)
     :return:
 
     """
@@ -99,7 +101,10 @@ def create_links(dir_with_reads, original_dir, sample):
 
     src_r2 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R2'])
     dst_r2 = new_file_wc.format(new_dir=dir_with_reads, sample_name = sample['sample_name'],  sample_file=sample['renamed_files']['R2'])
-
+    if hard:
+        copy2(src_r1, dst_r1)
+        copy2(src_r2, dst_r2)
+        return
     os.symlink(src_r1, dst_r1)
     os.symlink(src_r2, dst_r2)
     # try:

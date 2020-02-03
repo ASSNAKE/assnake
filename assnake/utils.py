@@ -1,6 +1,8 @@
 import yaml, configparser, os, click
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
+import os
+
 
 def read_yaml(file_location):
     yaml_file = {}
@@ -11,24 +13,28 @@ def read_yaml(file_location):
         except yaml.YAMLError as exc:
             print(exc)
 
+
 def get_internal_config():
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     config_internal = configparser.ConfigParser()
     config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
     return config_internal
 
+
 def load_wc_config():
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    return(read_yaml(os.path.join(dir_of_this_file,'./snake/wc_config.yaml')))
+    return (read_yaml(os.path.join(dir_of_this_file, './snake/wc_config.yaml')))
+
 
 def load_config_file():
     config_internal = get_internal_config()
     config_loc = config_internal['GENERAL']['config_loc']
-    return(read_yaml(config_loc))
+    return (read_yaml(config_loc))
+
 
 def get_config_loc():
     config_internal = get_internal_config()
-    return(config_internal['GENERAL']['config_loc'])
+    return (config_internal['GENERAL']['config_loc'])
 
 
 def check_if_assnake_is_initialized():
@@ -38,6 +44,7 @@ def check_if_assnake_is_initialized():
         click.echo('Just run ' + click.style('assnake init start', bg='blue'))
         exit()
 
+
 # decorator to saving graph of calls of the function
 def graph_of_calls(image2safe):
     def real_decorator(function):
@@ -46,62 +53,42 @@ def graph_of_calls(image2safe):
             graphviz.output_file = image2safe
             with PyCallGraph(output=graphviz):
                 function(*args, **kwargs)
+
         return wrapper
+
     return real_decorator
 
 
+def pathizer(path):
+    """
+    Make from path absolute path
+    :param path: absolute or relative path
+    :return: absolute path
+    """
+    return '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read(), rel_path=path) if (path[0] == '/') else path
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def dict_norm_print(d, indent=1):
+    for key, value in d.items():
+        click.echo('\t' * indent + str(key), nl=False)
+        if isinstance(value, dict):
+            click.echo('--↴	')
+            dict_norm_print(value, indent + 1)
+        else:
+            click.echo('\t' * (indent) + str(value))
 
 
 ## {{{ http://code.activestate.com/recipes/578019/ (r15)
 # see: http://goo.gl/kTQMs
 SYMBOLS = {
-    'customary'     : ('B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'),
-    'customary_ext' : ('byte', 'kilo', 'mega', 'giga', 'tera', 'peta', 'exa',
-                       'zetta', 'iotta'),
-    'iec'           : ('Bi', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi'),
-    'iec_ext'       : ('byte', 'kibi', 'mebi', 'gibi', 'tebi', 'pebi', 'exbi',
-                       'zebi', 'yobi'),
+    'customary': ('B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'),
+    'customary_ext': ('byte', 'kilo', 'mega', 'giga', 'tera', 'peta', 'exa',
+                      'zetta', 'iotta'),
+    'iec': ('Bi', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi'),
+    'iec_ext': ('byte', 'kibi', 'mebi', 'gibi', 'tebi', 'pebi', 'exbi',
+                'zebi', 'yobi'),
 }
+
 
 def bytes2human(n, format='%(value).1f %(symbol)s', symbols='customary'):
     """
@@ -146,12 +133,13 @@ def bytes2human(n, format='%(value).1f %(symbol)s', symbols='customary'):
     symbols = SYMBOLS[symbols]
     prefix = {}
     for i, s in enumerate(symbols[1:]):
-        prefix[s] = 1 << (i+1)*10
+        prefix[s] = 1 << (i + 1) * 10
     for symbol in reversed(symbols[1:]):
         if n >= prefix[symbol]:
             value = float(n) / prefix[symbol]
             return format % locals()
     return format % dict(symbol=symbols[0], value=n)
+
 
 def human2bytes(s):
     """
@@ -198,10 +186,9 @@ def human2bytes(s):
             letter = letter.upper()
         else:
             raise ValueError("can't interpret %r" % init)
-    prefix = {sset[0]:1}
+    prefix = {sset[0]: 1}
     for i, s in enumerate(sset[1:]):
-        prefix[s] = 1 << (i+1)*10
+        prefix[s] = 1 << (i + 1) * 10
     return int(num * prefix[letter])
-
 
 ## end of http://code.activestate.com/recipes/578019/ }}}

@@ -2,4 +2,4 @@
 .idea/
 __pycache__
 *egg-info
-tests/
+*.png
