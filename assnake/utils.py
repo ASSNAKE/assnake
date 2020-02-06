@@ -51,9 +51,11 @@ def graph_of_calls(image2safe):
         def wrapper(*args, **kwargs):
             graphviz = GraphvizOutput()
             graphviz.output_file = image2safe
-            with PyCallGraph(output=graphviz):
-                function(*args, **kwargs)
-
+            try:
+                with PyCallGraph(output=graphviz):
+                    function(*args, **kwargs)
+            except Exception as e:
+                click.echo("It seems you have not graphviz -- it is not crucial. Graphviz is being used for some future functionality")
         return wrapper
 
     return real_decorator
@@ -65,7 +67,8 @@ def pathizer(path):
     :param path: absolute or relative path
     :return: absolute path
     """
-    return '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read(), rel_path=path) if (path[0] == '/') else path
+
+    return '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read().replace('\n', ''), rel_path=path) if (path[0] != '/') else path
 
 
 def dict_norm_print(d, indent=1):

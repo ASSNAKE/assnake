@@ -57,15 +57,14 @@ def df_list():
 # TODO rel path 
 @click.command(name='create')
 @click.option('--df', '-d', prompt='Name of the dataset', help='Name of the dataset')
-@click.option('--fs_prefix', '-f', prompt='Filesystem prefix', help='Filesystem prefix. This MUST be ABSOLUTE path')
+@click.option('--fs_prefix', '-f', prompt='Filesystem prefix', help='Filesystem prefix.')
 @click.pass_obj
 def df_create(config, df, fs_prefix):
-    there_is_prpties = False
     """Register your dataset inside ASSNAKE!\n
-    You can use it in interactive mode."""
-    if fs_prefix[0] != '/':
-        click.echo('THIS IS NOT AN ABSOLUTE PATH!!!')
-        exit()
+        You can use it in interactive mode."""
+    there_is_prpties = False
+    fs_prefix = pathizer(fs_prefix)
+
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
     dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
 
