@@ -60,19 +60,22 @@ def get_samples_from_dir(loc, modify_name= lambda arg: arg):
                     {'name': 'SRA', 'strands': {'R1': '_1', 'R2': '_2'}}]  # possible endigngs of files
 
     # Fool check
-    if loc[-1] != '/':
-        loc += '/'
+    # if loc[-1] != '/':
+    #   loc += '/'
 
     for variant in end_variants:
         R1 = variant['strands']['R1']  # Get just the first strand. For paired end data it doesn't matter.
         samples = [
             item[item.rfind('/')+1:item.rfind(R1+ext)]
-            for item in glob.glob(loc + '*' + R1 + ext)
+            for item in glob.glob(loc + '/*' + R1 + ext)
         ]
-        if len(samples) > 0:
-            for sample in samples:
-                samples_list.append(get_sample_dict_from_dir(loc, sample, variant, ext, modify_name))
-            break
+        #print('samples: ',samples)
+        for sample in samples:
+            buff = get_sample_dict_from_dir(loc, sample, variant, ext, modify_name)
+            #print(buff['sample_name'], end = ' ')
+            samples_list.append(buff)
+        # print('')
+    # print([i['sample_name'] for i in samples_list])
 
     return samples_list
 

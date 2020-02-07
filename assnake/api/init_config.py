@@ -23,10 +23,13 @@ def fill_and_write_config(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drma
     os.makedirs(bwa_index_dir, exist_ok=True)
     os.makedirs(conda_dir, exist_ok=True)
     os.makedirs(drmaa_log_dir, exist_ok=True)
+    if not os.path.exists(config_location):
+        os.makedirs(config_location, exist_ok=True)
 
-    with open(config_location, 'w') as file:
+    config_location = os.path.join(config_location, 'config.yaml')
+    with open(config_location, 'w+') as file:
         _ = yaml.dump(config_template, file, sort_keys=False)
 
     config_internal['GENERAL']['config_loc'] = config_location
-    with open(os.path.join(dir_of_this_file, './../config_internal.ini'), 'w') as configfile:
+    with open(os.path.join(dir_of_this_file, './../config_internal.ini'), 'w+') as configfile:
         config_internal.write(configfile)

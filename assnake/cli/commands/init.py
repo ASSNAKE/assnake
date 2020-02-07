@@ -15,7 +15,7 @@ from assnake.api.init_config import fill_and_write_config
               help='This is the place, were all the conda environments goes.', required=False)
 @click.option('--drmaa_log_dir', '-D', type=click.Path(), default='{assnake_db}/drmaa_log_dir',
               help='This is the place, were all the drmaa log files goes.', required=False)
-@click.option('--config_location', '-C', type=click.Path(), default='{assnake_db}/config.yaml',
+@click.option('--config_location', '-C', type=click.Path(), default='{assnake_db}',
               help='This is the file, were the configure of database will be stored.', required=False)
 @click.option('--forced', '-f', is_flag=True,
               help='Force and confirm all in quite mode.')
@@ -60,7 +60,7 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, 
 
             def conf_ok():
                 return click.confirm(
-                    "Proposed path to congig file: " + click.style(config_location,
+                    "Proposed path to congig file directory: " + click.style(os.opath.join(config_location, 'config.yaml'),
                                                                    bold=True,
 
                                                                    fg='green') + '\n  Is it ok?')
@@ -74,10 +74,10 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, 
             while not log_ok():
                 drmaa_log_dir = click.prompt('  Provide absolute path for DRMAA log directory')
             while not conf_ok():
-                config_location = click.prompt('  Provide absolute path for configure log directory')
+                config_location = click.prompt('  Provide absolute path for configure directory')
             if verbose > 1:
                 click.secho(
-                    '  Your configuration file will be stored at ' + click.style(config_location, bold=True,
+                    '  Your configuration file will be stored at ' + click.style(os.path.join(config_location, 'config.yaml'), bold=True,
                                                                                  fg='green') + '\n')
         fill_and_write_config(*map(pathizer, [assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, config_location]))
         click.secho('== SUCCESS ==', bg='green', fg='white')
