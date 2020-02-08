@@ -4,8 +4,10 @@ import os
 import sys
 import glob
 import fnmatch
+from assnake.api.fs_helpers import create_links
 
 "Script for importing files to the assnake. Creates {prefix}/{df}/reads/{preproc}/{sample_name}"
+
 
 def find_files(base, pattern):
     """
@@ -62,7 +64,9 @@ def get_samples_from_dir(loc):
 
     return samples_list
 
-def create_links(dir_with_reads, original_dir, sample):
+
+# synonymous function was found in api.fs_helpers
+'''def create_links(dir_with_reads, original_dir, sample):
     orig_wc = '{orig_dir}/{sample_file}'
     new_dir_wc = '{reads_dir}/{sample_name}'
     new_file_wc = '{new_dir}/{sample_file}'
@@ -79,6 +83,8 @@ def create_links(dir_with_reads, original_dir, sample):
 
     os.symlink(src_r1, dst_r1)
     os.symlink(src_r2, dst_r2)
+'''
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -86,8 +92,9 @@ def main():
     parser.add_argument('--prefix', type=str, help='Prefix on file system for dataset')
     parser.add_argument('--df', type=str, help='Name of yor dataset')
     parser.add_argument('--preproc', type=str, default='raw', help='First preprocessing')
-    parser.add_argument('--dry', default=False, action='store_true', help='Only print what is going to happen, without actually doing anything')
-    parser.add_argument('--samples', nargs='+', help='List of sample names to import', default = [], required=False)
+    parser.add_argument('--dry', default=False, action='store_true',
+                        help='Only print what is going to happen, without actually doing anything')
+    parser.add_argument('--samples', nargs='+', help='List of sample names to import', default=[], required=False)
 
     args = parser.parse_args()
 
@@ -114,13 +121,13 @@ def main():
     for s in samples:
         if len(args.samples) > 0:
             if s['sample_name'] in args.samples:
-                
-                new_dir = new_dir_wc.format(reads_dir = dir_with_reads, sample_name = s['sample_name'])
-                
-                src_r1 = orig_wc.format(orig_dir = args.original_dir, sample_file = s['files']['R1'])
+
+                new_dir = new_dir_wc.format(reads_dir=dir_with_reads, sample_name=s['sample_name'])
+
+                src_r1 = orig_wc.format(orig_dir=args.original_dir, sample_file=s['files']['R1'])
                 dst_r1 = new_file_wc.format(new_dir=new_dir, sample_file=s['renamed_files']['R1'])
 
-                src_r2 = orig_wc.format(orig_dir = args.original_dir, sample_file = s['files']['R2'])
+                src_r2 = orig_wc.format(orig_dir=args.original_dir, sample_file=s['files']['R2'])
                 dst_r2 = new_file_wc.format(new_dir=new_dir, sample_file=s['renamed_files']['R2'])
 
                 if args.dry:
@@ -137,6 +144,5 @@ def main():
                     os.symlink(src_r2, dst_r2)
 
 
-    
 if __name__ == "__main__":
     main()

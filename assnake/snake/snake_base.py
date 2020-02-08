@@ -1,3 +1,8 @@
+#
+# The dynamic manager of modules (plugins)
+#
+
+
 import glob, os, pkg_resources, time
 import assnake.utils
 print('dsffdsf')

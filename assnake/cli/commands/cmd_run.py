@@ -1,10 +1,17 @@
+#############################################
+#   Perform assnake  ***  RUN cli command   #
+#############################################
+
 import click, os, snakemake
 from assnake.utils import get_config_loc, load_config_file
 # from assnake.assnake_cli import pass_environment
 
 
-@click.command('run', short_help='Runs snakemake for requested results')
+#---------------------------------------------------------------------------------------
+#                                     RUN
+#---------------------------------------------------------------------------------------
 
+@click.command('run', short_help='Runs snakemake for requested results')
 @click.option('--threads','-t', help='Threads per job', default=4)
 @click.option('--jobs','-j', help='Number of jobs', default=1)
 @click.option('--drmaa/--no-drmaa', default=False)
@@ -13,7 +20,7 @@ from assnake.utils import get_config_loc, load_config_file
 @click.pass_obj
 
 def run(config, threads, jobs, drmaa, run):
-    
+    print(config['requests'])
     click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')
 
     curr_dir = os.path.abspath(os.path.dirname(__file__))
@@ -22,7 +29,6 @@ def run(config, threads, jobs, drmaa, run):
     drmaa_param = None
     if drmaa:
         drmaa_param=' -V -S /bin/bash -pe make {threads}'.format(threads=threads)
-
     status = snakemake.snakemake(os.path.join(curr_dir, '../../snake/snake_base.py'), 
         # config = config['wc_config'],    
         targets=config['requests'], 
@@ -36,3 +42,4 @@ def run(config, threads, jobs, drmaa, run):
         conda_prefix = config['config']['conda_dir'],
         drmaa=drmaa_param,
         cores=jobs, nodes=jobs)
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
