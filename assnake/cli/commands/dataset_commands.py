@@ -9,8 +9,9 @@ import assnake.api.sample_set
 from tabulate import tabulate
 from assnake.api import fs_helpers
 import importlib
-from assnake.utils import pathizer, dict_norm_print
+from assnake.utils import pathizer, dict_norm_print, download_from_url
 import snakemake
+from zipfile import ZipFile
 
 # some util
 def show_av_dict(dfs):
@@ -58,8 +59,9 @@ def df_list():
 @click.command(name='create')
 @click.option('--df', '-d', prompt='Name of the dataset', help='Name of the dataset')
 @click.option('--fs_prefix', '-f', prompt='Filesystem prefix', help='Filesystem prefix.')
+@click.option('--test-data', '-t', is_flag=True, help='Download test data from Humann2 tutorial')
 @click.pass_obj
-def df_create(config, df, fs_prefix):
+def df_create(config, df, fs_prefix,test_data):
     """Register your dataset inside ASSNAKE!\n
         You can use it in interactive mode."""
     there_is_prpties = False
@@ -72,17 +74,16 @@ def df_create(config, df, fs_prefix):
     while click.confirm('Add property', abort=False):
         if not there_is_prpties:
             there_is_prpties = True
-        prpts.update({click.prompt('Name of property:'): click.prompt('Value of property:')})
+        prpts.update({click.prompt('Name of property'): click.prompt('Value of property')})
 
     if df not in dfs:
-        if os.path.isdir(os.path.join(fs_prefix, df)):
-            df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': prpts}
-            os.makedirs(os.path.join(config['config']['assnake_db'], 'datasets/' + df), exist_ok=True)
-            with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'), 'w') as info_file:
-                yaml.dump(df_info, info_file, default_flow_style=False)
-            click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
-        else:
-            click.secho('We were unable to find directory on the path')
+        os.makedirs(os.path.join(fs_prefix, df), exist_ok=True)
+        df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': prpts}
+        os.makedirs(os.path.join(config['config']['assnake_db'], 'datasets/' + df), exist_ok=True)
+        with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'), 'w') as info_file:
+            yaml.dump(df_info, info_file, default_flow_style=False)
+        click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
+
     else:
         click.secho('Duplicate name!', fg='red')
         if there_is_prpties:
@@ -96,6 +97,20 @@ def df_create(config, df, fs_prefix):
                 df_info_old['description'] = prpts
             with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'), 'w') as info_file:
                 yaml.dump(df_info_old, info_file, default_flow_style=False)
+
+    if test_data:
+        print('KISS MY ASS')
+        download_from_url('http://kronos.pharmacology.dal.ca/public_files/tutorial_datasets/mgs_tutorial_Oct2017.zip', 
+                                os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017.zip'))
+        
+        with ZipFile(os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017.zip'), 'r') as zipObj:
+            
+            zipObj.extractall(os.path.join(fs_prefix, df,'./'))
+        shutil.rmtree(os.path.join(fs_prefix, df, 'reads'), ignore_errors=True)
+        os.makedirs(os.path.join(fs_prefix, df, 'reads'), exist_ok=True)
+        shutil.move (os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017/raw_data'), os.path.join(fs_prefix, df, 'reads/raw'))
+        # TODO cleanup
+        shutil.rmtree(os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017'), ignore_errors=True)
 
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
