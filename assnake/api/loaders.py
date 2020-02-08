@@ -9,30 +9,6 @@ import yaml
 
 import assnake.utils
 
-# data_dir = "/data6/bio/TFM/pipeline/"
-# DF_DIR = data_dir + 'datasets/{df}/'
-# SAMPLE_DIR = DF_DIR + 'reads/{preproc}/{sample}'
-# FQGZ_LOC = SAMPLE_DIR +  '/{sample}_{strand}.fastq.gz'
-# COUNT_LOC = SAMPLE_DIR + '/profile/{sample}_{strand}.count'
-
-# SAMPLES_META_LOC = DF_DIR + '{df}_samples.tsv'
-# SOURCES_META_LOC = DF_DIR + '{df}_sources.tsv'
-
-# pipeline = '/data6/bio/TFM/pipeline/'
-
-
-# DF_DIR_PREFIX = '{prefix}/{df}/'
-# SAMPLE_DIR_PREFIX = DF_DIR_PREFIX + 'reads/{preproc}/{sample}'
-# FQGZ_LOC_PREFIX = SAMPLE_DIR_PREFIX +  '/{sample}_{strand}.fastq.gz'
-# COUNT_LOC_PREFIX = SAMPLE_DIR_PREFIX + '/profile/{sample}_{strand}.count'
-
-# SAMPLES_META_LOC = DF_DIR_PREFIX + '{df}_samples.tsv'
-# SOURCES_META_LOC = DF_DIR_PREFIX + '{df}_sources.tsv'
-
-
-
-
-
 def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, count_wc=''):
     """
     Loads information about read and bp count in paired-end sample.
