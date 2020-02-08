@@ -78,7 +78,7 @@ assnake dataset create
 
 
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = assnake.utils.get_config_loc()
+    config_loc = assnake.utils.get_config_loc() 
 
     if not os.path.isfile(config_loc):
             pass

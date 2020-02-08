@@ -55,14 +55,12 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, 
                 return click.confirm(
                     "Proposed folder for drmaa log files: " + click.style(drmaa_log_dir,
                                                                           bold=True,
-
                                                                           fg='green') + '\n  Is it ok?')
 
             def conf_ok():
                 return click.confirm(
-                    "Proposed path to congig file directory: " + click.style(os.opath.join(config_location, 'config.yaml'),
+                    "Proposed path to congig file directory: " + click.style(os.path.join(config_location, 'config.yaml'),
                                                                    bold=True,
-
                                                                    fg='green') + '\n  Is it ok?')
 
             while not fna_ok():
