@@ -1,8 +1,10 @@
 import yaml, configparser, os, click
-from pycallgraph import PyCallGraph
-from pycallgraph.output import GraphvizOutput
-import os
-
+try:
+    from pycallgraph import PyCallGraph
+    from pycallgraph.output import GraphvizOutput
+except ModuleNotFoundError:
+    pass
+import os, sys
 
 def read_yaml(file_location):
     yaml_file = {}
@@ -41,7 +43,7 @@ def check_if_assnake_is_initialized():
     if not os.path.isfile(get_config_loc()):
         click.secho("You need to init your installation!", fg='red', bold=True)
         click.echo("Don't worry, it won't take long.")
-        click.echo('Just run ' + click.style('assnake init start', bg='blue'))
+        click.echo('Just run ' + click.style('assnake init start', bg='blue', fg='bright_white'))
         exit()
 
 
@@ -49,13 +51,16 @@ def check_if_assnake_is_initialized():
 def graph_of_calls(image2safe):
     def real_decorator(function):
         def wrapper(*args, **kwargs):
-            graphviz = GraphvizOutput()
-            graphviz.output_file = image2safe
-            try:
-                with PyCallGraph(output=graphviz):
-                    function(*args, **kwargs)
-            except Exception as e:
-                click.echo("It seems you have not graphviz -- it is not crucial. Graphviz is being used for some future functionality")
+            if "pycallgraph" in sys.modules:
+                graphviz = GraphvizOutput()
+                graphviz.output_file = image2safe
+                try:
+                    with PyCallGraph(output=graphviz):
+                        function(*args, **kwargs)
+                except Exception as e:
+                    click.echo("It seems you have not graphviz -- it is not crucial. Graphviz is being used for some future functionality")
+            else:
+                function(*args, **kwargs)
         return wrapper
 
     return real_decorator
