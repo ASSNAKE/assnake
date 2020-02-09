@@ -73,7 +73,6 @@ def df_create(config, df, fs_prefix, description, quietly):
         if click.confirm('You have not specified the path to dir. Current path will be used, change it?', abort=False):
             fs_prefix = click.prompt('Please, type in the path')
 
-    print(description)
     fs_prefix = pathizer(fs_prefix)
 
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
