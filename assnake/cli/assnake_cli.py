@@ -165,6 +165,8 @@ discovered_plugins = {
 for module_name, module_class in discovered_plugins.items():
     for cmd in module_class.invocation_commands:
         request.add_command(cmd)
+    for cmd in module_class.initialization_commands:
+        init_group.add_command(cmd)
 
 
 # add run command to request group
