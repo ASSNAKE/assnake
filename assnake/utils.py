@@ -72,7 +72,8 @@ def pathizer(path):
     :param path: absolute or relative path
     :return: absolute path
     """
-
+    if path is None or path==' ' or path == '':
+        return os.popen('pwd').read().replace('\n', '')
     return '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read().replace('\n', ''), rel_path=path) if (path[0] != '/') else path
 
 
