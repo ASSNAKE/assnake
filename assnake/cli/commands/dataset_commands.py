@@ -60,7 +60,7 @@ def df_list():
 @click.option('--df', '-d', prompt='Name of the dataset', help='Name of the dataset')
 @click.option('--fs_prefix', '-f', help='Filesystem prefix. If none path to current dir will be used', required=False)
 @click.option('--description', '-D', nargs=2, multiple=True, required=False, type=click.Tuple([str, str]),
-              help='Add some description in this way assnake dataset create ... -D property_1 value_1 ... -D property_n value_n')
+              help='Add some description in this way ` assnake dataset create ... -D property_1 value_1 ... -D property_n value_n`')
 @click.option('--quietly', '-q', is_flag=True, help='Doing it quietly. No questions.')
 @click.pass_obj
 def df_create(config, df, fs_prefix, description, quietly):
