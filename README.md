@@ -2,6 +2,8 @@
 
 Assnake is a pipeline for metagenomics data analysis. It is built with Snakemake and is fully modular. It tracks all your tool versions, parameters and environments.
 
+## Installation
+As of now, clone this repository using git, activate your conda environment with python 3 installrf, and execute `pip install -e ./` from the source folder
 
 Analysis of metagenomics data consists of 2 steps: quality control and preprocessing, and analysis itself. 
 

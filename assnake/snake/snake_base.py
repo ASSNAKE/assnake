@@ -5,7 +5,6 @@
 
 import glob, os, pkg_resources, time
 import assnake.utils
-print('dsffdsf')
 wc_config = assnake.utils.load_wc_config()
 # print(wc_config)
 start = time.time()
