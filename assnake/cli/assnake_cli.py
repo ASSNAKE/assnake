@@ -32,7 +32,7 @@ from pycallgraph.output import GraphvizOutput
 @click.group()
 @click.version_option()
 @click.pass_context
-@graph_of_calls('cli_cli.png')
+# @graph_of_calls('cli_cli.png')
 def cli(ctx):
     """\b
    ___    ____   ____   _  __   ___    __ __   ____
@@ -71,10 +71,7 @@ Here is it how it goes.
 Somewhere on your filesystem you create a folder, and put your reads inside the ./<your_folder>/reads/raw folder.
 <your_folder> is also the name of the Dataset, so choose wisely!
 Than register yor dataset in the assnake with
-assnake dataset create
-
-    
-    """
+assnake dataset create"""
 
 
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
@@ -161,7 +158,7 @@ discovered_plugins = {
     for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
 }
 
-# updating request group with
+# updating request and init groups with corresponding functions
 for module_name, module_class in discovered_plugins.items():
     for cmd in module_class.invocation_commands:
         request.add_command(cmd)

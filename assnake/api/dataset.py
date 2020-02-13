@@ -93,8 +93,11 @@ class Dataset:
             'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
 
     def to_dict(self):
+        preprocs = {}
+        for ss in self.sample_sets:
+            preprocs.update({ss : self.sample_sets[ss].to_dict(orient='records')})
         return {
             'df': self.df,
             'fs_prefix': self.fs_prefix,
-            'preprocs': self.sample_sets
+            'preprocs': preprocs
         }

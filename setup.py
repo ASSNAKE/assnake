@@ -9,7 +9,7 @@ setup(name='assnake',
     url = 'https://github.com/Fedorov113/assnake',   # Provide either the link to your github or to your website
     packages=find_packages(),
     install_requires=[
-        'Click', 'pyyaml', 'pandas', 
+        'numpy', 'Click', 'pyyaml', 'pandas', 
         'tabulate', 'snakemake', 'drmaa', 
         'parse', 'pycallgraph', 'tqdm', 'scipy', 'plotly', 'matplotlib', 'scikit-bio'
     ],
