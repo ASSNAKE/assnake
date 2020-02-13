@@ -18,9 +18,6 @@ from assnake.utils import read_yaml, graph_of_calls
 
 import pkg_resources
 
-#import stuff for flow graph
-from pycallgraph import PyCallGraph
-from pycallgraph.output import GraphvizOutput
 
 
 
