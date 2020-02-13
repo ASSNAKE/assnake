@@ -4,9 +4,12 @@ import os
 import sys
 import glob
 import fnmatch
-from shutil import copy2
+from shutil import copy2, rmtree
+from assnake import utils
+import traceback
 import parse
 from assnake.api.loaders import load_dfs_from_db
+
 
 def find_files(base, pattern):
     """
@@ -46,7 +49,7 @@ def get_sample_dict_from_dir(loc, sample_name, variant, ext, modify_name=lambda 
     return temp_samples_dict
 
 
-def get_samples_from_dir(loc, modify_name= lambda arg: arg):
+def get_samples_from_dir(loc, modify_name=lambda arg: arg):
     """
     Searches for samples in loc. Sample should contain R1 and R2
     :param loc: location on filesystem where we should search
@@ -66,13 +69,13 @@ def get_samples_from_dir(loc, modify_name= lambda arg: arg):
     for variant in end_variants:
         R1 = variant['strands']['R1']  # Get just the first strand. For paired end data it doesn't matter.
         samples = [
-            item[item.rfind('/')+1:item.rfind(R1+ext)]
+            item[item.rfind('/') + 1:item.rfind(R1 + ext)]
             for item in glob.glob(loc + '/*' + R1 + ext)
         ]
-        #print('samples: ',samples)
+        # print('samples: ',samples)
         for sample in samples:
             buff = get_sample_dict_from_dir(loc, sample, variant, ext, modify_name)
-            #print(buff['sample_name'], end = ' ')
+            # print(buff['sample_name'], end = ' ')
             samples_list.append(buff)
         # print('')
     # print([i['sample_name'] for i in samples_list])
@@ -99,10 +102,12 @@ def create_links(dir_with_reads, original_dir, sample, hard=False):
         os.makedirs(dir_with_reads)
 
     src_r1 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R1'])
-    dst_r1 = new_file_wc.format(new_dir=dir_with_reads, sample_name = sample['sample_name'],  sample_file=sample['renamed_files']['R1'])
+    dst_r1 = new_file_wc.format(new_dir=dir_with_reads, sample_name=sample['sample_name'],
+                                sample_file=sample['renamed_files']['R1'])
 
     src_r2 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R2'])
-    dst_r2 = new_file_wc.format(new_dir=dir_with_reads, sample_name = sample['sample_name'],  sample_file=sample['renamed_files']['R2'])
+    dst_r2 = new_file_wc.format(new_dir=dir_with_reads, sample_name=sample['sample_name'],
+                                sample_file=sample['renamed_files']['R2'])
     if hard:
         copy2(src_r1, dst_r1)
         copy2(src_r2, dst_r2)
@@ -114,3 +119,15 @@ def create_links(dir_with_reads, original_dir, sample, hard=False):
     #     os.symlink(src_r2, dst_r2)
     # except:
     #     print(sample, 'ERROR')
+
+
+def delete_ds(dataset):
+    """
+    remove assnake dataset from database
+    """
+    try:
+        os.remove(
+            '{config}/datasets/{df}/df_info.yaml'.format(config=utils.load_config_file()['assnake_db'], df=dataset))
+        return (True,)
+    except Exception as e:
+        return (False, traceback.format_exc())
