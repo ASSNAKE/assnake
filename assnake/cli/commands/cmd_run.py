@@ -4,6 +4,7 @@
 
 import click, os, snakemake
 from assnake.utils import get_config_loc, load_config_file
+from assnake.api.update_fs_samples import update_fs_samples_csv
 # from assnake.assnake_cli import pass_environment
 
 
@@ -21,6 +22,7 @@ from assnake.utils import get_config_loc, load_config_file
 
 def run(config, threads, jobs, drmaa, run):
     print(config['requests'])
+
     click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')
 
     curr_dir = os.path.abspath(os.path.dirname(__file__))
@@ -42,4 +44,8 @@ def run(config, threads, jobs, drmaa, run):
         conda_prefix = config['config']['conda_dir'],
         drmaa=drmaa_param,
         cores=jobs, nodes=jobs)
+    if run:
+        update_fs_samples_csv(**config['invoked_args'])
+
+
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

@@ -18,9 +18,6 @@ from assnake.utils import read_yaml, graph_of_calls
 
 import pkg_resources
 
-#import stuff for flow graph
-from pycallgraph import PyCallGraph
-from pycallgraph.output import GraphvizOutput
 
 
 
@@ -122,6 +119,7 @@ dataset.add_command(dataset_commands.df_list)
 dataset.add_command(dataset_commands.df_info)
 dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
+dataset.add_command(dataset_commands.df_delete)
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
@@ -144,12 +142,8 @@ def result():
 @click.pass_obj
 def request(config):
     pass
-
 # adding defined programm
 result.add_command(request)
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
 
 
 # Creating set of entry points, i.e. plugins
@@ -169,6 +163,8 @@ for module_name, module_class in discovered_plugins.items():
 # add run command to request group
 request.add_command(run)
 
+
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 def main():
     # TODO Here we should manually parse and check that if we request result `run` command is last

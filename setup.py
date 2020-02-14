@@ -1,4 +1,13 @@
 from setuptools import setup, find_packages
+import os
+import configparser
+
+# Creating config_internal.ini
+dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+config_internal = configparser.ConfigParser()
+config_internal['GENERAL'] = {'config_loc': 'None'}
+with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+') as configfile:
+    config_internal.write(configfile)
 
 setup(name='assnake', 
     version='0.6.0',
