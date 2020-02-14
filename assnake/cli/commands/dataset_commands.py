@@ -13,6 +13,8 @@ from assnake.utils import pathizer, dict_norm_print, download_from_url
 import snakemake
 from zipfile import ZipFile
 import traceback
+from assnake.api.update_fs_samples import update_fs_samples_csv
+
 
 
 # some util
@@ -222,8 +224,8 @@ def df_delete(config, dataset_name, hard):
 # ---------------------------------------------------------------------------------------
 # DONE decide if we need either d and t or proceed both arguments as one and automatically choose path or not
 @click.command(name='import-reads')
-@click.option('--reads', '-r', prompt='Location of the reads source dataset.',
-              help='Location of the reads dataset.', type=click.Path())
+@click.option('--reads', '-r', prompt='Location of folder with read files',
+              help='Location of folder with read files', type=click.Path())
 @click.option('--dataset', '-d', help='Assnake dataset name. If -t is not specified', required=False)
 @click.option('--target', '-t', help='Location of the target directory. If -d is not specified.', required=False,
               type=click.Path())
@@ -239,6 +241,7 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
     that -t and -d  arguments are excclusive for each over -- specify only one of them -- as well as -s and -l.
     With -s `sample_1,sample_2,...,sample_n` notation is implied (no whitespaces between sample names)
     """
+    # print(os.getcwd())
     # This is cli wrapping over create_links from fs_helpers
 
     # stuff about presence of arguments
@@ -257,7 +260,6 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
     if not (arg_d ^ arg_t):
         click.secho('Please, specify either database (-d) or absolute path (-t)', err=True)
         exit(1)
-    importlib.reload(fs_helpers)
 
     # some stuffff to ensure correctness of source and destination (how philosophical)
     if arg_d:
@@ -273,7 +275,6 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
         if not os.path.exists(target):
             click.secho("Provided sample-list file couldn't be detected", err=True)
             exit(2)
-    print(target)
 
     # def rename(sample):
     #     new_name_wc = 'Rst{}_{}_B2'
@@ -306,4 +307,18 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
     # Here the logic -- just call create_links
     for d in dicts:
         if d['sample_name'] in samples_of_interest:
-            fs_helpers.create_links(reads, target, d, hard=copy)
+            fs_helpers.create_links(target, reads, d, hard=copy)
+
+    update_fs_samples_csv(df_info['df'], [], 'raw')
+
+
+@click.command(name='rescan')
+@click.option('--dataset', '-d', help='Assnake dataset name', required=False)
+@click.pass_obj
+def rescan_dataset(config, dataset):
+    """
+    Now it just updates fs_samples.tsv in ./assnkae_db/{dataset}/
+    """
+    success = update_fs_samples_csv(dataset)
+    if success:
+        click.secho('SUCCESSFULLY UPDATED INFORMATION IN DATABASE!', fg='green')
