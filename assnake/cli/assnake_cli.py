@@ -120,6 +120,7 @@ dataset.add_command(dataset_commands.df_info)
 dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
 dataset.add_command(dataset_commands.df_delete)
+dataset.add_command(dataset_commands.rescan_dataset)
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 

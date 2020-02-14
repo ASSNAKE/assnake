@@ -42,7 +42,8 @@ def get_sample_dict_from_dir(loc, sample_name, variant, ext, modify_name=lambda 
         if len(st_file) == 1:
             # DONE переписать через format
             stripped = st_file[0].replace(variant['strands'][strand] + ext, '')
-            stripped += '{sample_name}_{strand}{ext}'.format(sample_name=sample_name, strand=strand, ext=ext)
+            stripped += '_{strand}{ext}'.format(strand=strand, ext=ext)
+
             temp_samples_dict['renamed_files'][strand] = stripped
             temp_samples_dict['files'][strand] = st_file[0]
 
@@ -94,20 +95,17 @@ def create_links(dir_with_reads, original_dir, sample, hard=False):
     :return:
 
     """
-
     orig_wc = '{orig_dir}/{sample_file}'
-    new_file_wc = '{new_dir}/{sample_name}_{sample_file}'
+    new_file_wc = '{new_dir}/{sample_file}'
 
     if not os.path.isdir(dir_with_reads):
         os.makedirs(dir_with_reads)
 
     src_r1 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R1'])
-    dst_r1 = new_file_wc.format(new_dir=dir_with_reads, sample_name=sample['sample_name'],
-                                sample_file=sample['renamed_files']['R1'])
+    dst_r1 = new_file_wc.format(new_dir=dir_with_reads, sample_file=sample['renamed_files']['R1'])
 
     src_r2 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R2'])
-    dst_r2 = new_file_wc.format(new_dir=dir_with_reads, sample_name=sample['sample_name'],
-                                sample_file=sample['renamed_files']['R2'])
+    dst_r2 = new_file_wc.format(new_dir=dir_with_reads, sample_file=sample['renamed_files']['R2'])
     if hard:
         copy2(src_r1, dst_r1)
         copy2(src_r2, dst_r2)
