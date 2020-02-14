@@ -79,8 +79,7 @@ assnake dataset create"""
     else:
         config = read_yaml(config_loc)
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
-
-        ctx.obj = {'config': config, 'wc_config': wc_config}
+        ctx.obj = {'config': config, 'wc_config': wc_config, 'requested_dfs': []}
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
