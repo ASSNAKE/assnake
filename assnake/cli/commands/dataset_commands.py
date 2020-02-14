@@ -12,6 +12,8 @@ import importlib
 from assnake.utils import pathizer, dict_norm_print, download_from_url
 import snakemake
 from zipfile import ZipFile
+import traceback
+
 
 # some util
 def show_av_dict(dfs):
@@ -58,20 +60,32 @@ def df_list():
 # TODO rel path 
 @click.command(name='create')
 @click.option('--df', '-d', prompt='Name of the dataset', help='Name of the dataset')
-@click.option('--fs_prefix', '-f', prompt='Filesystem prefix', help='Filesystem prefix.')
+
+@click.option('--fs_prefix', '-f', help='Filesystem prefix. If none path to current dir will be used', required=False)
+@click.option('--description', '-D', nargs=2, multiple=True, required=False, type=click.Tuple([str, str]),
+              help='Add some description in this way ` assnake dataset create ... -D property_1 value_1 ... -D property_n value_n`')
+@click.option('--quietly', '-q', is_flag=True, help='Doing it quietly. No questions.')
 @click.option('--test-data', '-t', is_flag=True, help='Download test data from Humann2 tutorial')
 @click.pass_obj
-def df_create(config, df, fs_prefix,test_data):
+def df_create(config, df, fs_prefix, description, quietly, test_data):
     """Register your dataset inside ASSNAKE!\n
         You can use it in interactive mode."""
     there_is_prpties = False
+    if fs_prefix is None and (not quietly):
+        if click.confirm('You have not specified the path to dir. Current path will be used, change it?', abort=False):
+            fs_prefix = click.prompt('Please, type in the path')
+
     fs_prefix = pathizer(fs_prefix)
 
     assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
     dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
 
     prpts = dict()
-    while click.confirm('Add property', abort=False):
+    if len(description) != 0:
+        prpts.update(dict(description))
+        quietly = True
+        there_is_prpties = True
+    while (not quietly) and click.confirm('Add property', abort=False):
         if not there_is_prpties:
             there_is_prpties = True
         prpts.update({click.prompt('Name of property'): click.prompt('Value of property')})
@@ -84,10 +98,11 @@ def df_create(config, df, fs_prefix,test_data):
             yaml.dump(df_info, info_file, default_flow_style=False)
         click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
 
+
     else:
         click.secho('Duplicate name!', fg='red')
         if there_is_prpties:
-            click.echo('Description updated')
+            click.secho('Description updated', fg='green')
             with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'),
                       'r') as info_file_old:
                 df_info_old = yaml.load(info_file_old)
@@ -128,7 +143,7 @@ def df_info(config, name, preproc):
     dfs = assnake.api.loaders.load_dfs_from_db('')
     try:
         df_info = dfs[name]
-    except Exception as e:
+    except KeyError as e:
         click.echo('Can`t reach database with such name')
         show_av_dict(dfs)
     click.echo(click.style('' * 2 + df_info['df'] + ' ' * 2, fg='green', bold=True))
@@ -168,6 +183,40 @@ def df_info(config, name, preproc):
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
+
+# ---------------------------------------------------------------------------------------
+#                                   DELETE
+# ---------------------------------------------------------------------------------------
+@click.command(name='delete')
+@click.option('--dataset_name', '-d', prompt='dataset to remove.',
+              help='Name of dataset to delete.', type=str)
+@click.option('--hard', help='If is set, hard removing will be used instead of modifying congig file', is_flag=True)
+@click.pass_obj
+def df_delete(config, dataset_name, hard):
+    """
+    Delete datasets
+    """
+
+    dfs = assnake.api.loaders.load_dfs_from_db('')
+    try:
+        df_info = dfs[dataset_name]
+    except KeyError as e:
+        click.echo('Can`t reach database with such name')
+        show_av_dict(dfs)
+
+    respond = fs_helpers.delete_ds(dataset_name)
+    if respond[0]:
+        click.secho('Successfully deleted', fg='bright_white', bg='green')
+    else:
+        click.secho('ERROR', bg='red')
+        click.echo('For details see traceback below')
+        click.echo(respond[1])
+
+    if hard and click.confirm(
+        'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
+        abort=True):
+        shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), dataset_name))
+
 # ---------------------------------------------------------------------------------------
 #                                   IMPORT-READS
 # ---------------------------------------------------------------------------------------
@@ -192,14 +241,13 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
     """
     # This is cli wrapping over create_links from fs_helpers
 
-
     # stuff about presence of arguments
     arg_d = not bool(dataset is None)
     arg_t = not bool(target is None)
     arg_s = not bool(sample_set is None)
     arg_l = not bool(sample_list is None)
 
-    #check if samples arguments are ok
+    # check if samples arguments are ok
     if arg_l & arg_s:
         click.secho('Collision tends to be observed. Please, specify either list of samples in prompt or in file',
                     err=True)

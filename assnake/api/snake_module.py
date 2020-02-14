@@ -3,10 +3,13 @@ class SnakeModule:
     install_dir = ''
     snakefiles = []
     invocation_commands = []
+    initialization_commands = []
     wc_configs = []
     initialization_commands = []
 
+
     def __init__(self, name, install_dir, snakefiles, invocation_commands, initialization_commands = [], wc_configs = []):
+
         self.name = name
         self.install_dir = install_dir
         self.snakefiles = snakefiles

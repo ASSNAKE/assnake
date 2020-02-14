@@ -42,7 +42,7 @@ class Dataset:
             samples = SampleSet(self.fs_prefix, self.df, p)
             # print(samples.samples_pd)
             if len(samples.samples_pd):
-                samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']].to_dict(orient='records')
+                samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']]
             else:
                 break
             preprocessing.update({p:samples})
@@ -93,8 +93,11 @@ class Dataset:
             'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
 
     def to_dict(self):
+        preprocs = {}
+        for ss in self.sample_sets:
+            preprocs.update({ss : self.sample_sets[ss].to_dict(orient='records')})
         return {
             'df': self.df,
             'fs_prefix': self.fs_prefix,
-            'preprocs': self.sample_sets
+            'preprocs': preprocs
         }

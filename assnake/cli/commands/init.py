@@ -87,7 +87,7 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, 
                 click.secho('In (this) case, there is old installation -- only overwriting of ' +
                             click.style('config_internal.ini',
                                         fg='green') + ' in current version is supported.\nDon`t be '
-                                                     'upset, cookies are still nice thing')
+                                                     'upset, cookies are still nice thing and you always can do rm-rf')
             if click.confirm('  Would you like to reset?', abort=True):
                 click.echo('As you wish')
         config_internal = get_internal_config()
