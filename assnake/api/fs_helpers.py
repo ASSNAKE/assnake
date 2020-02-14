@@ -8,8 +8,8 @@ from shutil import copy2, rmtree
 from assnake import utils
 import traceback
 import parse
-from assnake.api.loaders import load_dfs_from_db
-
+from assnake.api.loaders import load_df_from_db
+import pandas as pd
 
 def find_files(base, pattern):
     """
@@ -131,3 +131,4 @@ def delete_ds(dataset):
         return (True,)
     except Exception as e:
         return (False, traceback.format_exc())
+

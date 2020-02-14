@@ -142,12 +142,8 @@ def result():
 @click.pass_obj
 def request(config):
     pass
-
 # adding defined programm
 result.add_command(request)
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
 
 
 # Creating set of entry points, i.e. plugins
@@ -167,6 +163,8 @@ for module_name, module_class in discovered_plugins.items():
 # add run command to request group
 request.add_command(run)
 
+
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 def main():
     # TODO Here we should manually parse and check that if we request result `run` command is last
