@@ -45,7 +45,8 @@ def run(config, threads, jobs, drmaa, run):
         drmaa=drmaa_param,
         cores=jobs, nodes=jobs)
     if run:
-        update_fs_samples_csv(**config['invoked_args'])
+        for requested_df in config['requested_dfs']:
+            update_fs_samples_csv(requested_df)
 
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
