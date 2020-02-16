@@ -81,13 +81,16 @@ def pathizer(path):
 
 
 def dict_norm_print(d, indent=1):
-    for key, value in d.items():
-        click.echo('\t' * indent + str(key), nl=False)
-        if isinstance(value, dict):
-            click.echo('--↴	')
-            dict_norm_print(value, indent + 1)
-        else:
-            click.echo('\t' * (indent) + str(value))
+    if isinstance(d, str):
+        click.echo('\t' * indent + str(d), nl=False)
+    else:
+        for key, value in d.items():
+            click.echo('\t' * indent + str(key), nl=False)
+            if isinstance(value, dict):
+                click.echo('--↴	')
+                dict_norm_print(value, indent + 1)
+            else:
+                click.echo('\t' * (indent) + str(value))
 
 
 ## {{{ http://code.activestate.com/recipes/578019/ (r15)

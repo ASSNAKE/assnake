@@ -8,9 +8,9 @@ sample_dir_wc:    '{fs_prefix}/{df}/reads/{preproc}/{sample}'
 count_wc: '{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}.count'
 
 
-# # fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'
-# fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{strand}_fastqc.zip'
-
+fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'
+fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{strand}_fastqc.zip'
+ 
 # multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
 # multiqc_report: '{prefix}/{df}/multiqc/{sample_set}/{strand}/multiqc_report.html'
 
