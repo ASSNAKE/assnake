@@ -20,7 +20,7 @@ setup(name='assnake',
     install_requires=[
         'numpy', 'Click', 'pyyaml', 'pandas', 
         'tabulate', 'snakemake', 'drmaa', 
-        'parse', 'pycallgraph', 'tqdm', 'scipy', 'plotly', 'matplotlib', 'scikit-bio'
+        'parse', 'pycallgraph', 'tqdm', 'scipy', 'plotly', 'matplotlib'
     ],
     entry_points='''
         [console_scripts]
