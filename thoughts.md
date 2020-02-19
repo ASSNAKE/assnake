@@ -70,3 +70,25 @@ The problem with metaphlan2 is that it needs bowtie2 to build it's database and 
 Another solution would be to download database somewhere `tar` file that would be. We set the location of this file and than we create the rule that will build index. Sounds legit.
 
 Okay when and how should we configure databases? Let's export init scripts for tools where users will provide path to where they want to store the database. 
+
+
+
+
+# 17 FEBRUARY 2020
+assnake-core-mapping - DF
+    invocation command
+
+assnake-core-assembly
+
+
+assnake-core-preprocessing
+
+assnake-core-taxonomy
+
+assnake-core-binning
+
+assnake
+    
+    construct_sample_table()
+
+    df  preproc fs_name

@@ -2,7 +2,7 @@ from scipy.spatial import distance
 from sklearn.manifold import MDS
 from sklearn.manifold import LocallyLinearEmbedding
 import pandas as pd
-from skbio.stats.composition import *
+# from skbio.stats.composition import *
 from scipy.spatial.distance import pdist, squareform
 
 import ecopy

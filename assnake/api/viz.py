@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 from matplotlib import colors as mcolors
 import plotly.figure_factory as FF
 import pandas as pd
-from skbio.stats.composition import *
+# from skbio.stats.composition import *
 from scipy.spatial.distance import pdist, squareform
 
 def plot_changes(tr_hm2, tr_mp2, plot=True):

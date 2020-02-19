@@ -47,9 +47,8 @@ def test_dataset_import(test_assn_data, dir_with_reads):
     for i, original_reads in enumerate(source_reads2check):
         for dict in get_samples_from_dir(str(path_to_smpls_dir / original_reads)):
             create_links(str(path_to_smpls_dir / dir_with_reads), original_reads, dict)
-            renames2check+=['{sample_name}_{sample_file}'.format(sample_name = dict['sample_name'],  sample_file=dict['renamed_files']['R2'])]
-            renames2check += ['{sample_name}_{sample_file}'.format(sample_name=dict['sample_name'],
-                                                                   sample_file=dict['renamed_files']['R1'])]
+            renames2check+=['{sample_file}'.format(sample_file=dict['renamed_files']['R2'])]
+            renames2check += ['{sample_file}'.format(sample_file=dict['renamed_files']['R1'])]
     assert set(os.listdir(str(path_to_smpls_dir / dir_with_reads))) == set(renames2check)
 
 
