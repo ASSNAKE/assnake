@@ -8,11 +8,8 @@ import assnake.api.loaders
 import assnake.api.sample_set
 from tabulate import tabulate
 from assnake.api import fs_helpers
-import importlib
 from assnake.utils import pathizer, dict_norm_print, download_from_url
-import snakemake
 from zipfile import ZipFile
-import traceback
 from assnake.api.update_fs_samples import update_fs_samples_csv
 
 

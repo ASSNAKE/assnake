@@ -2,10 +2,9 @@
 #   Perform assnake  ***  RUN cli command   #
 #############################################
 
-import click, os, snakemake
+import click, os
 from assnake.utils import get_config_loc, load_config_file
 from assnake.api.update_fs_samples import update_fs_samples_csv
-# from assnake.assnake_cli import pass_environment
 
 
 #---------------------------------------------------------------------------------------
@@ -21,6 +20,7 @@ from assnake.api.update_fs_samples import update_fs_samples_csv
 @click.pass_obj
 
 def run(config, threads, jobs, drmaa, run):
+    import snakemake # Moved import here because it is slow as fucking fuck
     # print(config['requests'])
 
     click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')

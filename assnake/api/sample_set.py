@@ -133,7 +133,8 @@ class SampleSet:
             os.makedirs(dada2_set_dir, exist_ok=True)
 
         dada2_df = pd.DataFrame(dada2_dicts)
-        dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
+        if not os.path.isfile(os.path.join(dada2_set_dir, 'samples.tsv')):
+            dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
 
 
     def prepare_mothur_set(self, dir_loc, set_name):
