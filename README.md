@@ -40,9 +40,9 @@ Just clone this repositories and install with `pip install -e ./` while `assnake
 After installation run `assnake result request --help` and you will see new available results.
 
 # Running DADA2 for 16s rRNA data
-
+Run command without `< >` symbols around your dataset name.
 1. Run `assnake result request dada2-filter-and-trim -d <YOUR_DATASET> -p raw run --threads 1 --jobs 4 --run`. This will filter your reads by quality with default parameters using 4 jobs in parallel and 1 thread on each job.
-2. Execute `assnake result request dada2-full -d miseq_sop -p raw__dada2fat_def run -t 4 -j 1 --run`. Now we run 1 jobs with 4 threads. If you know that your machine has more available cores, feel free to use them and increase threads or jobs. 
+2. Execute `assnake result request dada2-full -d <YOUR_DATASET> -p raw__dada2fat_def run -t 4 -j 1 --run`. Now we run 1 jobs with 4 threads. If you know that your machine has more available cores, feel free to use them and increase threads or jobs. 
 
 You are done! You can find dada2 results at `{FS_PREFIX}/{YOUR_DF}/dada2/sample_set/learn_erros__def/seqtab_nochim__20.rds` and `{FS_PREFIX}/{YOUR_DF}/dada2/sample_set/learn_erros__def/taxa_20.rds`.
 Just load this files in R using `readRDS()` function.
