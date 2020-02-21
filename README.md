@@ -1,14 +1,34 @@
 # ASSNAKE
 
-Assnake is a pipeline for metagenomics data analysis. It is built with Snakemake and is fully modular. It tracks all your tool versions, parameters and environments.
+Assnake is a system for metagenomics data analysis and management. 
+It allows you to go from raw reads to visualization and statistical analysis of your data as fast as possible.
+The pipeline is built using Snakemake and is fully modular.
 
-## Installation
-As of now, clone this repository using git, activate your conda environment with python 3 installed, and execute 
-`pip install -e ./` from the source folder.
-Next you need to call `assnake init start` and follow the instructions. After that you can start processing your data!
+# Quick start
+## Conda part
+1. Install conda https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
+2. Create new environment `conda create -n assnake python=3.6`
+3. Activate your new environment `source activate assnake`
+## Assnake part
+1. Navigate to some directory on your file system, for example your home directory `cd ~`
+2. Clone this repository to your computer using `git clone https://github.com/Fedorov113/assnake.git` 
+3. Enter to just created assnake directory `cd assnake`
+4. Install the package using `pip install -e ./`
+5. Verify your installation by running `assnake --help`
+
+
+## Initialization
+Call `assnake init start`
+
+It will ask you which directory you would like to use for assnake database, choose some folder on file system with at least 20 Gb of free space. If the folder is not yet created, assnake will create it. 
+
+Now you can start processing your data!
+
+Now we need to register or create dataset in assnake. Run `assnake dataset create --df <DATASET_NAME> --fs_prefix <FOLDER WHERE TO STORE DATA>`
 
 Analysis of metagenomics data consists of 2 steps: quality control and preprocessing, and analysis itself. 
 
+# OLD
 ## List of implemented preprocessing steps:
 1. Downloading data from SRA.  
 2. Count number of base pairs and reads in fastq files.

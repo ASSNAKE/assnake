@@ -1,4 +1,3 @@
-
 import sys, os, glob, yaml, shutil
 import click
 # # from sys import argv
@@ -86,6 +85,7 @@ def init_group():
 
 # Add start command (assnake init start) from assnake.cli.commands.init.py (./cli/commands/init.py)
 init_group.add_command(commands_init.init_start)
+init_group.add_command(commands_init.current_config)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group

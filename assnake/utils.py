@@ -1,11 +1,13 @@
 import yaml, configparser, os, click
 
-try:
-    from pycallgraph import PyCallGraph
-    from pycallgraph.output import GraphvizOutput
-except ModuleNotFoundError:
-    pass
+# try:
+#     from pycallgraph import PyCallGraph
+#     from pycallgraph.output import GraphvizOutput
+# except ModuleNotFoundError:
+#     pass
 import os, sys
+import requests, urllib
+from tqdm import tqdm
 
 
 def read_yaml(file_location):
@@ -48,6 +50,13 @@ def check_if_assnake_is_initialized():
         click.echo("Don't worry, it won't take long.")
         click.echo('Just run ' + click.style('assnake init start', bg='blue', fg='bright_white'))
         exit()
+
+def update_config(dict_to_add):
+    config = load_config_file()
+    config.update(dict_to_add)
+    config_location = get_config_loc()
+    with open(config_location, 'w+') as file:
+        _ = yaml.dump(config, file, sort_keys=False)
 
 
 # decorator to saving graph of calls of the function
@@ -215,7 +224,11 @@ def download_from_url(url, dst):
     @param: url to download file
     @param: dst place to put the file
     """
-    file_size = int(urllib.request.urlopen(url).info().get('Content-Length', -1))
+
+    req = urllib.request.Request(url,  method='HEAD')
+    f = urllib.request.urlopen(req)
+
+    file_size = int(f.headers['Content-Length'])
     if os.path.exists(dst):
         first_byte = os.path.getsize(dst)
     else:
