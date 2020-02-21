@@ -1,13 +1,57 @@
 # ASSNAKE
 
-Assnake is a pipeline for metagenomics data analysis. It is built with Snakemake and is fully modular. It tracks all your tool versions, parameters and environments.
+Assnake is a system for metagenomics data analysis and management. 
+It allows you to go from raw reads to visualization and statistical analysis of your data as fast as possible.
+The pipeline is built using Snakemake and is fully modular.
 
-## Installation
-As of now, clone this repository using git, activate your conda environment with python 3 installed, and execute 
-`pip install -e ./` from the source folder.
-Next you need to call `assnake init start` and follow the instructions. After that you can start processing your data!
+# Quick start
+## Conda part
+1. Install conda https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
+2. Create new environment `conda create -n assnake python=3.6`
+3. Activate your new environment `source activate assnake`
+## Assnake part
+1. Navigate to some directory on your file system, for example your home directory `cd ~`
+2. Clone this repository to your computer using `git clone https://github.com/Fedorov113/assnake.git` 
+3. Enter to just created assnake directory `cd assnake`
+4. Install the package using `pip install -e ./`
+5. Verify your installation by running `assnake --help`
+
+
+## Initialization
+Call `assnake init start`
+
+It will ask you which directory you would like to use for assnake database, choose some folder on file system with at least 20 Gb of free space. If the folder is not yet created, assnake will create it. 
+
+Now you can start processing your data!
+
+Now we need to register or create dataset in assnake. Run `assnake dataset create --df <DATASET_NAME> --fs_prefix <FOLDER WHERE TO STORE DATA>`
+Full folder name looks like this: '{fs_prefix}/{df}'. Say, I want to create dataset with name `miseq_sop` and I want to put in `/home/fedorov/bio`.
+I will call `assnake dataset create --df miseq_sop --fs_prefix /home/fedorov/bio`. Folder `/home/fedorov/bio/miseq_sop` will be created on file system, if not created already. If you already have same folder it is totally OK.
+
+Now run `assnake dataset info -d <DATASET_NAME>`
+
+## Installation of modules
+This version is for Vlad and dada2, so we need only 
+1. https://github.com/Fedorov113/assnake-dada2
+2. https://github.com/Fedorov113/assnake-core-preprocessing 
+
+Just clone this repositories and install with `pip install -e ./` while `assnake` conda env is activated (`source activate assnake`)
+
+After installation run `assnake result request --help` and you will see new available results.
+
+# Running DADA2 for 16s rRNA data
+Run command without `< >` symbols around your dataset name.
+1. Run `assnake result request dada2-filter-and-trim -d <YOUR_DATASET> -p raw run --threads 1 --jobs 4 --run`. This will filter your reads by quality with default parameters using 4 jobs in parallel and 1 thread on each job.
+2. Execute `assnake result request dada2-full -d <YOUR_DATASET> -p raw__dada2fat_def run -t 4 -j 1 --run`. Now we run 1 jobs with 4 threads. If you know that your machine has more available cores, feel free to use them and increase threads or jobs. 
+
+You are done! You can find dada2 results at `{FS_PREFIX}/{YOUR_DF}/dada2/sample_set/learn_erros__def/seqtab_nochim__20.rds` and `{FS_PREFIX}/{YOUR_DF}/dada2/sample_set/learn_erros__def/taxa_20.rds`.
+Just load this files in R using `readRDS()` function.
+
+
+<!-- # OLD
 
 Analysis of metagenomics data consists of 2 steps: quality control and preprocessing, and analysis itself. 
+
 
 ## List of implemented preprocessing steps:
 1. Downloading data from SRA.  
@@ -156,4 +200,4 @@ Than you have a couple of options:
 
 # Running tests
 `python cli.py -s ./tests/test_snake.py`
-
+ -->

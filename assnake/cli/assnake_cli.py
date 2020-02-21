@@ -1,25 +1,14 @@
-import click, sys, os, glob, yaml, shutil
-import pandas as pd
-import assnake.api.loaders
-import assnake.api.sample_set
-from tabulate import tabulate
-import snakemake
-from click.testing import CliRunner
-from sys import argv
+import sys, os, glob, yaml, shutil
+import click
+# # from sys import argv
 
-import assnake.cli.commands.dataset_commands as dataset_commands
+import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.init as commands_init
 from assnake.cli.commands.cmd_run import run
-import configparser
-import shutil
-import pprint
 
-from assnake.utils import read_yaml, graph_of_calls
+from assnake.utils import read_yaml, check_if_assnake_is_initialized, get_config_loc
 
-import pkg_resources
-
-
-
+from pkg_resources import iter_entry_points 
 
 
 #---------------------------------------------------------------------------------------
@@ -72,7 +61,7 @@ assnake dataset create"""
 
 
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = assnake.utils.get_config_loc() 
+    config_loc = get_config_loc() 
 
     if not os.path.isfile(config_loc):
             pass
@@ -80,11 +69,6 @@ assnake dataset create"""
         config = read_yaml(config_loc)
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
         ctx.obj = {'config': config, 'wc_config': wc_config, 'requested_dfs': []}
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
-
-
 
 
 #---------------------------------------------------------------------------------------
@@ -101,10 +85,7 @@ def init_group():
 
 # Add start command (assnake init start) from assnake.cli.commands.init.py (./cli/commands/init.py)
 init_group.add_command(commands_init.init_start)
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
-
+init_group.add_command(commands_init.current_config)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
@@ -112,7 +93,7 @@ init_group.add_command(commands_init.init_start)
 @cli.group(chain=True)
 def dataset():
     """Commands to work with datasets"""
-    assnake.utils.check_if_assnake_is_initialized()
+    check_if_assnake_is_initialized()
 
 dataset.add_command(dataset_commands.df_list)
 dataset.add_command(dataset_commands.df_info)
@@ -120,13 +101,6 @@ dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
 dataset.add_command(dataset_commands.df_delete)
 dataset.add_command(dataset_commands.rescan_dataset)
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
-
-
-
-
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group
@@ -134,26 +108,17 @@ dataset.add_command(dataset_commands.rescan_dataset)
 @cli.group()
 def result():
     """Commands to analyze your data"""
-    assnake.utils.check_if_assnake_is_initialized()
+    check_if_assnake_is_initialized()
 
 
-#define command `assnake result REQUEST`
 @click.group(chain = True, help = 'Used to request and run results')
 @click.pass_obj
 def request(config):
     pass
-# adding defined programm
 result.add_command(request)
 
-
-# Creating set of entry points, i.e. plugins
-discovered_plugins = {
-    entry_point.name: entry_point.load()
-    for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
-}
-
-# updating request and init groups with corresponding functions
-for module_name, module_class in discovered_plugins.items():
+for entry_point in iter_entry_points('assnake.plugins'):
+    module_class = entry_point.load()
     for cmd in module_class.invocation_commands:
         print(cmd)
         request.add_command(cmd)
@@ -161,12 +126,9 @@ for module_name, module_class in discovered_plugins.items():
         print(cmd)
         init_group.add_command(cmd)
 
-
 # add run command to request group
 request.add_command(run)
 
-
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 def main():
     # TODO Here we should manually parse and check that if we request result `run` command is last

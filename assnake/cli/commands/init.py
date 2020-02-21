@@ -23,6 +23,7 @@ from assnake.api.init_config import fill_and_write_config
 # @graph_of_calls('cli_start_init.png')
 def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, config_location, forced, verbose):
     # TODO Rework assnake install dir
+    assnake_db = assnake_db.rstrip('/')
     if not os.path.isfile(get_config_loc()):
         if not os.path.exists(assnake_db):
             os.mkdir(assnake_db)
@@ -95,3 +96,11 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, 
         config_internal['GENERAL']['config_loc'] = 'None'
         with open(os.path.join(dir_of_this_file, './../config_internal.ini'), 'w') as configfile:
             config_internal.write(configfile)
+
+@click.command(name = 'current-config')
+def current_config():
+    """
+    Just print your current config location
+    """
+    click.echo('CURRENT CONFIG LOCATION')
+    click.secho(get_config_loc(), bold=True)

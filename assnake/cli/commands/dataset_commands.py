@@ -8,11 +8,8 @@ import assnake.api.loaders
 import assnake.api.sample_set
 from tabulate import tabulate
 from assnake.api import fs_helpers
-import importlib
 from assnake.utils import pathizer, dict_norm_print, download_from_url
-import snakemake
 from zipfile import ZipFile
-import traceback
 from assnake.api.update_fs_samples import update_fs_samples_csv
 
 
@@ -125,7 +122,7 @@ def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
                 yaml.dump(df_info_old, info_file, default_flow_style=False)
 
     if test_data:
-        print('KISS MY ASS')
+        # print('KISS MY ASS')
         download_from_url('http://kronos.pharmacology.dal.ca/public_files/tutorial_datasets/mgs_tutorial_Oct2017.zip', 
                                 os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017.zip'))
         
@@ -333,7 +330,8 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
         if d['sample_name'] in samples_of_interest:
             fs_helpers.create_links(target, reads, d, hard=copy)
 
-    update_fs_samples_csv(df_info['df'], [], 'raw')
+    update_fs_samples_csv(df_info['df'])
+    click.secho("SUCCESSFULLY IMPORTED READS!", bg='green')
 
 
 @click.command(name='rescan')

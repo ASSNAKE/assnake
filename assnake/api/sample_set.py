@@ -86,34 +86,28 @@ class SampleSet:
         self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
         self.reads_info = pd.DataFrame(self.samples_pd['reads']) # Why do we need this?
 
-    def prepare_dada2_sample_list(self, set_name):
-        dada2_set_dir = os.path.join(self.config['dada2_dir'], set_name)
+    def prepare_dada2_sample_list(self, set_name='sample_set'):
+        dfs = list(set(self.samples_pd['df']))
+        if len(dfs) == 1:
+            fs_prefix = list(set(self.samples_pd['fs_prefix']))[0]
+        print(dfs)
+            
+        dada2_set_dir = '{fs_prefix}/{df}/dada2/{sample_set}/'.format(fs_prefix = fs_prefix, df = dfs[0], sample_set = set_name)
 
         dada2_dicts = []
         for s in self.samples_pd.to_dict(orient='records'):
             dada2_dicts.append(dict(mg_sample=s['fs_name'],
-            R1 = self.wc_config['fastq_gz_file_wc'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
-            R2 = self.wc_config['fastq_gz_file_wc'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2'),
-            merged = self.wc_config['dada2_merged_wc'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], sample_set = set_name)))
+            R1 = self.wc_config['fastq_gz_file_wc'].format(fs_prefix=s['fs_prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
+            R2 = self.wc_config['fastq_gz_file_wc'].format(fs_prefix=s['fs_prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2'),
+            # merged = self.wc_config['dada2_merged_wc'].format(prefix=s['fs_prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], sample_set = set_name)
+            ))
         if not os.path.exists(dada2_set_dir):
-            os.mkdir(dada2_set_dir)
+            os.makedirs(dada2_set_dir, exist_ok=True)
 
         dada2_df = pd.DataFrame(dada2_dicts)
-        dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
+        if not os.path.isfile(os.path.join(dada2_set_dir, 'samples.tsv')):
+            dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
 
-    def prepare_dada2_subset(self, error_list, error_params, subset_name):
-        dada2_dicts = []
-        fastq_gz_file_wc = '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz'
-        for s in self.samples_pd.to_dict(orient='records'):
-            dada2_dicts.append(dict(mg_sample=s['fs_name'],
-            R1 = fastq_gz_file_wc.format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
-            R2 = fastq_gz_file_wc.format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2')))
-        dada2_set_dir = os.path.join(self.config['dada2_dir'], error_list, error_params, subset_name)
-        if not os.path.exists(dada2_set_dir):
-            os.mkdir(dada2_set_dir)
-
-        dada2_df = pd.DataFrame(dada2_dicts)
-        dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
 
     def prepare_mothur_set(self, dir_loc, set_name):
         mothur_set_dir = os.path.join(dir_loc, set_name)
