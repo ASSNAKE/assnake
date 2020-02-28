@@ -1,4 +1,4 @@
-import yaml, configparser, os, click
+import yaml, configparser, click
 
 # try:
 #     from pycallgraph import PyCallGraph
@@ -86,7 +86,7 @@ def pathizer(path):
     """
     if path is None or path==' ' or path == '':
         return os.popen('pwd').read().replace('\n', '')
-    return '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read().replace('\n', ''), rel_path=path) if (path[0] != '/') else path
+    return os.path.abspath('{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read().replace('\n', ''), rel_path=path) if (path[0] != '/') else path)
 
 
 def dict_norm_print(d, indent=1):
@@ -247,3 +247,6 @@ def download_from_url(url, dst):
                 pbar.update(1024)
     pbar.close()
     return file_size
+
+def get_url_remote_file_size(url):
+    return urllib.request.urlopen(url).info()['Content-Length']

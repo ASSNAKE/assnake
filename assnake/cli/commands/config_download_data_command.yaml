@@ -1,0 +1,4 @@
+centrifuge: "ftp://ftp.ccb.jhu.edu/pub/infphilo/centrifuge/data/p+h+v.tar.gz"
+test: "https://files.adme.ru/files/news/part_207/2077015/preview-4266215-1200x630-99-1556793614.jpg"
+centrifuge_name: "centrifuge.tar.gz"
+test_name: 'test.jpg'

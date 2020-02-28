@@ -5,6 +5,7 @@ import click
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.init as commands_init
 from assnake.cli.commands.cmd_run import run
+import assnake.cli.commands.download_data_command as data_download_command
 
 from assnake.utils import read_yaml, check_if_assnake_is_initialized, get_config_loc
 
@@ -101,6 +102,16 @@ dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
 dataset.add_command(dataset_commands.df_delete)
 dataset.add_command(dataset_commands.rescan_dataset)
+
+#---------------------------------------------------------------------------------------
+#                                  assnake  DOWNLOAD ***  group
+#---------------------------------------------------------------------------------------
+@cli.group(chain=True)
+def download():
+    """Commands to download data"""
+    check_if_assnake_is_initialized()
+
+download.add_command(data_download_command.data_download)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group
