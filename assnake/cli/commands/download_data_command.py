@@ -33,6 +33,7 @@ def data_download(context, output_dir, data,  force):
 
     if data == 'custom':
         url = click.prompt('Type in yout url')
+        name = click.prompt('Type in name of these data')
     else:
 
         url = config[data]
@@ -43,7 +44,10 @@ def data_download(context, output_dir, data,  force):
         exit(2)
     if force or click.confirm("The {} bytes will be doawnloaded, continue?".format(size), abort=True):
         try:
-            size = download_from_url(url, os.path.join(path, config["{}_name".format(data)]))
+            if data != 'custom':
+                size = download_from_url(url, os.path.join(path, config["{}_name".format(data)]))
+            else:
+                size = download_from_url(url, os.path.join(path, name))
         except urllib.error.HTTPError as e:
             click.secho("HTTP error" + click.style(e.code, fg='red'))
             exit(2)
