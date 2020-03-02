@@ -120,8 +120,10 @@ result.add_command(request)
 for entry_point in iter_entry_points('assnake.plugins'):
     module_class = entry_point.load()
     for cmd in module_class.invocation_commands:
+        print(cmd)
         request.add_command(cmd)
     for cmd in module_class.initialization_commands:
+        print(cmd)
         init_group.add_command(cmd)
 
 # add run command to request group

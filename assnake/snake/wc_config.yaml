@@ -1,20 +1,21 @@
 fastq_gz_file_wc: '{fs_prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz'
 fastq_gz_R1_wc: '{fs_prefix}/{df}/reads/{preproc}/{sample}_R1.fastq.gz'
 fastq_gz_R2_wc: '{fs_prefix}/{df}/reads/{preproc}/{sample}_R2.fastq.gz'
-fastq_file:       '{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq'
-md5_fastq_gz:     '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}.md5'
+fastq_file:       '{fs_prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq'
+md5_fastq_gz:     '{fs_prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}.md5'
 
 
 sample_dir_wc:    '{fs_prefix}/{df}/reads/{preproc}/{sample}'
 count_wc: '{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}.count'
 
 
-fastqc_data_wc:   '{prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_{strand}_fastqc/fastqc_data.txt'
+fastqc_data_wc:   '{fs_prefix}/{df}/profile/fastqc/{preproc}/{fs_name}/{fs_name}_{strand}_fastqc/fastqc_data.txt'
 fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{strand}_fastqc.zip'
- 
 
+multiqc_fastqc_wc: '{fs_prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
 sample_wc: '{directory}/{sample_name}_{strand}.{extension}'
 # multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
+
 # multiqc_report: '{prefix}/{df}/multiqc/{sample_set}/{strand}/multiqc_report.html'
 
 # dada2_fat_wc: '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R1.fastq.gz'

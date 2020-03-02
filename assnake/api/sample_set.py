@@ -86,34 +86,6 @@ class SampleSet:
         self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
         self.reads_info = pd.DataFrame(self.samples_pd['reads']) # Why do we need this?
 
-    def prepare_fastqc_list_multiqc(self, strand, set_name):
-        fastqc_list = []
-
-        for s in self.samples_pd.to_dict(orient='records'):
-            fastqc_list.append(self.wc_config['fastqc_data_wc'].format(**s, strand=strand))
-
-        dfs = list(set(self.samples_pd['df']))
-        
-        if len(dfs) == 1:
-            prefix = list(set(self.samples_pd['prefix']))[0]
-            sample_list = self.wc_config['multiqc_fatqc_wc'].format(
-                df = dfs[0], 
-                prefix = prefix, 
-                strand = strand,
-                sample_set=set_name)
-            # print(sample_list)
-            
-            multiqc_dir = os.path.dirname(sample_list)
-            if not os.path.isdir(multiqc_dir):
-                os.makedirs(multiqc_dir)
-            try:
-                with open(sample_list, 'x') as file:
-                    file.writelines('\n'.join(fastqc_list)) 
-            except FileExistsError:
-                print('List already exists')
-
-        return fastqc_list
-
     def prepare_dada2_sample_list(self, set_name='sample_set'):
         dfs = list(set(self.samples_pd['df']))
         if len(dfs) == 1:
@@ -264,6 +236,7 @@ class SampleSet:
                     sample = s['fs_name'],
                     params = params
                 ))
+
         
         return result_locs
 

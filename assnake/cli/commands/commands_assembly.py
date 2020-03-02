@@ -5,7 +5,7 @@
 import click, os
 @click.command('prepare_set_for_assembly')
 @click.option('--df', '-d')
-@click.option('--preproc','-p', help='Preprocessing to use' )
+@click.option('--preproc','-p', help='Preprocessing to use', required = False)
 @click.option('--samples-to-add','-s', 
                 help='Samples from dataset to process', 
                 default='', 
@@ -18,6 +18,8 @@ def prepare_set_for_assembly(df, preproc, samples_to_add,set_name):
     print(df)
     print(preproc)
     print(samples_to_add)
+    if preproc is None:
+        preproc = 'raw'
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
     df = assnake.api.loaders.load_df_from_db(df)
     ss = assnake.api.sample_set.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)

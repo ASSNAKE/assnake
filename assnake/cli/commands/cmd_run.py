@@ -45,11 +45,12 @@ def run(config, threads, jobs, drmaa, run):
         drmaa=drmaa_param,
         cores=jobs, nodes=jobs)
     if run:
+        print(config['requested_dfs'])
         if type(config['requested_dfs']) is list:
             for requested_df in config['requested_dfs']:
                 update_fs_samples_csv(requested_df)
         else:
-            update_fs_samples_csv(requested_df)
+            update_fs_samples_csv(config['requested_dfs'])
 
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\

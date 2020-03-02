@@ -58,17 +58,26 @@ def df_list():
 # ---------------------------------------------------------------------------------------
 # TODO rel path 
 @click.command(name='create')
-@click.option('--df', '-d', prompt='Name of the dataset', help='Name of the dataset')
+@click.option('--df', '-d', help='Name of the dataset', required = False)
 
 @click.option('--fs_prefix', '-f', help='Filesystem prefix. If none path to current dir will be used', required=False)
 @click.option('--description', '-D', nargs=2, multiple=True, required=False, type=click.Tuple([str, str]),
               help='Add some description in this way ` assnake dataset create ... -D property_1 value_1 ... -D property_n value_n`')
 @click.option('--quietly', '-q', is_flag=True, help='Doing it quietly. No questions.')
 @click.option('--test-data', '-t', is_flag=True, help='Download test data from Humann2 tutorial')
+@click.argument('df_arg', required=False)
 @click.pass_obj
-def df_create(config, df, fs_prefix, description, quietly, test_data):
+def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
     """Register your dataset inside ASSNAKE!\n
-        You can use it in interactive mode."""
+        You can use it in interactive mode.
+        Usage: assnake dataset create [dataset] or -d [dataset] ..
+
+        """
+    if not (bool(df is None)^bool(df_arg is None)):
+        click.echo('Please, specify dataset either as option or argument')
+        df = click.prompt('Type the name in:')
+    if df is None:
+        df = df_arg
     there_is_prpties = False
     if fs_prefix is None and (not quietly):
         if click.confirm('You have not specified the path to dir. Current path will be used, change it?', abort=False):
@@ -134,20 +143,29 @@ def df_create(config, df, fs_prefix, description, quietly, test_data):
 #                                   INFO
 # ---------------------------------------------------------------------------------------
 @click.command(name='info')
-@click.option('--name', '-d', prompt='Name of the dataset', help='Name of the dataset')
+@click.option('--df', '-d', help='Name of the dataset', required=False)
 @click.option('--preproc', '-p', help='Show samples for preprocessing', required=False)
+@click.argument('df_arg', required=False)
 @click.pass_obj
-def df_info(config, name, preproc):
-    """View info for the specific dataset"""
+def df_info(config, df, preproc, df_arg):
+    """View info for the specific dataset
+        Usage: assnake dataset info [dataset] or -d [dataset] ...
+
+    """
+    if not (bool(df is None) ^ bool(df_arg is None)):
+        click.echo('Please, specify dataset either as option or argument')
+        df = click.prompt('Type the name in')
+    if df is None:
+        df = df_arg
     dfs = assnake.api.loaders.load_dfs_from_db('')
     try:
-        df_info = dfs[name]
+        df_info = dfs[df]
     except KeyError as e:
         click.echo('Can`t reach database with such name')
         show_av_dict(dfs)
     click.echo(click.style('' * 2 + df_info['df'] + ' ' * 2, fg='green', bold=True))
     click.echo('Filesystem prefix: ' + df_info.get('fs_prefix', ''))
-    click.echo('Full path: ' + os.path.join(df_info.get('fs_prefix', ''), name))
+    click.echo('Full path: ' + os.path.join(df_info.get('fs_prefix', ''), df))
     click.echo('Description: ')
     dict_norm_print(df_info.get('description', ''))
 
@@ -187,23 +205,29 @@ def df_info(config, name, preproc):
 #                                   DELETE
 # ---------------------------------------------------------------------------------------
 @click.command(name='delete')
-@click.option('--dataset_name', '-d', prompt='dataset to remove.',
-              help='Name of dataset to delete.', type=str)
+@click.option('--df', '-d',
+              help='Name of dataset to delete.', type=click.STRING )
 @click.option('--hard', help='If is set, hard removing will be used instead of modifying congig file', is_flag=True)
+@click.argument('df_arg', required=False)
 @click.pass_obj
-def df_delete(config, dataset_name, hard):
+def df_delete(config, df, hard, df_arg):
     """
     Delete datasets
+    Usage: assnake dataset delete [dataset] or -d [dataset] ...
     """
-
+    if not (bool(df is None) ^ bool(df_arg is None)):
+        click.echo('Please, specify dataset either as option or argument')
+        df = click.prompt('Type the name in:')
+    if df is None:
+        df = df_arg
     dfs = assnake.api.loaders.load_dfs_from_db('')
     try:
-        df_info = dfs[dataset_name]
+        df_info = dfs[df]
     except KeyError as e:
         click.echo('Can`t reach database with such name')
         show_av_dict(dfs)
 
-    respond = fs_helpers.delete_ds(dataset_name)
+    respond = fs_helpers.delete_ds(df)
     if respond[0]:
         click.secho('Successfully deleted', fg='bright_white', bg='green')
     else:
@@ -214,7 +238,7 @@ def df_delete(config, dataset_name, hard):
     if hard and click.confirm(
         'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
         abort=True):
-        shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), dataset_name))
+        shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), df))
 
 # ---------------------------------------------------------------------------------------
 #                                   IMPORT-READS
@@ -312,11 +336,19 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
 
 @click.command(name='rescan')
 @click.option('--dataset', '-d', help='Assnake dataset name', required=False)
+@click.argument('df_arg', required=False)
 @click.pass_obj
-def rescan_dataset(config, dataset):
+def rescan_dataset(config, dataset, df_arg):
     """
     Now it just updates fs_samples.tsv in ./assnkae_db/{dataset}/
+
+    Usage: assnake dataset rescan [dataset] or -d [dataset] ..
     """
+    if not (bool(dataset is None) ^ bool(df_arg is None)):
+        click.echo('Please, specify dataset either as option or argument')
+        dataset = click.prompt('Type the name in:')
+    if dataset is None:
+        dataset = df_arg
     success = update_fs_samples_csv(dataset)
     if success:
         click.secho('SUCCESSFULLY UPDATED INFORMATION IN DATABASE!', fg='green')
