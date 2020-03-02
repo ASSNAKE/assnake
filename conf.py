@@ -20,7 +20,7 @@
 project = 'Assnake'
 copyright = '2020, Fedorov'
 author = 'Fedorov'
-
+master_doc = 'index'
 # The full version, including alpha/beta/rc tags
 release = 'N/a'
 
@@ -31,6 +31,7 @@ release = 'N/a'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+  'sphinx.ext.autodoc
 ]
 
 # Add any paths that contain templates here, relative to this directory.
