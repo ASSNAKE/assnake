@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../../assnake'))
 project = 'assnake'
 copyright = '2020, Fedorov'
 author = 'Fedorov'
-
+master_doc = 'index'
 # The full version, including alpha/beta/rc tags
 release = 'soon'
 
