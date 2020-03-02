@@ -1,0 +1,744 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+  <head>
+    <meta charset="utf-8" />
+    <title>assnake.api package &#8212; assnake soon documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="assnake-api-package">
+<h1>assnake.api package<a class="headerlink" href="#assnake-api-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="assnake-api-anal-module">
+<h2>assnake.api.anal module<a class="headerlink" href="#assnake-api-anal-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-assnake.api.bb_stats">
+<span id="assnake-api-bb-stats-module"></span><h2>assnake.api.bb_stats module<a class="headerlink" href="#module-assnake.api.bb_stats" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.bb_stats.basic_info">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">basic_info</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">samples</em>, <em class="sig-param">queries</em>, <em class="sig-param">titles</em>, <em class="sig-param">print_stats=False</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.basic_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.get_cov_stats">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">get_cov_stats</code><span class="sig-paren">(</span><em class="sig-param">prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">samples</em>, <em class="sig-param">tool</em>, <em class="sig-param">preproc</em>, <em class="sig-param">seq_set_path</em>, <em class="sig-param">seq_set_id</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.get_cov_stats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.get_df_from_query">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">get_df_from_query</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">q</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.get_df_from_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.load_centrifuge">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">load_centrifuge</code><span class="sig-paren">(</span><em class="sig-param">ref</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.load_centrifuge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.load_cov_stats">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">load_cov_stats</code><span class="sig-paren">(</span><em class="sig-param">samples</em>, <em class="sig-param">folder</em>, <em class="sig-param">light=False</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.load_cov_stats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.load_coverage">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">load_coverage</code><span class="sig-paren">(</span><em class="sig-param">samples</em>, <em class="sig-param">folder</em>, <em class="sig-param">ext='.bb_stats'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.load_coverage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.plot_coverage">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">plot_coverage</code><span class="sig-paren">(</span><em class="sig-param">seq</em>, <em class="sig-param">samples</em>, <em class="sig-param">cov_dfs_list</em>, <em class="sig-param">cov_info_all</em>, <em class="sig-param">roll=False</em>, <em class="sig-param">remove_outliers=False</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.plot_coverage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.plot_gc_cov_portrait">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">plot_gc_cov_portrait</code><span class="sig-paren">(</span><em class="sig-param">gc, cov, ax=None, rgba_colors=[[1, 1, 1, 1]], size=10, title='GC-cov-taxa Portrait'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.plot_gc_cov_portrait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.plot_gc_cov_portrait_mult">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">plot_gc_cov_portrait_mult</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">samples</em>, <em class="sig-param">ax</em>, <em class="sig-param">norm=False</em>, <em class="sig-param">size=4</em>, <em class="sig-param">title='cov-gc poratrait'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.plot_gc_cov_portrait_mult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.plot_portrait_with_diff">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">plot_portrait_with_diff</code><span class="sig-paren">(</span><em class="sig-param">omg</em>, <em class="sig-param">sample</em>, <em class="sig-param">s_vs_s</em>, <em class="sig-param">ax</em>, <em class="sig-param">size=4</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.plot_portrait_with_diff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.prepare">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">prepare</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">org</em>, <em class="sig-param">norm</em>, <em class="sig-param">roll=False</em>, <em class="sig-param">remove_outliers=False</em>, <em class="sig-param">agg_win=100</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.prepare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.print_seq">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">print_seq</code><span class="sig-paren">(</span><em class="sig-param">seq_id</em>, <em class="sig-param">seq_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.print_seq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.remove_outliers">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">remove_outliers</code><span class="sig-paren">(</span><em class="sig-param">df_in</em>, <em class="sig-param">col_name</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.remove_outliers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.roller">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">roller</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">window</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.roller" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.bb_stats.to_nucl_res">
+<code class="sig-prename descclassname">assnake.api.bb_stats.</code><code class="sig-name descname">to_nucl_res</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.bb_stats.to_nucl_res" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.dada2">
+<span id="assnake-api-dada2-module"></span><h2>assnake.api.dada2 module<a class="headerlink" href="#module-assnake.api.dada2" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.dada2.get_full_track">
+<code class="sig-prename descclassname">assnake.api.dada2.</code><code class="sig-name descname">get_full_track</code><span class="sig-paren">(</span><em class="sig-param">fs_prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">preproc</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.dada2.get_full_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads infromation about reads number on all steps of dada2 analysis.
+Tracking script from R should be runned first.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.dada2.rename_seqs_to_asvs">
+<code class="sig-prename descclassname">assnake.api.dada2.</code><code class="sig-name descname">rename_seqs_to_asvs</code><span class="sig-paren">(</span><em class="sig-param">otu_table</em>, <em class="sig-param">otu_table_renamed_loc</em>, <em class="sig-param">asvs_fasta_loc</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.dada2.rename_seqs_to_asvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Because by default from dada2 we have indexes as full sequences we need to give them new human-readable names,
+and save this mapping to fasta file.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.dataset">
+<span id="assnake-api-dataset-module"></span><h2>assnake.api.dataset module<a class="headerlink" href="#module-assnake.api.dataset" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="assnake.api.dataset.Dataset">
+<em class="property">class </em><code class="sig-prename descclassname">assnake.api.dataset.</code><code class="sig-name descname">Dataset</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.dataset.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.biospecimens">
+<code class="sig-name descname">biospecimens</code><em class="property"> = None</em><a class="headerlink" href="#assnake.api.dataset.Dataset.biospecimens" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.df">
+<code class="sig-name descname">df</code><em class="property"> = ''</em><a class="headerlink" href="#assnake.api.dataset.Dataset.df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.fs_prefix">
+<code class="sig-name descname">fs_prefix</code><em class="property"> = ''</em><a class="headerlink" href="#assnake.api.dataset.Dataset.fs_prefix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.full_path">
+<code class="sig-name descname">full_path</code><em class="property"> = ''</em><a class="headerlink" href="#assnake.api.dataset.Dataset.full_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.mg_samples">
+<code class="sig-name descname">mg_samples</code><em class="property"> = None</em><a class="headerlink" href="#assnake.api.dataset.Dataset.mg_samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.sample_sets">
+<code class="sig-name descname">sample_sets</code><em class="property"> = {}</em><a class="headerlink" href="#assnake.api.dataset.Dataset.sample_sets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.dataset.Dataset.sources">
+<code class="sig-name descname">sources</code><em class="property"> = None</em><a class="headerlink" href="#assnake.api.dataset.Dataset.sources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.dataset.Dataset.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.dataset.Dataset.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.fs_helpers">
+<span id="assnake-api-fs-helpers-module"></span><h2>assnake.api.fs_helpers module<a class="headerlink" href="#module-assnake.api.fs_helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.fs_helpers.create_links">
+<code class="sig-prename descclassname">assnake.api.fs_helpers.</code><code class="sig-name descname">create_links</code><span class="sig-paren">(</span><em class="sig-param">dir_with_reads</em>, <em class="sig-param">original_dir</em>, <em class="sig-param">sample</em>, <em class="sig-param">hard=False</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.fs_helpers.create_links" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dir_with_reads</strong> -- куда класть</p></li>
+<li><p><strong>original_dir</strong> -- откуда</p></li>
+<li><p><strong>sample</strong> -- dictionary от get samples dict from dir</p></li>
+<li><p><strong>hard</strong> -- if hard copying is needed or symbolic is sufficient  (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.fs_helpers.delete_ds">
+<code class="sig-prename descclassname">assnake.api.fs_helpers.</code><code class="sig-name descname">delete_ds</code><span class="sig-paren">(</span><em class="sig-param">dataset</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.fs_helpers.delete_ds" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove assnake dataset from database</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.fs_helpers.find_files">
+<code class="sig-prename descclassname">assnake.api.fs_helpers.</code><code class="sig-name descname">find_files</code><span class="sig-paren">(</span><em class="sig-param">base</em>, <em class="sig-param">pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.fs_helpers.find_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of files matching pattern in base folder.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.fs_helpers.get_sample_dict_from_dir">
+<code class="sig-prename descclassname">assnake.api.fs_helpers.</code><code class="sig-name descname">get_sample_dict_from_dir</code><span class="sig-paren">(</span><em class="sig-param">loc</em>, <em class="sig-param">sample_name</em>, <em class="sig-param">variant</em>, <em class="sig-param">ext</em>, <em class="sig-param">modify_name=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.fs_helpers.get_sample_dict_from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loc</strong> -- </p></li>
+<li><p><strong>sample_name</strong> -- </p></li>
+<li><p><strong>variant</strong> -- </p></li>
+<li><p><strong>ext</strong> -- </p></li>
+<li><p><strong>modify_name</strong> -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.fs_helpers.get_samples_from_dir">
+<code class="sig-prename descclassname">assnake.api.fs_helpers.</code><code class="sig-name descname">get_samples_from_dir</code><span class="sig-paren">(</span><em class="sig-param">loc</em>, <em class="sig-param">modify_name=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.fs_helpers.get_samples_from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for samples in loc. Sample should contain R1 and R2
+:param loc: location on filesystem where we should search
+:return: Returns list of sample dicts in loc</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.init_config">
+<span id="assnake-api-init-config-module"></span><h2>assnake.api.init_config module<a class="headerlink" href="#module-assnake.api.init_config" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.init_config.fill_and_write_config">
+<code class="sig-prename descclassname">assnake.api.init_config.</code><code class="sig-name descname">fill_and_write_config</code><span class="sig-paren">(</span><em class="sig-param">assnake_db</em>, <em class="sig-param">fna_db_dir</em>, <em class="sig-param">bwa_index_dir</em>, <em class="sig-param">conda_dir</em>, <em class="sig-param">drmaa_log_dir</em>, <em class="sig-param">config_location</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.init_config.fill_and_write_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.loaders">
+<span id="assnake-api-loaders-module"></span><h2>assnake.api.loaders module<a class="headerlink" href="#module-assnake.api.loaders" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.loaders.df_full_info">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">df_full_info</code><span class="sig-paren">(</span><em class="sig-param">prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">preprocessing='longest'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.df_full_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dict with samples [{'df': df, 'preproc': preproc, 'sample': sample}]</p>
+<dl class="simple">
+<dt>params:</dt><dd><p>df - name of dataset
+preprocessing - longest/newest</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.filter_mp2">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">filter_mp2</code><span class="sig-paren">(</span><em class="sig-param">mp2</em>, <em class="sig-param">level='g__'</em>, <em class="sig-param">zeroes_in_samples=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.filter_mp2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.general_taxa_one">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">general_taxa_one</code><span class="sig-paren">(</span><em class="sig-param">s</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.general_taxa_one" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.get_general_taxa_comp_krak_style">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">get_general_taxa_comp_krak_style</code><span class="sig-paren">(</span><em class="sig-param">samples</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.get_general_taxa_comp_krak_style" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_biospecimens_in_df">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_biospecimens_in_df</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">db_loc</em>, <em class="sig-param">return_as='dict'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_biospecimens_in_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dict/dataframe with techical info about biospecimens in dataset</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_count">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_count</code><span class="sig-paren">(</span><em class="sig-param">fs_prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">preproc</em>, <em class="sig-param">sample</em>, <em class="sig-param">report_bps=False</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">count_wc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads information about read and bp count in paired-end sample.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_df_from_db">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_df_from_db</code><span class="sig-paren">(</span><em class="sig-param">df_name</em>, <em class="sig-param">db_loc=''</em>, <em class="sig-param">include_preprocs=False</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_df_from_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns one dictionary with df info</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_dfs_from_db">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_dfs_from_db</code><span class="sig-paren">(</span><em class="sig-param">db_loc</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_dfs_from_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dict of dictionaries with info about datasets from fs database. Key - df name
+Mandatory fields: df, prefix</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_hm2">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_hm2</code><span class="sig-paren">(</span><em class="sig-param">prefix</em>, <em class="sig-param">samples</em>, <em class="sig-param">dbs='chocophlan__uniref90'</em>, <em class="sig-param">index_by='fs_name'</em>, <em class="sig-param">norm=False</em>, <em class="sig-param">modifier='unstratified'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_hm2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_hm2_grouped">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_hm2_grouped</code><span class="sig-paren">(</span><em class="sig-param">samples</em>, <em class="sig-param">index_by='fs_name'</em>, <em class="sig-param">norm=False</em>, <em class="sig-param">mapping='map_ko_uniref90'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_hm2_grouped" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_mag_contigs">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_mag_contigs</code><span class="sig-paren">(</span><em class="sig-param">samples</em>, <em class="sig-param">source</em>, <em class="sig-param">dfs</em>, <em class="sig-param">assembly</em>, <em class="sig-param">assembler</em>, <em class="sig-param">centr</em>, <em class="sig-param">binn</em>, <em class="sig-param">collection</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_mag_contigs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads info about one bin from MAGs, returns dataframe with contigs coverage info in samples.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_mags_info">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_mags_info</code><span class="sig-paren">(</span><em class="sig-param">meta</em>, <em class="sig-param">source</em>, <em class="sig-param">dfs</em>, <em class="sig-param">assembly</em>, <em class="sig-param">assembler</em>, <em class="sig-param">centr</em>, <em class="sig-param">collection</em>, <em class="sig-param">report_abundance_as='width'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_mags_info" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Loads information about MAGs for specific assembly and samples, estimates abundance and returns a dataframe</dt><dd><p>with index corresponding to bins and columns corresponding to abundance in samples. Can be transformed to OTU table by applying <cite>df.T</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_mg_samples_in_df">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_mg_samples_in_df</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">db_loc</em>, <em class="sig-param">return_as='dict'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_mg_samples_in_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dict/dataframe with techical info about mg_samples in dataset</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_mg_samples_in_df_fs">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_mg_samples_in_df_fs</code><span class="sig-paren">(</span><em class="sig-param">db_loc</em>, <em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_mg_samples_in_df_fs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_mp2_new">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_mp2_new</code><span class="sig-paren">(</span><em class="sig-param">samples</em>, <em class="sig-param">version='__v2.9.12'</em>, <em class="sig-param">params='def'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_mp2_new" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_mp2_old">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_mp2_old</code><span class="sig-paren">(</span><em class="sig-param">prefix</em>, <em class="sig-param">samples</em>, <em class="sig-param">level='s__'</em>, <em class="sig-param">org='Bacteria'</em>, <em class="sig-param">index_by='fs_name'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_mp2_old" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_resanal_reports">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_resanal_reports</code><span class="sig-paren">(</span><em class="sig-param">samples</em>, <em class="sig-param">level='Mechanism'</em>, <em class="sig-param">norm=True</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_resanal_reports" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_sample">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_sample</code><span class="sig-paren">(</span><em class="sig-param">fs_prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">preproc</em>, <em class="sig-param">sample</em>, <em class="sig-param">report_bps=False</em>, <em class="sig-param">report_size=False</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">sample_dir_wc=''</em>, <em class="sig-param">fastq_gz_file_wc=''</em>, <em class="sig-param">count_wc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads all necessary info about given sample from file system.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_samples_metadata">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_samples_metadata</code><span class="sig-paren">(</span><em class="sig-param">prefix</em>, <em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_samples_metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.load_sources_in_df">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">load_sources_in_df</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">db_loc</em>, <em class="sig-param">return_as='dict'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.load_sources_in_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns dict/dataframe with techical info about sources in dataset</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.mg_samples_for_df_fs">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">mg_samples_for_df_fs</code><span class="sig-paren">(</span><em class="sig-param">prefix</em>, <em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.mg_samples_for_df_fs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.read_krak_node">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">read_krak_node</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">node_name</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.read_krak_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.samples_in_df">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">samples_in_df</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">db_loc</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.samples_in_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.loaders.samples_to_pd">
+<code class="sig-prename descclassname">assnake.api.loaders.</code><code class="sig-name descname">samples_to_pd</code><span class="sig-paren">(</span><em class="sig-param">samples</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.loaders.samples_to_pd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.mg_py">
+<span id="assnake-api-mg-py-module"></span><h2>assnake.api.mg_py module<a class="headerlink" href="#module-assnake.api.mg_py" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.mg_py.create_taxa_count_from_dada2">
+<code class="sig-prename descclassname">assnake.api.mg_py.</code><code class="sig-name descname">create_taxa_count_from_dada2</code><span class="sig-paren">(</span><em class="sig-param">tax_table, otu_table, rank_names=['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus']</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.mg_py.create_taxa_count_from_dada2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.mg_py.single_level_from_mp2_table">
+<code class="sig-prename descclassname">assnake.api.mg_py.</code><code class="sig-name descname">single_level_from_mp2_table</code><span class="sig-paren">(</span><em class="sig-param">tax_table, rank='g__', ranks=['k__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__', 't__']</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.mg_py.single_level_from_mp2_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes metaphlan2 style table with all taxonomic levels included, like
+k__Archaea; k__Archaea|p__Euryarchaeota; etc., and desired taxonomic level as input, returns feature table
+with only selected taxonomic level features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tax_table</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>) -- DataFrame with counts and full taxonomic information. Samples are columns.</p></li>
+<li><p><strong>rank</strong> (<em>str</em>) -- Rank level at wich we want to agglomerate data</p></li>
+<li><p><strong>levels</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- List with all ranks present in table</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tax_table_pruned (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.mg_py.tax_glom">
+<code class="sig-prename descclassname">assnake.api.mg_py.</code><code class="sig-name descname">tax_glom</code><span class="sig-paren">(</span><em class="sig-param">taxa_counts, rank='Phylum', include_na=True, index='simple_long', rank_names=['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'], ranks_short=['k', 'p', 'c', 'o', 'f', 'g', 's']</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.mg_py.tax_glom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agglomerates data at desired taxonomic rank</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tax_table</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>) -- DataFrame with counts and multiindex with taxonomic information. Samples are columns.</p></li>
+<li><p><strong>rank</strong> (<em>str</em>) -- Rank level at wich we want to agglomerate data</p></li>
+<li><p><strong>include_na</strong> (<em>bool</em>) -- Whether to include counts without classification at desired level</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>agg_counts (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.new_loaders">
+<span id="assnake-api-new-loaders-module"></span><h2>assnake.api.new_loaders module<a class="headerlink" href="#module-assnake.api.new_loaders" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="assnake-api-oop-module">
+<h2>assnake.api.oop module<a class="headerlink" href="#assnake-api-oop-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-assnake.api.prep">
+<span id="assnake-api-prep-module"></span><h2>assnake.api.prep module<a class="headerlink" href="#module-assnake.api.prep" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.prep.prepare_list_for_multiqc_fastqc">
+<code class="sig-prename descclassname">assnake.api.prep.</code><code class="sig-name descname">prepare_list_for_multiqc_fastqc</code><span class="sig-paren">(</span><em class="sig-param">sample_dicts_list</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.prep.prepare_list_for_multiqc_fastqc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves sample list file for multiqc</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.prep.prepare_samples_for_dada2">
+<code class="sig-prename descclassname">assnake.api.prep.</code><code class="sig-name descname">prepare_samples_for_dada2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.prep.prepare_samples_for_dada2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.sample_set">
+<span id="assnake-api-sample-set-module"></span><h2>assnake.api.sample_set module<a class="headerlink" href="#module-assnake.api.sample_set" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="assnake.api.sample_set.SampleSet">
+<em class="property">class </em><code class="sig-prename descclassname">assnake.api.sample_set.</code><code class="sig-name descname">SampleSet</code><span class="sig-paren">(</span><em class="sig-param">fs_prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">preproc</em>, <em class="sig-param">samples_to_add=[]</em>, <em class="sig-param">do_not_add=[]</em>, <em class="sig-param">pattern=''</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that agglomerates samples and provides convinience functions for different tasks,
+such as constructing list of desired results locations, or preparing lists of files for rules.</p>
+<dl class="attribute">
+<dt id="assnake.api.sample_set.SampleSet.samples_pd">
+<code class="sig-name descname">samples_pd</code><a class="headerlink" href="#assnake.api.sample_set.SampleSet.samples_pd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pandas DataFrame with information about samples</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.sample_set.SampleSet.add_samples">
+<code class="sig-name descname">add_samples</code><span class="sig-paren">(</span><em class="sig-param">fs_prefix</em>, <em class="sig-param">df</em>, <em class="sig-param">preproc</em>, <em class="sig-param">samples_to_add=[]</em>, <em class="sig-param">do_not_add=[]</em>, <em class="sig-param">pattern=''</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet.add_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to add samples into the SampleSet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fs_prefix</strong> -- Prefix of the dataset on filesystem</p></li>
+<li><p><strong>df</strong> -- Name of the dataset</p></li>
+<li><p><strong>preproc</strong> -- Preprocessing you want to use</p></li>
+<li><p><strong>samples_to_add</strong> -- List of sample names to add</p></li>
+<li><p><strong>do_not_add</strong> -- list of sample names NOT to add</p></li>
+<li><p><strong>pattern</strong> -- sample names must match this glob pattern to be included.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.sample_set.SampleSet.config">
+<code class="sig-name descname">config</code><em class="property"> = {}</em><a class="headerlink" href="#assnake.api.sample_set.SampleSet.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.sample_set.SampleSet.general_taxa">
+<code class="sig-name descname">general_taxa</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet.general_taxa" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.sample_set.SampleSet.get_locs_for_result">
+<code class="sig-name descname">get_locs_for_result</code><span class="sig-paren">(</span><em class="sig-param">result</em>, <em class="sig-param">preproc=''</em>, <em class="sig-param">params='def'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet.get_locs_for_result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.sample_set.SampleSet.prepare_assembly_set">
+<code class="sig-name descname">prepare_assembly_set</code><span class="sig-paren">(</span><em class="sig-param">assembler</em>, <em class="sig-param">params</em>, <em class="sig-param">set_name</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet.prepare_assembly_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.sample_set.SampleSet.prepare_dada2_sample_list">
+<code class="sig-name descname">prepare_dada2_sample_list</code><span class="sig-paren">(</span><em class="sig-param">set_name='sample_set'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet.prepare_dada2_sample_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="assnake.api.sample_set.SampleSet.prepare_mothur_set">
+<code class="sig-name descname">prepare_mothur_set</code><span class="sig-paren">(</span><em class="sig-param">dir_loc</em>, <em class="sig-param">set_name</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.sample_set.SampleSet.prepare_mothur_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.sample_set.SampleSet.reads_info">
+<code class="sig-name descname">reads_info</code><em class="property"> = Empty DataFrame Columns: [] Index: []</em><a class="headerlink" href="#assnake.api.sample_set.SampleSet.reads_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">samples_pd</code><em class="property"> = Empty DataFrame Columns: [df, fs_name, preproc, reads, sample] Index: []</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.sample_set.SampleSet.wc_config">
+<code class="sig-name descname">wc_config</code><em class="property"> = {}</em><a class="headerlink" href="#assnake.api.sample_set.SampleSet.wc_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.snake_module">
+<span id="assnake-api-snake-module-module"></span><h2>assnake.api.snake_module module<a class="headerlink" href="#module-assnake.api.snake_module" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="assnake.api.snake_module.SnakeModule">
+<em class="property">class </em><code class="sig-prename descclassname">assnake.api.snake_module.</code><code class="sig-name descname">SnakeModule</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">install_dir</em>, <em class="sig-param">snakefiles</em>, <em class="sig-param">invocation_commands</em>, <em class="sig-param">initialization_commands=[]</em>, <em class="sig-param">wc_configs=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.snake_module.SnakeModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="assnake.api.snake_module.SnakeModule.initialization_commands">
+<code class="sig-name descname">initialization_commands</code><em class="property"> = []</em><a class="headerlink" href="#assnake.api.snake_module.SnakeModule.initialization_commands" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.snake_module.SnakeModule.install_dir">
+<code class="sig-name descname">install_dir</code><em class="property"> = ''</em><a class="headerlink" href="#assnake.api.snake_module.SnakeModule.install_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.snake_module.SnakeModule.invocation_commands">
+<code class="sig-name descname">invocation_commands</code><em class="property"> = []</em><a class="headerlink" href="#assnake.api.snake_module.SnakeModule.invocation_commands" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.snake_module.SnakeModule.name">
+<code class="sig-name descname">name</code><em class="property"> = ''</em><a class="headerlink" href="#assnake.api.snake_module.SnakeModule.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.snake_module.SnakeModule.snakefiles">
+<code class="sig-name descname">snakefiles</code><em class="property"> = []</em><a class="headerlink" href="#assnake.api.snake_module.SnakeModule.snakefiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="assnake.api.snake_module.SnakeModule.wc_configs">
+<code class="sig-name descname">wc_configs</code><em class="property"> = []</em><a class="headerlink" href="#assnake.api.snake_module.SnakeModule.wc_configs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.update_fs_samples">
+<span id="assnake-api-update-fs-samples-module"></span><h2>assnake.api.update_fs_samples module<a class="headerlink" href="#module-assnake.api.update_fs_samples" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.update_fs_samples.update_fs_samples_csv">
+<code class="sig-prename descclassname">assnake.api.update_fs_samples.</code><code class="sig-name descname">update_fs_samples_csv</code><span class="sig-paren">(</span><em class="sig-param">dataset</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.update_fs_samples.update_fs_samples_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scans dataset folder and updates fs_samples.tsv if necessary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataset</strong> -- Name of the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns sample dict in loc</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api.viz">
+<span id="assnake-api-viz-module"></span><h2>assnake.api.viz module<a class="headerlink" href="#module-assnake.api.viz" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="assnake.api.viz.boxplots_dist">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">boxplots_dist</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">meta</em>, <em class="sig-param">type_of_data=''</em>, <em class="sig-param">plot=True</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.boxplots_dist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.heatmap_new">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">heatmap_new</code><span class="sig-paren">(</span><em class="sig-param">feature_table</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.heatmap_new" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plot_centr">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plot_centr</code><span class="sig-paren">(</span><em class="sig-param">centr</em>, <em class="sig-param">subtitle=''</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plot_centr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plot_changes">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plot_changes</code><span class="sig-paren">(</span><em class="sig-param">tr_hm2</em>, <em class="sig-param">tr_mp2</em>, <em class="sig-param">plot=True</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plot_changes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plot_mds">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plot_mds</code><span class="sig-paren">(</span><em class="sig-param">mds</em>, <em class="sig-param">feature_name</em>, <em class="sig-param">meta</em>, <em class="sig-param">title='MDS'</em>, <em class="sig-param">select_by='fs_name'</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plot_mds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plot_reads_bps">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plot_reads_bps</code><span class="sig-paren">(</span><em class="sig-param">meta</em>, <em class="sig-param">reads=True</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plot_reads_bps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plot_reads_count_change">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plot_reads_count_change</code><span class="sig-paren">(</span><em class="sig-param">sample_set</em>, <em class="sig-param">first_preproc</em>, <em class="sig-param">second_preproc</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plot_reads_count_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plot_reads_count_change2">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plot_reads_count_change2</code><span class="sig-paren">(</span><em class="sig-param">read_table</em>, <em class="sig-param">preprocs</em>, <em class="sig-param">sort</em>, <em class="sig-param">title='Reads number'</em>, <em class="sig-param">trace_names=[]</em>, <em class="sig-param">number_index_hack=False</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plot_reads_count_change2" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots bar chart with reads lost on each preprocessing step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>read_table</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>) -- DataFrame with columns with number of reads for each sample on every preprocessing step</p></li>
+<li><p><strong>preprocs</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) -- List of preprocessings in called order</p></li>
+<li><p><strong>sort</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) -- Sort by this variable</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.plotly_heatmap">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">plotly_heatmap</code><span class="sig-paren">(</span><em class="sig-param">otu_table</em>, <em class="sig-param">title</em>, <em class="sig-param">groups=None</em>, <em class="sig-param">feature=''</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.plotly_heatmap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.time_filled_scatter">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">time_filled_scatter</code><span class="sig-paren">(</span><em class="sig-param">otu_table</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.time_filled_scatter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="assnake.api.viz.viz_zeroes">
+<code class="sig-prename descclassname">assnake.api.viz.</code><code class="sig-name descname">viz_zeroes</code><span class="sig-paren">(</span><em class="sig-param">otu_table</em><span class="sig-paren">)</span><a class="headerlink" href="#assnake.api.viz.viz_zeroes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-assnake.api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-assnake.api" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">assnake</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Fedorov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/assnake.api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
