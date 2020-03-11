@@ -29,32 +29,28 @@ def get_sample_dict_from_dir(loc, sample_name, variant, ext, modify_name=lambda 
     :param modify_name:
     :return:
     '''
-    # DONE в 1 строчку
-    sample_name = modify_name(sample_name)
-    temp_samples_dict = {'sample_name': sample_name,
+    final_sample_name = modify_name(sample_name)
+    temp_samples_dict = {'sample_name': final_sample_name,
                          'files': {'R1': '', 'R2': '', 'S': []},
-                         'renamed_files': {'R1': '', 'R2': '', 'S': []}
-                         }
+                         'renamed_files': {'R1': '', 'R2': '', 'S': []}}
 
     for strand in ['R1', 'R2']:
         st = variant['strands'][strand]
         st_file = find_files(loc, sample_name + st + ext)
         if len(st_file) == 1:
-            # DONE переписать через format
-            stripped = st_file[0].replace(variant['strands'][strand] + ext, '')
-            stripped += '_{strand}{ext}'.format(strand=strand, ext=ext)
-
-            temp_samples_dict['renamed_files'][strand] = stripped
+            temp_samples_dict['renamed_files'][strand] = final_sample_name + '_{strand}{ext}'.format(strand=strand, ext=ext)
             temp_samples_dict['files'][strand] = st_file[0]
 
     return temp_samples_dict
 
 
-def get_samples_from_dir(loc, modify_name=lambda arg: arg):
+def get_samples_from_dir(loc, modify_name=lambda arg: arg.replace('-', '_')):
     """
-    Searches for samples in loc. Sample should contain R1 and R2
+    Searches for samples in directory. One sample consists of two files, for first and second strand. 
+
     :param loc: location on filesystem where we should search
-    :return: Returns list of sample dicts in loc
+    :param modify_name: function that can be used to modify name of sample. By default it replaces '-' with '_' as some bioinformatics software don't like '-' in sample names
+    :returns: Returns list of sample dicts in loc
     """
     samples_list = []  # to write samples in
     ext = '.fastq.gz'  # extention
@@ -73,26 +69,23 @@ def get_samples_from_dir(loc, modify_name=lambda arg: arg):
             item[item.rfind('/') + 1:item.rfind(R1 + ext)]
             for item in glob.glob(loc + '/*' + R1 + ext)
         ]
-        # print('samples: ',samples)
         for sample in samples:
             buff = get_sample_dict_from_dir(loc, sample, variant, ext, modify_name)
-            # print(buff['sample_name'], end = ' ')
             samples_list.append(buff)
-        # print('')
-    # print([i['sample_name'] for i in samples_list])
 
     return samples_list
 
 
-# TODO везде документацию,
-# DONE все класть {fs_prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz
 def create_links(dir_with_reads, original_dir, sample, hard=False):
     """
-    :param dir_with_reads:  куда класть
-    :param original_dir: откуда
-    :param sample: dictionary от get samples dict from dir
+    This method creates links or hard copies reads files from one directory to another. 
+
+    :param dir_with_reads: folder where to put reads
+    :param original_dir: folders that contains original reads files 
+    :param sample: dictionary from get_sample_dict_from_dir method
     :param hard: if hard copying is needed or symbolic is sufficient  (False)
-    :return:
+
+    :returns:
 
     """
     orig_wc = '{orig_dir}/{sample_file}'
@@ -112,16 +105,11 @@ def create_links(dir_with_reads, original_dir, sample, hard=False):
         return
     os.symlink(src_r1, dst_r1)
     os.symlink(src_r2, dst_r2)
-    # try:
-    #     os.symlink(src_r1, dst_r1)
-    #     os.symlink(src_r2, dst_r2)
-    # except:
-    #     print(sample, 'ERROR')
 
 
 def delete_ds(dataset):
     """
-    remove assnake dataset from database
+    Remove assnake dataset from database
     """
     try:
         os.remove(

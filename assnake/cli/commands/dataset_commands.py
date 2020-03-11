@@ -75,7 +75,7 @@ def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
         """
     if not (bool(df is None)^bool(df_arg is None)):
         click.echo('Please, specify dataset either as option or argument')
-        df = click.prompt('Type the name in:')
+        df = click.prompt('Type the name in')
     if df is None:
         df = df_arg
     there_is_prpties = False
@@ -122,7 +122,6 @@ def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
                 yaml.dump(df_info_old, info_file, default_flow_style=False)
 
     if test_data:
-        # print('KISS MY ASS')
         download_from_url('http://kronos.pharmacology.dal.ca/public_files/tutorial_datasets/mgs_tutorial_Oct2017.zip', 
                                 os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017.zip'))
         
@@ -145,7 +144,7 @@ def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
 @click.command(name='info')
 @click.option('--df', '-d', help='Name of the dataset', required=False)
 @click.option('--preproc', '-p', help='Show samples for preprocessing', required=False)
-@click.argument('df_arg', required=False)
+@click.argument('df_arg', required=True)
 @click.pass_obj
 def df_info(config, df, preproc, df_arg):
     """View info for the specific dataset
@@ -248,6 +247,7 @@ def df_delete(config, df, hard, df_arg):
 @click.option('--reads', '-r', prompt='Location of folder with read files',
               help='Location of folder with read files', type=click.Path())
 @click.option('--dataset', '-d', help='Assnake dataset name. If -t is not specified', required=False)
+@click.option('--rename-method', help='How to rename samples', type=click.Choice(['replace-', 'removeSending'], case_sensitive=False), required=False)
 @click.option('--target', '-t', help='Location of the target directory. If -d is not specified.', required=False,
               type=click.Path())
 @click.option('--sample_set', '-s', help='Comma-divided list of samples of interest', required=False)
@@ -255,7 +255,7 @@ def df_delete(config, df, hard, df_arg):
               type=click.Path())
 @click.option('--copy', help='If is set, hard copying will be used instead of symbolic links ', is_flag=True)
 @click.pass_obj
-def df_import_reads(config, reads, dataset, target, sample_set, sample_list, copy):
+def df_import_reads(config, reads, dataset, rename_method, target, sample_set, sample_list, copy):
     """
     Import reads from directory to assnake dataset. Currently local text files are supported. The --target argument
     point to location (relative or absolute) of assnake dataset in your file system. Please, pay attention,
@@ -303,8 +303,12 @@ def df_import_reads(config, reads, dataset, target, sample_set, sample_list, cop
     #     splitted[2] = (1 if len(splitted) == 3 else a)
     #     return new_name_wc.format(splitted[1], splitted[2])
 
-    # Bla bla about simple list and simple file checking and proceeding
-    dicts = fs_helpers.get_samples_from_dir(reads)
+    if rename_method == 'removeSending':
+        modify_name=lambda arg: '_'.join(arg.replace('-', '_').split('_')[0:-1])
+    else:
+        modify_name=lambda arg: arg.replace('-', '_')
+
+    dicts = fs_helpers.get_samples_from_dir(reads, modify_name)
     sample_names = {d['sample_name'] for d in dicts}
     if arg_s:
         samples_of_interest = sample_set.split(',')

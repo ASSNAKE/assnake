@@ -6,13 +6,13 @@ md5_fastq_gz:     '{fs_prefix}/{df}/reads/{preproc}/{fs_name}/profile/{fs_name}_
 
 
 sample_dir_wc:    '{fs_prefix}/{df}/reads/{preproc}/{sample}'
-count_wc: '{fs_prefix}/{df}/profile/{preproc}/{sample}/{sample}_{strand}.count'
+count_wc: '{fs_prefix}/{df}/profile/count/{preproc}/{sample}/{sample}_{strand}.count' 
 
 
 fastqc_data_wc:   '{fs_prefix}/{df}/profile/fastqc/{preproc}/{fs_name}/{fs_name}_{strand}_fastqc/fastqc_data.txt'
 fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{strand}_fastqc.zip'
 
-multiqc_fastqc_wc: '{fs_prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
+multiqc_fastqc_wc: '{fs_prefix}/{df}/profile/multiqc/{sample_set}/{strand}/samples.list'
 sample_wc: '{directory}/{sample_name}_{strand}.{extension}'
 # multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
 

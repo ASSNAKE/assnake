@@ -168,22 +168,8 @@ class SampleSet:
         result_locs = []
         strands = ['R1', 'R2']
 
-        if result == 'count':
-            for s in self.samples_pd.to_dict(orient='records'):
-                if preproc == '':
-                    preprocessing = s['preproc']
-                else:
-                    preprocessing = preproc
-                for strand in strands:
-                    result_locs.append(self.wc_config['count_wc'].format(
-                        fs_prefix = s['fs_prefix'].rstrip('\/'),
-                        df = s['df'],
-                        preproc = s['preproc'],
-                        sample = s['fs_name'],
-                        strand = strand
-                    )) 
-                    # print(result_locs)
-        elif result == 'fastqc':
+        
+        if result == 'fastqc':
             for s in self.samples_pd.to_dict(orient='records'):
                 if preproc == '':
                     preprocessing = s['preproc']
