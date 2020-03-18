@@ -43,9 +43,6 @@ class SampleSet:
         self.config = assnake.utils.load_config_file()
         self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)
 
-
-
-        
     def add_samples(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
         '''
         This function is used to add samples into the SampleSet.
@@ -86,42 +83,6 @@ class SampleSet:
         self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
         self.reads_info = pd.DataFrame(self.samples_pd['reads']) # Why do we need this?
 
-    def prepare_dada2_sample_list(self, set_name='sample_set'):
-        dfs = list(set(self.samples_pd['df']))
-        if len(dfs) == 1:
-            fs_prefix = list(set(self.samples_pd['fs_prefix']))[0]
-        print(dfs)
-            
-        dada2_set_dir = '{fs_prefix}/{df}/dada2/{sample_set}/'.format(fs_prefix = fs_prefix, df = dfs[0], sample_set = set_name)
-
-        dada2_dicts = []
-        for s in self.samples_pd.to_dict(orient='records'):
-            dada2_dicts.append(dict(mg_sample=s['fs_name'],
-            R1 = self.wc_config['fastq_gz_file_wc'].format(fs_prefix=s['fs_prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
-            R2 = self.wc_config['fastq_gz_file_wc'].format(fs_prefix=s['fs_prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2'),
-            # merged = self.wc_config['dada2_merged_wc'].format(prefix=s['fs_prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], sample_set = set_name)
-            ))
-        if not os.path.exists(dada2_set_dir):
-            os.makedirs(dada2_set_dir, exist_ok=True)
-
-        dada2_df = pd.DataFrame(dada2_dicts)
-        if not os.path.isfile(os.path.join(dada2_set_dir, 'samples.tsv')):
-            dada2_df.to_csv(os.path.join(dada2_set_dir, 'samples.tsv'), sep='\t', index=False)
-
-
-    def prepare_mothur_set(self, dir_loc, set_name):
-        mothur_set_dir = os.path.join(dir_loc, set_name)
-
-        mothur_dicts = []
-        for s in self.samples_pd.to_dict(orient='records'):
-            mothur_dicts.append(dict(mg_sample=s['fs_name'],
-                R1 = self.wc_config['fastq_file'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R1'), 
-                R2 = self.wc_config['fastq_file'].format(prefix=s['prefix'], df=s['df'], preproc=s['preproc'], sample = s['fs_name'], strand = 'R2')))
-        if not os.path.exists(mothur_set_dir):
-            os.makedirs(mothur_set_dir)
-
-        mothur_df = pd.DataFrame(mothur_dicts)
-        mothur_df.to_csv(os.path.join(mothur_set_dir, 'stability.files'), columns=['mg_sample', 'R1', 'R2'], sep='\t', index=False, header=False)
 
     def prepare_assembly_set(self, assembler, params, set_name):
         # prepare dataframe
@@ -144,30 +105,10 @@ class SampleSet:
             os.makedirs(sample_table_dir)
         samples.to_csv(sample_table_loc, sep='\t', index=False)
 
-        # for s in self.samples:
-        #     fastqc_list.append(self.wc_config['fastqc_data_wc'].format(**s, strand=strand))
-
-        # 
-        
-        # if len(dfs) == 1:
-        #     prefix = list(set(self.samples_df['prefix']))[0]
-        #     sample_list = self.wc_config['multiqc_fatqc_wc'].format(
-        #         df = dfs[0], 
-        #         prefix = prefix, 
-        #         strand = strand,
-        #         sample_set=set_name)
-        #     print(sample_list)
-            
-        #     multiqc_dir = os.path.dirname(sample_list)
-        #     if not os.path.isdir(multiqc_dir):
-        #         os.makedirs(multiqc_dir)
-        #     with open(sample_list, 'x') as file:
-        #         file.writelines('\n'.join(fastqc_list)) 
 
     def get_locs_for_result(self, result, preproc='', params='def'):
         result_locs = []
         strands = ['R1', 'R2']
-
         
         if result == 'fastqc':
             for s in self.samples_pd.to_dict(orient='records'):
@@ -209,20 +150,6 @@ class SampleSet:
                     sample = s['fs_name'],
                     strand = 'R1'
                 ))
-        elif result == 'dada2-filter-and-trim':
-            for s in self.samples_pd.to_dict(orient='records'):
-                if preproc == '':
-                    preprocessing = s['preproc']
-                else:
-                    preprocessing = preproc
-                result_locs.append(self.wc_config['dada2_fat_wc'].format(
-                    prefix = s['prefix'].rstrip('\/'),
-                    df = s['df'],
-                    preproc = preprocessing,
-                    sample = s['fs_name'],
-                    params = params
-                ))
-
         
         return result_locs
 

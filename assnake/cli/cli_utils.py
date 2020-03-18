@@ -5,7 +5,9 @@ import click, os
 import pandas as pd
 
 # https://stackoverflow.com/a/40195800
-options_wo_params = [
+sample_set_construction_options = []
+
+sample_set_construction_options = [
     click.option('--df','-d', help='Name of the dataset', required=True ),
     click.option('--preproc','-p', help='Preprocessing to use' ),
 
@@ -56,7 +58,7 @@ def add_options(options):
     return _add_options
 
 
-def generic_command_individual_samples(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, params):
+def generic_command_individual_samples(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
     exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
 
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
@@ -79,10 +81,18 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
     click.echo(tabulate(sample_set.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
 
-    return sample_set
+    # construct sample set name for fs
+    if meta_column is None and column_value is None:
+        curr_date = datetime.datetime.now()
+        def_name = '{month}{year}'.format(month=curr_date.strftime("%b"), year=curr_date.strftime("%y"))
+        sample_set_name = def_name
+    else:
+        sample_set_name = meta_column + '__' + column_value
+
+    return sample_set, sample_set_name
     
 
-def generate_result_list(sample_set, wc_str, **kwargs):
+def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
     res_list = []
     for s in sample_set.samples_pd.to_dict(orient='records'):
         preprocessing = s['preproc']
@@ -91,7 +101,7 @@ def generate_result_list(sample_set, wc_str, **kwargs):
             df = s['df'],
             preproc = preprocessing,
             sample = s['fs_name'],
-            params = kwargs['params']
+            **kwargs
         ))
     return res_list
 
