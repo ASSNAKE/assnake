@@ -1,55 +1,115 @@
-
-
 import assnake.api.loaders
-import assnake.api.sample_set
+import assnake
 from tabulate import tabulate
-import click
+import click, os
+import pandas as pd
 
-@click.command('remove-human-bbmap', short_help='Count number of reads and basepairs in fastq file')
+# https://stackoverflow.com/a/40195800
+options_wo_params = [
+    click.option('--df','-d', help='Name of the dataset', required=True ),
+    click.option('--preproc','-p', help='Preprocessing to use' ),
 
-@click.option('--df','-d', help='Name of the dataset', required=True )
-@click.option('--preproc','-p', help='Preprocessing to use' )
+    click.option('--meta-column', '-c', help='Select samples based on metadata column' ),
+    click.option('--column-value','-v', help='Value of metadata column by which select samples' ),
 
-@click.option('--meta-column', '-c', help='Select samples based on metadata column' )
-@click.option('--column-value','-v', help='Value of metadata column by which select samples' )
-
-@click.option('--samples-to-add','-s', 
+    click.option('--samples-to-add','-s', 
                 help='Samples from dataset to process', 
                 default='', 
                 metavar='<samples_to_add>', 
-                type=click.STRING )
-@click.option('--exclude-samples','-x', 
+                type=click.STRING ),
+    click.option('--exclude-samples','-x', 
                 help='Exclude this samples from run', 
                 default='', 
                 metavar='<samples_to_add>', 
+                type=click.STRING ),
+]
+
+options_w_params = [
+    click.option('--df','-d', help='Name of the dataset', required=True ),
+    click.option('--preproc','-p', help='Preprocessing to use' ),
+
+    click.option('--meta-column', '-c', help='Select samples based on metadata column' ),
+    click.option('--column-value','-v', help='Value of metadata column by which select samples' ),
+
+    click.option('--samples-to-add','-s', 
+                help='Samples from dataset to process', 
+                default='', 
+                metavar='<samples_to_add>', 
+                type=click.STRING ),
+    click.option('--exclude-samples','-x', 
+                help='Exclude this samples from run', 
+                default='', 
+                metavar='<samples_to_add>', 
+                type=click.STRING ),
+    click.option('--params', 
+                help='Parameters to use', 
+                default='def',
                 type=click.STRING )
+]
 
-@click.pass_obj
 
-def generic_command_individual_samples(config, df, preproc, meta_column, meta_value, samples_to_add, exclude_samples):
-    samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
+def add_options(options):
+    def _add_options(func):
+        for option in reversed(options):
+            func = option(func)
+        return func
+    return _add_options
+
+
+def generic_command_individual_samples(config, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, params):
     exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
 
-    df = assnake.api.loaders.load_df_from_db(df)
-    config['requested_dfs'] += [df['df']]
-    ss = assnake.api.sample_set.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
+    samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
+    df_loaded = assnake.api.loaders.load_df_from_db(df)
+    config['requested_dfs'] += [df_loaded['df']]
 
-    click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), 
-        headers='keys', tablefmt='fancy_grid'))
+    # Now for the meta column stuff
+    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
+    if os.path.isfile(meta_loc):
+        meta = pd.read_csv(meta_loc, sep = '\t')
+        if meta_column is not None and column_value is not None:
+            subset_by_col_value = meta.loc[meta[meta_column] == column_value]
+            if len(subset_by_col_value) > 0:
+                samples_to_add = list(subset_by_col_value['sample_name'])
+
+
+    sample_set = assnake.SampleSet(df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
     res_list = []
 
     if len(exclude_samples) > 0 :  
-        ss.samples_pd = ss.samples_pd.loc[~ss.samples_pd['fs_name'].isin(exclude_samples), ]
-    for s in ss.samples_pd.to_dict(orient='records'):
+        sample_set.samples_pd = sample_set.samples_pd.loc[~sample_set.samples_pd['fs_name'].isin(exclude_samples), ]
+
+    click.echo(tabulate(sample_set.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+
+    for s in sample_set.samples_pd.to_dict(orient='records'):
         preprocessing = s['preproc']
-        res_list.append( '{fs_prefix}/{df}/reads/{preproc}__rmhum_bbmap/{sample}_R1.fastq.gz'.format(
-            fs_prefix = s['fs_prefix'].rstrip('\/'),
+        res_list.append(wc_str.format(
+            fs_prefix = s['fs_prefix'].rstrip('\/'),    
             df = s['df'],
             preproc = preprocessing,
-            sample = s['fs_name']
+            sample = s['fs_name'],
+            params = params
         ))
 
     if config.get('requests', None) is None:
         config['requests'] = res_list
     else:
         config['requests'] += res_list
+    
+
+
+
+
+# def magic_options(func):
+#     @add_options(options)
+#     @click.pass_obj
+#     def distill_magic(config, **kwargs):
+#         kwargs['result'] = 'ssss'
+#         func(config, **kwargs)
+
+#     return distill_magic
+
+# @click.command('test')
+# @magic_options
+# def tt(config, **kwargs):
+#     print(kwargs)

@@ -87,6 +87,12 @@ def init_group():
 init_group.add_command(commands_init.init_start)
 init_group.add_command(commands_init.current_config)
 
+
+
+# init_group.command( name = 'tt' )(tt)
+# init_group.add_command(tt)
+
+
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
 #---------------------------------------------------------------------------------------
