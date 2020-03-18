@@ -56,7 +56,7 @@ def add_options(options):
     return _add_options
 
 
-def generic_command_individual_samples(config, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, params):
+def generic_command_individual_samples(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, params):
     exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
 
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
@@ -74,13 +74,16 @@ def generic_command_individual_samples(config, wc_str, df, preproc, meta_column,
 
 
     sample_set = assnake.SampleSet(df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
-    res_list = []
-
     if len(exclude_samples) > 0 :  
         sample_set.samples_pd = sample_set.samples_pd.loc[~sample_set.samples_pd['fs_name'].isin(exclude_samples), ]
 
     click.echo(tabulate(sample_set.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
 
+    return sample_set
+    
+
+def generate_result_list(sample_set, wc_str, **kwargs):
+    res_list = []
     for s in sample_set.samples_pd.to_dict(orient='records'):
         preprocessing = s['preproc']
         res_list.append(wc_str.format(
@@ -88,17 +91,9 @@ def generic_command_individual_samples(config, wc_str, df, preproc, meta_column,
             df = s['df'],
             preproc = preprocessing,
             sample = s['fs_name'],
-            params = params
+            params = kwargs['params']
         ))
-
-    if config.get('requests', None) is None:
-        config['requests'] = res_list
-    else:
-        config['requests'] += res_list
-    
-
-
-
+    return res_list
 
 # def magic_options(func):
 #     @add_options(options)
