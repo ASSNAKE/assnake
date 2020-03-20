@@ -1,7 +1,7 @@
 import assnake.api.loaders
 import assnake
 from tabulate import tabulate
-import click, os
+import click, os, datetime
 import pandas as pd
 
 # https://stackoverflow.com/a/40195800
@@ -59,9 +59,23 @@ def add_options(options):
 
 
 def generic_command_individual_samples(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
-    exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
+    """
+    Construct sample sets, has multiple options.
+    Returns dict or sample_sets based on the provided options.
+    
+    meta_column - factor column in sample metadata sheet. Cannot be combined with samples_to_add. exclude_samples has higher proirity. 
+    column_value - value of column to select by. \
+        Can be multiple - separated by commas without whitespace. \
+        If meta_column is provided, bot no column_value is provided \
+        - treat it like select all unique values of that column. 
+        If multiple - one value - one sample_set. If --merge enabled - all values go in one sample_set
 
+    assnake result request megahit -d FMT_FHM -c source run 
+
+    """
+    exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
+
     df_loaded = assnake.api.loaders.load_df_from_db(df)
     config['requested_dfs'] += [df_loaded['df']]
 

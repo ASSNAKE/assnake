@@ -7,7 +7,7 @@ import assnake.cli.commands.init as commands_init
 from assnake.cli.commands.cmd_run import run
 
 from assnake.utils import read_yaml, check_if_assnake_is_initialized, get_config_loc
-
+from assnake.cli.cli_utils import sample_set_construction_options, add_options, generic_command_individual_samples, generate_result_list
 from pkg_resources import iter_entry_points 
 
 
@@ -68,7 +68,7 @@ assnake dataset create"""
     else:
         config = read_yaml(config_loc)
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
-        ctx.obj = {'config': config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': []}
+        ctx.obj = {'config': config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': []}
 
 
 #---------------------------------------------------------------------------------------
@@ -111,27 +111,40 @@ dataset.add_command(dataset_commands.rescan_dataset)
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group
 #---------------------------------------------------------------------------------------
-@cli.group()
+@cli.group(chain = True, help = 'Used to request and run results')
 def result():
     """Commands to analyze your data"""
     check_if_assnake_is_initialized()
 
 
-@click.group(chain = True, help = 'Used to request and run results')
-@click.pass_obj
-def request(config):
-    pass
-result.add_command(request)
+# @click.group(chain = True, help = 'Used to request and run results')
+# @click.pass_obj
+# def request(config):
+#     pass
+# result.add_command(request)
 
 for entry_point in iter_entry_points('assnake.plugins'):
     module_class = entry_point.load()
     for cmd in module_class.invocation_commands:
-        request.add_command(cmd)
+        result.add_command(cmd)
     for cmd in module_class.initialization_commands:
         init_group.add_command(cmd)
 
 # add run command to request group
-request.add_command(run)
+result.add_command(run)
+
+
+@click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
+@add_options(sample_set_construction_options)
+@click.option('--params', help='Parameters to use', default='def', type=click.STRING )
+@click.option('--message', '-m', multiple=True)
+
+@click.pass_obj
+def request_sample_set(config, message, **kwargs):
+    click.echo('\n'.join(message))
+    sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
+    config['sample_sets'].append(sample_set.samples_pd.copy())
+result.add_command(request_sample_set)
 
 
 def main():

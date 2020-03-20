@@ -355,8 +355,11 @@ def plot_reads_count_change2(read_table, preprocs, sort, title = 'Reads number',
         traces.append(go.Bar(x=read_table.index, y=read_table['diff_'+prev_preproc+'--'+p], name='diff_'+prev_preproc+'--'+p))
         prev_preproc = p
 
+    
     traces.append(go.Bar( x=read_table.index, y=read_table[preprocs[-1]], name=preprocs[-1]))
 
+    traces.reverse()
+    
     layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800, title = title)
     fig = go.Figure(data=traces, layout=layout)
     plotly.offline.iplot(fig)
