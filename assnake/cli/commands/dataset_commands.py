@@ -5,12 +5,13 @@
 import click, sys, os, glob, yaml, shutil
 import pandas as pd
 import assnake.api.loaders
-import assnake.api.sample_set
+import assnake.core.sample_set
 from tabulate import tabulate
 from assnake.api import fs_helpers
 from assnake.utils import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
-from assnake.api.update_fs_samples import update_fs_samples_csv
+from assnake.api.loaders import update_fs_samples_csv
+
 
 
 
@@ -179,7 +180,7 @@ def df_info(config, df, preproc, df_arg):
     preprocessing = {}
     all_samples = []
     for p in preprocs:
-        samples = assnake.api.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
+        samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
         # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
         all_samples += (list(samples.samples_pd['fs_name']))
         samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')

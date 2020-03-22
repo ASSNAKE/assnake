@@ -3,7 +3,7 @@ import glob
 
 import pandas as pd
 import numpy as np
-import assnake.api.bb_stats
+# import assnake.api.bb_stats
 # import sample_set
 import yaml
 
@@ -130,43 +130,25 @@ def load_sample(fs_prefix, df, preproc, sample,
             #'preprocs':containers, 
             **load_count(fs_prefix, df, final_preproc, sample, verbose, count_wc=count_wc)}
 
-def samples_in_df(df, db_loc):
-    df_info = None
-    df_info_loc = db_loc+'/datasets/'+df+'/df_info.yaml'
-    
-    with open(df_info_loc, 'r') as stream:
-        try:
-            df_info = (yaml.load(stream, Loader=yaml.FullLoader))
-        except yaml.YAMLError as exc:
-            print(exc)
-                       
-    samples = df_full_info(df_info['fs_prefix'], df_info['df'])
-    return samples
 
-def load_mg_samples_in_df_fs(db_loc, df):
-    df_info = None
-    df_info_loc = db_loc+'/datasets/'+df+'/df_info.yaml'
-    
-    with open(df_info_loc, 'r') as stream:
-        try:
-            df_info = (yaml.load(stream, Loader=yaml.FullLoader))
-        except yaml.YAMLError as exc:
-            print(exc)
-                       
-    samples = mg_samples_for_df_fs(df_info['fs_prefix'], df_info['df'])
-    
-    samples_info = load_mg_samples_in_df(df, db_loc, 'pandas')
-    
-    for sample in samples:
-        biospecimen = list(samples_info.loc[samples_info['fs_name'] == sample['name_on_fs']]['biospecimen'])
-        if len(biospecimen) == 1:
-            sample.update({'biospecimen' : biospecimen[0]})
-        else:
-            print('biospecimen: ' + sample)
-    
-    return samples
+fields = ['sample', 'sequencing_run']
 
 
+def update_fs_samples_csv(dataset):
+    '''
+    Scans dataset folder and updates fs_samples.tsv if necessary
+    
+    :param dataset: Name of the dataset
+    :return: Returns sample dict in loc
+    
+    '''
+    fs_samples_tsv_loc = '{config}/datasets/{df}/fs_samples.tsv'.format(config=utils.load_config_file()['assnake_db'], df=dataset)
+    df = Dataset(dataset)
+    fs_samples_pd = pd.concat(list(df.sample_sets.values()))
+    fs_samples_pd['Final'] = 'never_set'
+    fs_samples_pd.to_csv(fs_samples_tsv_loc, sep='\t', index = False)
+
+    return True
 
 def samples_to_pd(samples):
     meta_df = pd.DataFrame(columns=['fs_name', 'df', 'preproc', 'size', 'bytes', 'reads','bps'])
@@ -176,300 +158,3 @@ def samples_to_pd(samples):
 
 
 
-def load_mp2_new(samples, version = '__v2.9.12', params = 'def'):
-    if not isinstance(samples, list):
-        samples = samples.to_dict(orient='records')
-    mp2_wc = '{fs_prefix}/{df}/taxa/{preproc}/mp2__def{version}/{sample}/{sample}.mp2'
-    mp2_all = []
-    for s in samples:
-        mp2_loc = mp2_wc.format(
-            fs_prefix = s['fs_prefix'].rstrip('\/'),
-            df = s['df'],
-            preproc = s['preproc'],
-            sample = s['fs_name'],
-            version = version,
-            params = params
-        )
-        if os.path.isfile(mp2_loc):
-            try:
-                mp2 = pd.read_csv(mp2_loc, sep='\t', header = [2])
-                mp2['fs_name']=s['fs_name']
-                mp2_all.append(mp2)
-            except:
-                print('ERROR LOADING:', mp2_loc)
-
-    mp2_all = pd.concat(mp2_all)
-    mp2_all = mp2_all.pivot(index='fs_name', columns = '#clade_name', values = 'relative_abundance')
-    return mp2_all
-
-def filter_mp2(mp2, level = 'g__', zeroes_in_samples = 0.5):
-    levels = ['k__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__', 't__']
-
-    ind = levels.index(level)
-    columns = mp2.columns
-    cols = []
-    for col in columns:
-        if not (levels[ind] in col and levels[ind+1] not in col):
-            cols.append(col)
-            
-
-    mp2_all_order = mp2.drop(cols, axis=1)
-    mp2_all_order = mp2_all_order.fillna(0)
-    mp2_all_order = mp2_all_order.div(mp2_all_order.sum(axis=1), axis=0)
-
-    mp2_all_order_sub = mp2_all_order.loc[:, (mp2_all_order == 0).mean(0) < zeroes_in_samples ]
-
-    return mp2_all_order_sub
-
-def load_hm2(prefix, samples, dbs = 'chocophlan__uniref90', index_by = 'fs_name', norm = False, modifier='unstratified'):
-    dfs = []
-    
-    db_nucl = 'chocophlan'
-    db_protein = 'uniref90'
-    loc_wc = '{prefix}/{df}/humann2/{dbs}/{sample}/{preproc}/{sample}_pathabundance{modifier}.tsv'
-    
-    if modifier != '':
-        modifier = '_' + modifier
-        
-    for s in samples:
-        loc = loc_wc.format(prefix=prefix,
-                            df = s['df'], 
-                            preproc=s['preproc'], 
-                            sample = s['fs_name'],
-                            dbs = dbs,
-                           modifier=modifier)
-        if os.path.isfile(loc):
-            # try:
-            hp2_df = pd.read_csv(loc, sep='\t')
-            hp2_df = hp2_df.set_index('# Pathway')
-            hp2_df.columns = [s[index_by]]
-            hp2_df.index.name = ''
-            hp2_df = hp2_df.T
-            if norm:
-                count = load_sample(df = s['df'], preproc=s['preproc'], sample = s['fs_name'])
-                comp = general_taxa_one(s)
-                if comp is not None:
-                    hp2_df = hp2_df.divide(comp['bacteria'])
-                else:
-                    hp2_df = hp2_df.divide(count['reads'])
-            dfs.append(hp2_df)
-            # except:
-                # print('ERROR: ' + loc)
-        else:
-            print(loc)
-    mp2_combined = pd.concat(dfs, axis=0)
-    mp2_combined = mp2_combined.fillna(0)
-    
-    return mp2_combined
-
-def load_hm2_grouped(samples, index_by='fs_name', norm = False, mapping = 'map_ko_uniref90'):
-    dfs = []
-    
-    db_nucl = 'chocophlan'
-    db_protein = 'uniref90'
-    
-    loc_wc = pipeline + 'datasets/{df}/humann2/{db_nucl}__{db_protein}/{sample}/{preproc}/{sample}__{mapping}.tsv'
-
-    for s in samples:
-        loc = loc_wc.format(df = s['df'], 
-                            preproc=s['preproc'], 
-                            sample = s['fs_name'],
-                            db_nucl = db_nucl,
-                            db_protein = db_protein,
-                            mapping=mapping)
-        if os.path.isfile(loc):
-            try:
-                hp2_df = pd.read_csv(loc, sep='\t')
-                hp2_df = hp2_df.set_index('# Gene Family')
-                hp2_df.columns = [s[index_by]]
-                hp2_df.index.name = ''
-                hp2_df = hp2_df.T
-                if norm:
-                    count = load_sample(df = s['df'], preproc=s['preproc'], sample = s['fs_name'])
-                    comp = general_taxa_one(s)
-                    if comp is not None:
-                        hp2_df = hp2_df.divide(comp['bacteria'])
-                    else:
-                        hp2_df = hp2_df.divide(count['reads'])
-                dfs.append(hp2_df)
-            except:
-                print('ERROR: ' + loc)
-    mp2_combined = pd.concat(dfs, axis=0)
-    mp2_combined = mp2_combined.fillna(0)
-    
-    return mp2_combined
-
-def read_krak_node(df, node_name):
-    reads = df.loc[df[5] == node_name][1]
-    if len(reads) == 0:
-        reads = 0
-    else:
-        reads = int(reads)
-    return reads
-
-
-def general_taxa_one(s):
-    loc_wc = pipeline + 'datasets/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv'
-    
-    loc = loc_wc.format(df = s['df'], 
-                            preproc=s['preproc'], 
-                            sample = s['fs_name'],
-                            params = 'def')
-    
-    if os.path.isfile(loc):
-        try:
-            centr_krak = pd.read_csv(loc, sep='\t', header=None)
-            uncl = read_krak_node(centr_krak, 'unclassified')
-            vir = read_krak_node(centr_krak, '  Viruses')
-            homo = read_krak_node(centr_krak,
-                                      '                                                              Homo sapiens')
-            bacteria = read_krak_node(centr_krak, '    Bacteria')
-            archaea = read_krak_node(centr_krak, '    Archaea')
-            other = read_krak_node(centr_krak, 'root') - vir - homo - bacteria - archaea
-
-            total = uncl + vir + bacteria + archaea + homo + other
-            composition = {'sample': s['fs_name'],
-                               'uncl': uncl,
-                               'vir': vir,
-                               'bacteria': bacteria,
-                               'archaea': archaea,
-                               'homo': homo,
-                               'other': other,
-                               'total': total}
-            return composition
-        except:
-            print('error' + loc)
-            return None
-    else:
-        return None
-
-def get_general_taxa_comp_krak_style(samples):
-    loc_wc = '{fs_prefix}/{df}/taxa/{preproc}/centr__{params}/{sample}/{sample}_krak.tsv'
-    comp = []
-    
-    for s in samples:
-        loc = loc_wc.format(df = s['df'], 
-                            fs_prefix = s['fs_prefix'],
-                            preproc=s['preproc'], 
-                            sample = s['fs_name'],
-                            params = 'def1')
-        if os.path.isfile(loc):
-            try:
-                centr_krak = pd.read_csv(loc, sep='\t', header=None)
-                uncl = read_krak_node(centr_krak, 'unclassified')
-                vir = read_krak_node(centr_krak, '  Viruses')
-                homo = read_krak_node(centr_krak,
-                                      '                                                              Homo sapiens')
-                bacteria = read_krak_node(centr_krak, '    Bacteria')
-                archaea = read_krak_node(centr_krak, '    Archaea')
-                other = read_krak_node(centr_krak, 'root') - vir - homo - bacteria - archaea
-
-                total = uncl + vir + bacteria + archaea + homo + other
-                composition = {'sample': s['fs_name'],
-                               'uncl': uncl,
-                               'vir': vir,
-                               'bacteria': bacteria,
-                               'archaea': archaea,
-                               'homo': homo,
-                               'other': other,
-                               'total': total}
-                comp.append(composition)
-            except:
-                print('error' + loc)
-        else:
-            print('NO FILE: ', loc)
-    return comp
-
-def load_mag_contigs(samples, source, dfs, assembly, assembler, centr, binn, collection,):
-    '''
-    Loads info about one bin from MAGs, returns dataframe with contigs coverage info in samples.
-    '''
-    bin_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-contigs.names'
-    taxa_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
-
-    # samples_for_source = meta.loc[meta['source'] == source]
-    # samples_for_source = list(samples_for_source['fs_name'])
-    T5_stats = bb_stats.get_cov_stats('/data6/bio/TFM/pipeline/datasets', 
-                           dfs, 
-                           samples,
-                           'bwa', 
-                           'imp__tmtic_def1', 
-                           'assembly___{assembler}___{dfs}___{ass}___imp__tmtic_def1'.format(ass = assembly, assembler=assembler, dfs= dfs),
-                          'final_contigs__1000')
-
-    contigs_in_bin = pd.read_csv(bin_wc.format(binn = binn, ass = assembly,assembler=assembler, dfs= dfs, collection=collection), header=None)
-    contigs_in_bin.columns = ['contig']
-    merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
-    merged = merged.drop(['#ID'], axis=1)
-
-    merged['part'] = merged['Length']/merged['Length'].sum()
-    for s in samples:
-        merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
-#             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
-        # merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/centr.loc[s]['bacteria'].item()
-    
-    return merged
-
-def load_mags_info(meta, source, dfs, assembly, assembler, centr, collection, report_abundance_as = 'width'):
-    '''
-    Loads information about MAGs for specific assembly and samples, estimates abundance and returns a dataframe
-     with index corresponding to bins and columns corresponding to abundance in samples. Can be transformed to OTU table by applying `df.T`
-    '''
-    mags = []
-    
-    # TODO replace with load_mag_contigs function
-    bin_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}'
-    taxa_wc = '/data5/bio/databases/fna/assembly/{assembler}/{dfs}/{ass}/imp__tmtic_def1/{collection}/bin_by_bin/{binn}/{binn}-bin_taxonomy.tab'
-    
-    bins  = [r.split('/')[-1] for r 
-             in glob.glob(bin_wc.format(binn = '*', dfs=dfs, ass = assembly, assembler=assembler, collection=collection))]
-    bin_wc += '/{binn}-contigs.names'
-
-    samples_for_source = meta.loc[meta['source'] == source]
-    samples_for_source = list(samples_for_source['fs_name'])
-    T5_stats = bb_stats.get_cov_stats('/data6/bio/TFM/pipeline/datasets', 
-                           dfs, 
-                           samples_for_source,
-                           'bwa', 
-                           'imp__tmtic_def1', 
-                           'assembly___{assembler}___{dfs}___{ass}___imp__tmtic_def1'.format(ass = assembly, assembler=assembler, dfs= dfs),
-                          'final_contigs__1000')
-
-    for b in bins:
-        contigs_in_bin = pd.read_csv(bin_wc.format(binn = b, ass = assembly,assembler=assembler, dfs= dfs, collection=collection), header=None)
-        contigs_in_bin.columns = ['contig']
-        merged = contigs_in_bin.merge(T5_stats, right_on='#ID', left_on='contig')
-        merged = merged.drop(['#ID'], axis=1)
-
-        no_drop = ['contig', 'Length', 'Ref_GC',]
-
-        merged['part'] = merged['Length']/merged['Length'].sum()
-        for s in samples_for_source:
-            no_drop.append('avg_on_per_on_part__'+s)
-            no_drop.append('cov_width__'+s)
-
-            merged['avg_on_per__'+s]=merged['Avg_fold__'+s]*merged['Covered_percent__'+s]
-#             merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/meta.loc[meta['fs_name'] == s]['reads'].item()
-            if centr is not None:
-                merged['avg_on_per_on_part__'+s]=merged['avg_on_per__'+s]*merged['part']/(centr.loc[s]['bacteria'].item() + centr.loc[s]['uncl'].item())
-            merged['cov_width__'+s] = merged['Covered_percent__'+s]/100*merged['part']
-        cols = list(merged.columns)    
-        drop = list(set(cols) - set(no_drop))    
-
-        merged = merged.drop(drop, axis=1)
-
-
-        # taxa = pd.read_csv(taxa_wc.format(binn = b, ass = assembly), header=None, sep='\t')
-        # taxa = taxa.fillna('Unknown')
-        dd = {'Mag': b}
-        for s in samples_for_source:
-            if report_abundance_as == 'width':
-                dd.update({s: merged['cov_width__'+s].sum()})
-            else:
-                dd.update({s: merged['avg_on_per_on_part__'+s].sum()})
-        mags.append(dd)
-
-    mags = pd.DataFrame(mags)
-    mags.index = mags['Mag']
-    mags = mags.drop(['Mag'], axis=1)
-    return mags

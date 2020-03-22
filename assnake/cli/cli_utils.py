@@ -83,10 +83,13 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
     if os.path.isfile(meta_loc):
         meta = pd.read_csv(meta_loc, sep = '\t')
-        if meta_column is not None and column_value is not None:
-            subset_by_col_value = meta.loc[meta[meta_column] == column_value]
-            if len(subset_by_col_value) > 0:
-                samples_to_add = list(subset_by_col_value['sample_name'])
+        if meta_column is not None:
+            if column_value is not None:
+                subset_by_col_value = meta.loc[meta[meta_column] == column_value]
+                if len(subset_by_col_value) > 0:
+                    samples_to_add = list(subset_by_col_value['sample_name'])
+            else:
+                print('dfg')
 
 
     sample_set = assnake.SampleSet(df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)

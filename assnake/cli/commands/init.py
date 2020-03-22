@@ -1,6 +1,6 @@
 import click, os
 from assnake.utils import get_config_loc, get_internal_config, pathizer
-from assnake.api.init_config import fill_and_write_config
+from assnake.cli.init_config import fill_and_write_config
 
 
 @click.command(name='start')
