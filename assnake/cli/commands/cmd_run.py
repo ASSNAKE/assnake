@@ -4,7 +4,7 @@
 
 import click, os
 from assnake.utils import get_config_loc, load_config_file
-from assnake.api.update_fs_samples import update_fs_samples_csv
+from assnake.api.loaders import update_fs_samples_csv
 
 
 #---------------------------------------------------------------------------------------

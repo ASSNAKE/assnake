@@ -1,4 +1,4 @@
-from assnake.api.sample_set import SampleSet
+from assnake.core.sample_set import SampleSet
 import os, glob, yaml, time
 import pandas as pd
 from assnake.utils import load_config_file

@@ -22,7 +22,7 @@ def prepare_set_for_assembly(df, preproc, samples_to_add,set_name):
         preproc = 'raw'
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
     df = assnake.api.loaders.load_df_from_db(df)
-    ss = assnake.api.sample_set.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
+    ss = assnake.SampleSet.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
 
     click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc', 'df']].sort_values('reads'), 
         headers='keys', tablefmt='fancy_grid'))
