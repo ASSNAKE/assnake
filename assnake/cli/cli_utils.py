@@ -88,8 +88,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
                 subset_by_col_value = meta.loc[meta[meta_column] == column_value]
                 if len(subset_by_col_value) > 0:
                     samples_to_add = list(subset_by_col_value['sample_name'])
-            else:
-                print('dfg')
+
 
 
     sample_set = assnake.SampleSet(df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)

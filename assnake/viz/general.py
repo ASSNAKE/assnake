@@ -2,7 +2,7 @@ import scipy.cluster.hierarchy as shc
 
 import plotly
 
-plotly.offline.init_notebook_mode()
+# plotly.offline.init_notebook_mode()
 import plotly.graph_objs as go
 from matplotlib import colors as mcolors
 import plotly.figure_factory as FF
@@ -55,7 +55,7 @@ def plot_centr(centr, subtitle=''):
     )
 
     fig = go.Figure(data=data, layout=layout)
-    plotly.offline.iplot(fig)
+    if False: plotly.offline.iplot(fig)
 
 def plot_mds(mds, feature_name, meta, title='MDS', select_by='fs_name'):
     features = set(meta[feature_name])
@@ -82,11 +82,11 @@ def plot_mds(mds, feature_name, meta, title='MDS', select_by='fs_name'):
 
     fig = go.Figure(data=traces,
                     layout=layout)
-    plotly.offline.iplot(fig)
+    if False: plotly.offline.iplot(fig)
 
 
 
-def plot_reads_count_change(read_table, preprocs, sort, title = 'Reads number', trace_names = [], number_index_hack=False):
+def plot_reads_count_change(read_table, preprocs, sort, title = 'Reads number', trace_names = [], number_index_hack=False, plot=False):
     """
     This function plots bar chart with reads lost on each preprocessing step.
 
@@ -115,4 +115,4 @@ def plot_reads_count_change(read_table, preprocs, sort, title = 'Reads number', 
     
     layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800, title = title)
     fig = go.Figure(data=traces, layout=layout)
-    plotly.offline.iplot(fig)
+    if plot: plotly.offline.iplot(fig)

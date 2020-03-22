@@ -81,8 +81,7 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     preprocessing = {}
     if include_preprocs:
         for p in preprocs:
-            samples = sample_set.SampleSet()
-            samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
+            samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
             samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
             preprocessing.update({p:samples})
     df_info.update({"preprocs": preprocessing})

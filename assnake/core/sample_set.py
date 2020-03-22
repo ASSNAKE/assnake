@@ -22,14 +22,9 @@ class SampleSet:
 
     
     def __init__(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
-        dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
-        wc_config_loc = os.path.join(dir_of_this_file, '../snake/wc_config.yaml')
-        with open(wc_config_loc, 'r') as stream:
-            try:
-                self.wc_config = yaml.load(stream, Loader=yaml.FullLoader)
-            except yaml.YAMLError as exc:
-                print(exc)
+        self.wc_config = assnake.utils.load_wc_config()
+        self.config = assnake.utils.load_config_file()
 
         discovered_plugins = {
             entry_point.name: entry_point.load()
@@ -39,8 +34,7 @@ class SampleSet:
             for wc_config in module_class.wc_configs:
                 if wc_config is not None:
                     self.wc_config.update(wc_config)
-        
-        self.config = assnake.utils.load_config_file()
+                
         self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)
 
     def add_samples(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
@@ -81,7 +75,6 @@ class SampleSet:
         # samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc'] # We can debate on this
 
         self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
-        self.reads_info = pd.DataFrame(self.samples_pd['reads']) # Why do we need this?
 
 
     
