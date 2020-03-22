@@ -11,72 +11,50 @@ import parse
 from assnake.api.loaders import load_df_from_db
 import pandas as pd
 
-def find_files(base, pattern):
-    """
-    Return list of files matching pattern in base folder.
-    """
-    return [n for n in fnmatch.filter(os.listdir(base), pattern) if
-            os.path.isfile(os.path.join(base, n))]
 
 
-def get_sample_dict_from_dir(loc, sample_name, variant, ext, modify_name=lambda arg: arg):
-    '''
-
-    :param loc:
-    :param sample_name:
-    :param variant:
-    :param ext:
-    :param modify_name:
-    :return:
-    '''
-    final_sample_name = modify_name(sample_name)
-    temp_samples_dict = {'sample_name': final_sample_name,
-                         'files': {'R1': '', 'R2': '', 'S': []},
-                         'renamed_files': {'R1': '', 'R2': '', 'S': []}}
-
-    for strand in ['R1', 'R2']:
-        st = variant['strands'][strand]
-        st_file = find_files(loc, sample_name + st + ext)
-        if len(st_file) == 1:
-            temp_samples_dict['renamed_files'][strand] = final_sample_name + '_{strand}{ext}'.format(strand=strand, ext=ext)
-            temp_samples_dict['files'][strand] = st_file[0]
-
-    return temp_samples_dict
-
-
-def get_samples_from_dir(loc, modify_name=lambda arg: arg.replace('-', '_')):
-    """
-    Searches for samples in directory. One sample consists of two files, for first and second strand. 
-
-    :param loc: location on filesystem where we should search
-    :param modify_name: function that can be used to modify name of sample. By default it replaces '-' with '_' as some bioinformatics software don't like '-' in sample names
-    :returns: Returns list of sample dicts in loc
-    """
+def get_samples_from_dir(directory_with_reads, modify_name):
     samples_list = []  # to write samples in
+    
     ext = '.fastq.gz'  # extention
-    end_variants = [{'name': 'normal', 'strands': {'R1': '_R1', 'R2': '_R2'}},
-                    # {'name': 'ILLUMINA_1', 'strands': {'R1': '_L001_R1_001', 'R2': '_L001_R2_001'}},
-                    {'name': 'ILLUMINA', 'strands': {'R1': '_R1_001', 'R2': '_R2_001'}},
+    ending_variants = [{'name': 'normal', 'strands': {'R1': '_R1', 'R2': '_R2'}},
+                    # {'name': 'ILLUMINA_WITH_LANE', 'strands': {'R1': '_L001_R1_001', 'R2': '_L001_R2_001'}},
+                    {'name': 'ILLUMINA_001', 'strands': {'R1': '_R1_001', 'R2': '_R2_001'}},
                     {'name': 'SRA', 'strands': {'R1': '_1', 'R2': '_2'}}]  # possible endigngs of files
 
-    # Fool check
-    # if loc[-1] != '/':
-    #   loc += '/'
 
-    for variant in end_variants:
-        R1 = variant['strands']['R1']  # Get just the first strand. For paired end data it doesn't matter.
+    for ending_variant in ending_variants:
+
+        variant_w_ext = ending_variant['strands']['R1'] + ext
+        globbing_path = os.path.join(directory_with_reads, '*' + variant_w_ext)
+        files_mathching_pattern = glob.glob(globbing_path)
+
+        # get sample names
         samples = [
-            item[item.rfind('/') + 1:item.rfind(R1 + ext)]
-            for item in glob.glob(loc + '/*' + R1 + ext)
+            filename.split('/')[-1].replace(variant_w_ext, '') # Take last part of path (basename) and replace _R1/fastq.gz with nothing to get sample name
+            for filename in files_mathching_pattern
         ]
-        for sample in samples:
-            buff = get_sample_dict_from_dir(loc, sample, variant, ext, modify_name)
-            samples_list.append(buff)
+        
+        # prepare sample dicts
+        samples_list += [
+            {
+                'name_in_run': s,
+                'modified_name': modify_name(s),
+                
+                'ending_variant_id': ending_variant['name'],
+                'ending_variant_R1': ending_variant['strands']['R1'],
+                'ending_variant_R2': ending_variant['strands']['R2'],
+                'directory': directory_with_reads,
+                'extension': ext
+            } 
+            for s in samples
+        ]
+        
 
-    return samples_list
+    return pd.DataFrame(samples_list)
 
 
-def create_links(dir_with_reads, original_dir, sample, hard=False):
+def create_links(dir_w_reads, import_dir, samples, hard = False, create_dir_if_not_exist = False):
     """
     This method creates links or hard copies reads files from one directory to another. 
 
@@ -88,24 +66,50 @@ def create_links(dir_with_reads, original_dir, sample, hard=False):
     :returns:
 
     """
-    orig_wc = '{orig_dir}/{sample_file}'
-    new_file_wc = '{new_dir}/{sample_file}'
+    orig_wc     = '{dir_w_reads}/{name_in_run}{ending_variant}{extension}'
+    new_file_wc = '{import_dir}/{name_in_dataset}{strand}{extension}'
 
-    if not os.path.isdir(dir_with_reads):
-        os.makedirs(dir_with_reads)
+    # make dirs
+    if not os.path.isdir(import_dir) and create_dir_if_not_exist:
+        os.makedirs(import_dir)
 
-    src_r1 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R1'])
-    dst_r1 = new_file_wc.format(new_dir=dir_with_reads, sample_file=sample['renamed_files']['R1'])
+    for sample in samples.to_dict(orient = 'records'):
+        
+        src_r1 = orig_wc.format(
+            dir_w_reads = dir_w_reads, 
+            name_in_run = sample['name_in_run'],
+            ending_variant = sample['ending_variant_R1'],
+            extension = sample['extension']
+        )
+        dst_r1 = new_file_wc.format(
+            import_dir = import_dir, 
+            name_in_dataset = sample['name_in_dataset'],
+            strand = '_R1',
+            extension = sample['extension']
+        )
 
-    src_r2 = orig_wc.format(orig_dir=original_dir, sample_file=sample['files']['R2'])
-    dst_r2 = new_file_wc.format(new_dir=dir_with_reads, sample_file=sample['renamed_files']['R2'])
-    if hard:
-        copy2(src_r1, dst_r1)
-        copy2(src_r2, dst_r2)
-        return
-    os.symlink(src_r1, dst_r1)
-    os.symlink(src_r2, dst_r2)
+        src_r2 = orig_wc.format(
+            dir_w_reads = dir_w_reads, 
+            name_in_run = sample['name_in_run'],
+            ending_variant = sample['ending_variant_R2'],
+            extension = sample['extension']
+        )
+        dst_r2 = new_file_wc.format(
+            import_dir = import_dir, 
+            name_in_dataset = sample['name_in_dataset'],
+            strand = '_R2',
+            extension = sample['extension']
+        )
 
+        if hard:
+            copy2(src_r1, dst_r1)
+            copy2(src_r2, dst_r2)
+            return
+        print('---')
+        print(src_r1, dst_r1)
+        print(src_r2, dst_r2)
+    #     os.symlink(src_r1, dst_r1)
+    #     os.symlink(src_r2, dst_r2)
 
 def delete_ds(dataset):
     """

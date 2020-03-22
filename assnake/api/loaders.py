@@ -3,8 +3,6 @@ import glob
 
 import pandas as pd
 import numpy as np
-# import assnake.api.bb_stats
-# import sample_set
 import yaml
 
 import assnake.utils
@@ -14,6 +12,7 @@ def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, 
     Loads information about read and bp count in paired-end sample.
     """
     strands = ['R1', 'R2']
+    
     count_loc1 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand=strands[0])
     count_loc2 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand=strands[1])
     
