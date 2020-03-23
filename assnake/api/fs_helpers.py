@@ -13,7 +13,7 @@ import pandas as pd
 
 
 
-def get_samples_from_dir(directory_with_reads, modify_name):
+def get_samples_from_dir(directory_with_reads, modify_name = None):
     samples_list = []  # to write samples in
     
     ext = '.fastq.gz'  # extention
@@ -39,7 +39,7 @@ def get_samples_from_dir(directory_with_reads, modify_name):
         samples_list += [
             {
                 'name_in_run': s,
-                'modified_name': modify_name(s),
+                'modified_name': modify_name(s) if modify_name is not None else s,
                 
                 'ending_variant_id': ending_variant['name'],
                 'ending_variant_R1': ending_variant['strands']['R1'],
@@ -54,7 +54,7 @@ def get_samples_from_dir(directory_with_reads, modify_name):
     return pd.DataFrame(samples_list)
 
 
-def create_links(dir_w_reads, import_dir, samples, hard = False, create_dir_if_not_exist = False):
+def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = False, rename = False, just_print = False):
     """
     This method creates links or hard copies reads files from one directory to another. 
 
@@ -70,46 +70,54 @@ def create_links(dir_w_reads, import_dir, samples, hard = False, create_dir_if_n
     new_file_wc = '{import_dir}/{name_in_dataset}{strand}{extension}'
 
     # make dirs
-    if not os.path.isdir(import_dir) and create_dir_if_not_exist:
-        os.makedirs(import_dir)
+    if not os.path.isdir(import_dir):
+        if create_dir_if_not_exist:
+            os.makedirs(import_dir)
+        else:
+            print("Such dir doesn't exist and create_dir_if_not_exist is set to False")
 
     for sample in samples.to_dict(orient = 'records'):
         
         src_r1 = orig_wc.format(
-            dir_w_reads = dir_w_reads, 
+            dir_w_reads = sample['directory'], 
             name_in_run = sample['name_in_run'],
             ending_variant = sample['ending_variant_R1'],
             extension = sample['extension']
         )
         dst_r1 = new_file_wc.format(
             import_dir = import_dir, 
-            name_in_dataset = sample['name_in_dataset'],
+            name_in_dataset = sample['fs_name'],
             strand = '_R1',
             extension = sample['extension']
         )
 
         src_r2 = orig_wc.format(
-            dir_w_reads = dir_w_reads, 
+            dir_w_reads = sample['directory'], 
             name_in_run = sample['name_in_run'],
             ending_variant = sample['ending_variant_R2'],
             extension = sample['extension']
         )
         dst_r2 = new_file_wc.format(
             import_dir = import_dir, 
-            name_in_dataset = sample['name_in_dataset'],
+            name_in_dataset = sample['fs_name'],
             strand = '_R2',
             extension = sample['extension']
         )
+
+        if rename:
+            os.rename(src_r1, dst_r1)
+            os.rename(src_r2, dst_r2)
+            return
 
         if hard:
             copy2(src_r1, dst_r1)
             copy2(src_r2, dst_r2)
             return
-        print('---')
-        print(src_r1, dst_r1)
-        print(src_r2, dst_r2)
-    #     os.symlink(src_r1, dst_r1)
-    #     os.symlink(src_r2, dst_r2)
+        # print('---')
+        # print(src_r1, dst_r1)
+        # print(src_r2, dst_r2)
+        os.symlink(src_r1, dst_r1)
+        os.symlink(src_r2, dst_r2)
 
 def delete_ds(dataset):
     """

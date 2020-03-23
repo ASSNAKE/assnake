@@ -112,9 +112,9 @@ class Dataset:
         self.self_reads_info = self.sample_containers.pivot(index='fs_name', columns='preproc', values='reads')
   
 
-    def plot_reads_loss(self):
-        preprocs = list(self.self_reads_info.columns)
-        plot_reads_count_change(self.self_reads_info.copy(), preprocs = preprocs, sort = 'raw', plot=True)
+    def plot_reads_loss(self, preprocs = [], sort = 'raw'):
+        # preprocs = list(self.self_reads_info.columns)
+        plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=True)
 
     def __str__(self):
         return self.df + '\n' + self.fs_prefix +'\n' + str(self.sample_sets)

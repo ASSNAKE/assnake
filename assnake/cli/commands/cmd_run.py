@@ -16,10 +16,10 @@ from assnake.api.loaders import update_fs_samples_csv
 @click.option('--jobs','-j', help='Number of jobs', default=1)
 @click.option('--drmaa/--no-drmaa', default=False)
 @click.option('--run/--no-run', default=False)
-
+@click.option('--touch/--no-touch', default=False)
 @click.pass_obj
 
-def run(config, threads, jobs, drmaa, run):
+def run(config, threads, jobs, drmaa, run, touch):
     import snakemake # Moved import here because it is slow as fucking fuck
     # print(config['requests'])
 
@@ -43,6 +43,7 @@ def run(config, threads, jobs, drmaa, run):
         latency_wait = 120,
         conda_prefix = config['config']['conda_dir'],
         drmaa=drmaa_param,
+        touch = touch,
         cores=jobs, nodes=jobs)
     if run:
         print(config['requested_dfs'])

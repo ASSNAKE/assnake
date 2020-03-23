@@ -4,7 +4,7 @@ import glob
 import pandas as pd
 import numpy as np
 import yaml
-
+import assnake
 import assnake.utils
 
 def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, count_wc=''):
@@ -24,11 +24,11 @@ def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, 
             count_dict['reads'] += int(line.split(' ')[0]) + 1
             if report_bps:
                 count_dict.update({'bps':int(line.split(' ')[1])})
-        with open(count_loc2, 'r') as f:
-            line = f.readline().rstrip()
-            count_dict['reads'] += int(line.split(' ')[0])
-            if report_bps:
-                count_dict['bps'] += int(line.split(' ')[1])
+        # with open(count_loc2, 'r') as f:
+        #     line = f.readline().rstrip()
+        #     count_dict['reads'] += int(line.split(' ')[0])
+        #     if report_bps:
+        #         count_dict['bps'] += int(line.split(' ')[1])
     except:
         if verbose: 
             print('error loading counts: ', sample)
@@ -140,8 +140,8 @@ def update_fs_samples_csv(dataset):
     :return: Returns sample dict in loc
     
     '''
-    fs_samples_tsv_loc = '{config}/datasets/{df}/fs_samples.tsv'.format(config=utils.load_config_file()['assnake_db'], df=dataset)
-    df = Dataset(dataset)
+    fs_samples_tsv_loc = '{config}/datasets/{df}/fs_samples.tsv'.format(config=assnake.utils.load_config_file()['assnake_db'], df=dataset)
+    df = assnake.Dataset(dataset)
     fs_samples_pd = pd.concat(list(df.sample_sets.values()))
     fs_samples_pd['Final'] = 'never_set'
     fs_samples_pd.to_csv(fs_samples_tsv_loc, sep='\t', index = False)
