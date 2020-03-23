@@ -297,7 +297,8 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
         if not os.path.exists(target):
             click.secho("Provided sample-list file couldn't be detected", err=True)
             exit(2)
-
+    target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
+    os.makedirs(target, exist_ok=True)
     # def rename(sample):
     #     new_name_wc = 'Rst{}_{}_B2'
     #     splitted = sample.split('_')
@@ -309,34 +310,34 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
     else:
         modify_name=lambda arg: arg.replace('-', '_')
 
-    dicts = fs_helpers.get_samples_from_dir(reads, modify_name)
-    sample_names = {d['sample_name'] for d in dicts}
-    if arg_s:
-        samples_of_interest = sample_set.split(',')
-    elif arg_l:
-        sample_list = pathizer(sample_list)
-        if os.path.exists(sample_list):
-            with open(sample_list, 'r') as ls_file:
-                samples_of_interest = ls_file.readlines()
-        else:
-            click.secho("Provided sample-list file couldn't be detected", err=True)
-    else:
-        samples_of_interest = sample_names
-
-    # Such a mess! check if specified samples are in directory
-    if (arg_s or arg_l) and (len(set(samples_of_interest) - {d['sample_name'] for d in dicts}) != 0):
-        click.secho("Warning! Samples, been specified, are not in reads file", err=True)
-        click.confirm('Continue?', abort=True)
-    if copy:
-        click.secho("Please, keep in mind, that hard copying may take plenty of time")
-
-    # Here the logic -- just call create_links
-    for d in dicts:
-        if d['sample_name'] in samples_of_interest:
-            fs_helpers.create_links(target, reads, d, hard=copy)
+    samples_in_run = fs_helpers.get_samples_from_dir(reads, modify_name)
+    samples_in_run['fs_name'] = samples_in_run['modified_name']
+    fs_helpers.create_links(target,  samples_in_run, hard=copy)
 
     update_fs_samples_csv(df_info['df'])
-    click.secho("SUCCESSFULLY IMPORTED READS!", bg='green')
+    click.secho("SUCCESSFULLY IMPORTED READS!", bg='green') 
+    # sample_names = {d['sample_name'] for d in dicts}
+    # if arg_s:
+    #     samples_of_interest = sample_set.split(',')
+    # elif arg_l:
+    #     sample_list = pathizer(sample_list)
+    #     if os.path.exists(sample_list):
+    #         with open(sample_list, 'r') as ls_file:
+    #             samples_of_interest = ls_file.readlines()
+    #     else:
+    #         click.secho("Provided sample-list file couldn't be detected", err=True)
+    # else:
+    #     samples_of_interest = sample_names
+
+    # # Such a mess! check if specified samples are in directory
+    # if (arg_s or arg_l) and (len(set(samples_of_interest) - {d['sample_name'] for d in dicts}) != 0):
+    #     click.secho("Warning! Samples, been specified, are not in reads file", err=True)
+    #     click.confirm('Continue?', abort=True)
+    # if copy:
+    #     click.secho("Please, keep in mind, that hard copying may take plenty of time")
+
+    # Here the logic -- just call create_links
+    
 
 
 @click.command(name='rescan')
