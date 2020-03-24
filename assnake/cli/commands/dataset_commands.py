@@ -124,13 +124,17 @@ def check_absolute_path(path, path_name):
     Last part of the path (basename) will be used as df-name. MUST be empty, may not exist. \
     For regestiring existing datasets inside new Assnake instance use assnake dataset register', required=False)
 
+
+@click.option('--first-preprocessing-name', 
+    help='Name of your first preprocessing. raw by default. You want to set it to sra, for exaple if yoo are planning to download from NCBI. Purely cosmetic effect.', required=False, default = 'raw')
+
 @click.option('--description', '-D', nargs=2, multiple=True, required=False, type=click.Tuple([str, str]),
               help='Add some description in this way ` assnake dataset create ... -D property_1 value_1 ... -D property_n value_n`')
 
 @click.option('--quietly', '-q', is_flag=True, help='Doing it quietly. No questions.')
 @click.option('--test-data', '-t', is_flag=True, help='Download test data from Humann2 tutorial')
 @click.pass_obj
-def df_create(config, df_name, data_storage_folder, full_path_to_df, description, quietly, test_data):
+def df_create(config, df_name, data_storage_folder, full_path_to_df,first_preprocessing_name, description, quietly, test_data):
     """Register your dataset inside ASSNAKE!\n
         You can use it in interactive mode.
         Usage: assnake dataset create [dataset] or -d [dataset] ..
@@ -162,7 +166,7 @@ def df_create(config, df_name, data_storage_folder, full_path_to_df, description
         full_df_path = validate_df_prefix(df, fs_prefix, True)
 
     os.makedirs(full_df_path, exist_ok=True)
-    os.makedirs(os.path.join(full_df_path, 'reads/raw'), exist_ok=True)
+    os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
     df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
 
     assnake_db = config['config']['assnake_db']
@@ -191,10 +195,13 @@ def df_create(config, df_name, data_storage_folder, full_path_to_df, description
 #                                   INIT
 # ---------------------------------------------------------------------------------------
 
-@click.command(name='init')
+@click.command(name='init', help = 'Register dataset in Assnake based on the folder from where you called the command. (Working directory)')
 @click.option('--df-name', '-d', help='Name of the dataset. If provided, folder with this name will be created in current dir.', required = False)
+@click.option('--first-preprocessing-name', 
+    help='Name of your first preprocessing. raw by default. You want to set it to sra, for exaple if yoo are planning to download from NCBI. Purely cosmetic effect.', required=False, default = 'raw')
+
 @click.pass_obj
-def df_init(config, df_name):
+def df_init(config, df_name, first_preprocessing_name):
     cwd = os.getcwd()
 
     if df_name is None:
@@ -213,7 +220,7 @@ def df_init(config, df_name):
         full_path_empty = False
  
 
-    os.makedirs(os.path.join(full_df_path, 'reads/raw'), exist_ok=True)
+    os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
     df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
 
     assnake_db = config['config']['assnake_db']
