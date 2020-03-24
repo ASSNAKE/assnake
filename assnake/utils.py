@@ -86,7 +86,8 @@ def pathizer(path):
     """
     if path is None or path==' ' or path == '':
         return os.popen('pwd').read().replace('\n', '')
-    return '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read().replace('\n', ''), rel_path=path) if (path[0] != '/') else path
+    final = '{prefix}/{rel_path}'.format(prefix=os.popen('pwd').read().replace('\n', ''), rel_path=path) if (path[0] != '/') else path
+    return final.rstrip('\/')
 
 
 def dict_norm_print(d, indent=1):

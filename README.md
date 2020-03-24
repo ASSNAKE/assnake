@@ -1,8 +1,26 @@
 # ASSNAKE
 
-Assnake is a system for metagenomics data analysis and management. 
-It allows you to go from raw reads to visualization and statistical analysis of your data as fast as possible.
-The pipeline is built using Snakemake and is fully modular.
+Assnake is a system for NGS data analysis, vizualisation and management.
+It allows you to go from raw reads to biological insights in just a few commands.
+
+As of pre-alpha release Assnake is capable of full-blown metagenomic data analysis (Both Shotgun WGS and Amplicon 16s included!) and some RNA-seq analysis.
+
+Assnake was born in an effort to provide userfriendly, scalable and powerful system for NGS data analysis, but at the same time our goal was to make it easy to extend with your own pipelines.
+
+Assnake has 3 key concepts:
+
+* You store reads of your Samples inside Datasets.
+    Datasets are just folders on your file system, assnake assumes that raw reads are stored inside `{PATH_TO_DATASET_FOLDER}/{YOUR_DATASET_NAME}/reads/raw`
+    So, for example you may have your reads stored at /home/ozzy/bat_microbiome/reads/raw. /home/ozzy is the prefix of your Dataset and bat_microbiome is it's name. You need to register your dataset inside Assnake with `assnake dataset create -f /home/ozzy -d bat_microbiome` Don't be afraid, Assnake is very careful and will never overwrite or delete your data!
+* Data needs quality control and cleaning before being analyzed.
+* Everything that produces meaningful and useful data produces Result which you can request from Assnake `assnake result <RESULT_NAME> --df <DATASET> run`. For example command `assnake result fastqc --df bat_microbiome run` will produce fastqc reports for all samples in Dataset bat_microbiome.
+
+
+Assnake draws inspiration mainly from Anvio (incorporated into Assnake) and QIIME-2. 
+
+Assnake uses Snakemake as a workflow subsystem, thus it gets Snakemake's ability to run on all kinds of servers, clusters, personal computers and in the cloud.
+
+Assnake is entirely open sourced and is built with great open-source community. We encourage the community to join Assnake's initiative in creating open reproducable and userfriendly omics data analysis and management.
 
 # Quick start
 ## Conda part
