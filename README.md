@@ -5,29 +5,47 @@ It allows you to go from raw reads to biological insights in just a few commands
 
 As of pre-alpha release Assnake is capable of full-blown metagenomic data analysis (Both Shotgun WGS and Amplicon 16s included!) and some RNA-seq analysis.
 
-Assnake was born in an effort to provide userfriendly, scalable and powerful system for NGS data analysis, but at the same time our goal was to make it easy to extend with your own pipelines.
+Assnake was born in an effort to provide userfriendly, scalable and reproducable system for NGS data analysis accessible to researches without advanced computer skills, but at the same time our goal was to make this system flexible, easy to modify and extend with your own pipelines or analysis helpers.
 
-Assnake has 3 key concepts:
+Chances are, you work with more than one NGS dataset, and maybe you are not the only one working on a server/cluster. How many times have you found yourself searching for the data all over the filesystem and asking your collegues if they remember where someone put that data? When you finally find raw data, the result files and code are most proably in a state of creative chaos and gatehring them together may be a tough task. If you want to compare results of different studies, validate your findings using external data or provide your readers with an easy way to reproduce your analysis, all you code and files should be in strict order. Moreover, it is hard to keep track of all software dependecies and conflicts, versions of tools and pipelines, deploying your environment on a new machine may be a real pain in the ass. ASSnake solves all these problems in an userfriendly and extendable way, by allowing you to catalogue your data, run and reproduce pipelines and statistical analysis. 
 
-* You store reads of your Samples inside Datasets.
-    Datasets are just folders on your file system, assnake assumes that raw reads are stored inside `{PATH_TO_DATASET_FOLDER}/{YOUR_DATASET_NAME}/reads/raw`
-    So, for example you may have your reads stored at /home/ozzy/bat_microbiome/reads/raw. /home/ozzy is the prefix of your Dataset and bat_microbiome is it's name. You need to register your dataset inside Assnake with `assnake dataset create -f /home/ozzy -d bat_microbiome` Don't be afraid, Assnake is very careful and will never overwrite or delete your data!
-* Data needs quality control and cleaning before being analyzed.
-* Everything that produces meaningful and useful data produces Result which you can request from Assnake `assnake result <RESULT_NAME> --df <DATASET> run`. For example command `assnake result fastqc --df bat_microbiome run` will produce fastqc reports for all samples in Dataset bat_microbiome.
+### Assnake Quick Start:
 
+1. Install through conda. (Now only installation by cloning GitHub repo is available)
+2. Initialize your installation `assnake init start --just-do-it` (1 minute)
+3. Create Assnake Dataset `assnake dataset create -f {PREFIX_OF_DOLDER} -d {DATASET_NAME}` (1 minute)
+4. Import reads into Dataset `assnake dataset import-reads -d {DATASET_NAME} -r {FOLDER_WITH_READS}` (1 minute)
+5. Run the pipeline of your choice! `assnake result dada2-full -d {DATASET_NAME} gather -j 8 --run`
+
+
+### Assnake Main Concepts:
+
+* You store reads of your *Samples* inside *Datasets*.
+    Techincallly *Datasets* are just folders on your file system, and you need to tell Assnake about their existence.  
+    Assnake assumes that raw reads are stored inside `{PATH_TO_DATASET_FOLDER}/{YOUR_DATASET_NAME}/reads/raw`.
+    So, for example you may have your reads stored at `/home/ozzy/bat_microbiome/reads/raw`. `/home/ozzy` is the prefix of your Dataset and `bat_microbiome` is its name. You need to register your dataset inside Assnake with `assnake dataset create -f /home/ozzy -d bat_microbiome` Don't be afraid, Assnake is very careful and will never overwrite or delete your data!
+* Data needs quality control and cleaning before being analyzed. When *preprocessing* your reads, say, removing low quality or contaminant sequences, you get new read files. Theay are stored inside `{fs_prefix}/{df}/reads/{preprocessing}` folders. So, the name of the folder is the name of your preprocessing! For raw reads the name of preprocessing would be `raw`, name `raw__tmtic_def` means that raw reads were preprocessed with Trimmomatic with default parameters. `preprocessing` name fully describes all the steps that were apllied to the reads inside the folder, steps are separated using double underscore `__`
+* Everything that generates meaningful and useful data produces Result, which you can request from Assnake using `assnake result <RESULT_NAME>` command. For example command `assnake result fastqc --df bat_microbiome run` will produce fastqc reports for all samples in Dataset bat_microbiome. By the way, by performing *preprocessing* results you get Result in form of reads! `{sample}_R1.fastq.gz {sample}_R2.fastq.gz`
+* *Results* are provided by *SnakeModules*. They implement all the logic connected with the Result and one Module can implemet any number of results. For example, assnake-dada2 module implements DADA2 pipeline. It extends Assnake with 2 Results - `dada2-filter-and-trim` for trimming reads and `dada2-full` for running full pipeline and generate table with ASVs (Amplicon Sequence Variants (link to github issue about the term)) abundances across samples and table with taxonomic annotation of ASVs. It also exposes API that allows you to easy access, manipulate and vizualise this data (Heatmaps, Barplots, PCA plots) from Python or R (Notebooks are great!) *More on that in Extending Assnake section* - not written
+
+This four concepts are the foundation of the Assnake. This assumtions are pretty general and applicable for many types of data. Actually snakemake is a *framework* for creating data-processing pipelines with the primary focus on NGS and other omics data. 
 
 Assnake draws inspiration mainly from Anvio (incorporated into Assnake) and QIIME-2. 
 
 Assnake uses Snakemake as a workflow subsystem, thus it gets Snakemake's ability to run on all kinds of servers, clusters, personal computers and in the cloud.
 
-Assnake is entirely open sourced and is built with great open-source community. We encourage the community to join Assnake's initiative in creating open reproducable and userfriendly omics data analysis and management.
+Assnake is entirely open sourced and is built with great open-source tools. We encourage the community to join Assnake's initiative in creating open, reproducable, userfriendly, and scalable omics data analysis and management.
 
-# Quick start
-## Conda part
+## Installation
+
+### Conda part
+
 1. Install conda https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
 2. Create new environment `conda create -n assnake python=3.6`
 3. Activate your new environment `source activate assnake`
-## Assnake part
+
+### Assnake part
+
 1. Navigate to some directory on your file system, for example your home directory `cd ~`
 2. Clone this repository to your computer using `git clone https://github.com/Fedorov113/assnake.git` 
 3. Enter to just created assnake directory `cd assnake`
