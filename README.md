@@ -1,11 +1,11 @@
 # ASSNAKE
 
-Assnake is a system for NGS data analysis, vizualisation and management.
+Assnake is a system for Illumina NGS data analysis, vizualisation and management.
 It allows you to go from raw reads to biological insights in just a few commands.
 
 As of pre-alpha release Assnake is capable of full-blown metagenomic data analysis (Both Shotgun WGS and Amplicon 16s included!) and some RNA-seq analysis.
 
-Assnake was born in an effort to provide userfriendly, scalable and reproducable system for NGS data analysis accessible to researches without advanced computer skills, but at the same time our goal was to make this system flexible, easy to modify and extend with your own pipelines or analysis helpers.
+Assnake was born in an effort to provide userfriendly, scalable and reproducable system for NGS data analysis accessible to researches without advanced computer skills, but at the same time make such system flexible, easy to modify and extend with your own pipelines or analysis code.
 
 Chances are, you work with more than one NGS dataset, and maybe you are not the only one working on a server/cluster. How many times have you found yourself searching for the data all over the filesystem and asking your collegues if they remember where someone put that data? When you finally find raw data, the result files and code are most proably in a state of creative chaos and gatehring them together may be a tough task. If you want to compare results of different studies, validate your findings using external data or provide your readers with an easy way to reproduce your analysis, all you code and files should be in strict order. Moreover, it is hard to keep track of all software dependecies and conflicts, versions of tools and pipelines, deploying your environment on a new machine may be a real pain in the ass. ASSnake solves all these problems in an userfriendly and extendable way, by allowing you to catalogue your data, run and reproduce pipelines and statistical analysis. 
 

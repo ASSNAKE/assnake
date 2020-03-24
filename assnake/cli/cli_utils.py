@@ -91,11 +91,11 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
 
 
-    sample_set = assnake.SampleSet(df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
+    sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
     if len(exclude_samples) > 0 :  
-        sample_set.samples_pd = sample_set.samples_pd.loc[~sample_set.samples_pd['fs_name'].isin(exclude_samples), ]
+        sample_set = sample_set.loc[~sample_set['fs_name'].isin(exclude_samples), ]
 
-    click.echo(tabulate(sample_set.samples_pd[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+    click.echo(tabulate(sample_set[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
 
     # construct sample set name for fs
     if meta_column is None and column_value is None:
@@ -110,7 +110,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
 def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
     res_list = []
-    for s in sample_set.samples_pd.to_dict(orient='records'):
+    for s in sample_set.to_dict(orient='records'):
         preprocessing = s['preproc']
         res_list.append(wc_str.format(
             fs_prefix = s['fs_prefix'].rstrip('\/'),    

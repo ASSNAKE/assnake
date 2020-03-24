@@ -7,6 +7,8 @@ import yaml
 import assnake
 import assnake.utils
 
+from assnake.utils import bytes2human
+
 def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, count_wc=''):
     """
     Loads information about read and bp count in paired-end sample.
@@ -128,6 +130,40 @@ def load_sample(fs_prefix, df, preproc, sample,
             #'preprocs':containers, 
             **load_count(fs_prefix, df, final_preproc, sample, verbose, count_wc=count_wc)}
 
+
+def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = '*'):
+    '''
+    This function is used to add samples into the SampleSet.
+
+    Args:
+        fs_prefix: Prefix of the dataset on filesystem
+        df: Name of the dataset
+        preproc: Preprocessing you want to use
+        samples_to_add: List of sample names to add
+        do_not_add: list of sample names NOT to add
+        pattern: sample names must match this glob pattern to be included. 
+    '''
+    samples = []
+    fastq_gz_file_loc = wc_config['fastq_gz_file_wc'].format(
+        fs_prefix=fs_prefix, df=df, preproc=preproc, 
+        strand='R1', sample = pattern)
+    
+    fs_names = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
+
+    sample_dir_wc    = wc_config['sample_dir_wc']
+    fastq_gz_file_wc = wc_config['fastq_gz_file_wc']
+    count_wc         = wc_config['count_wc']
+
+    fs_names = list(set(fs_names) - set(do_not_add))
+
+    if len(samples_to_add) > 0: fs_names = fs_names and samples_to_add
+
+    samples = [load_sample(fs_prefix, df, preproc, fs_name,
+                    sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, 
+                    count_wc=count_wc) for fs_name in fs_names]
+    
+    sample_set = pd.DataFrame(samples)
+    return sample_set
 
 fields = ['sample', 'sequencing_run']
 

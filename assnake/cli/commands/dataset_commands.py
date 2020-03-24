@@ -1,7 +1,3 @@
-#
-# Perform assnake dataset [create/info/list] commands
-#
-
 import click, sys, os, glob, yaml, shutil
 import pandas as pd
 import assnake.api.loaders
@@ -11,9 +7,6 @@ from assnake.api import fs_helpers
 from assnake.utils import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
 from assnake.api.loaders import update_fs_samples_csv
-
-
-
 
 # some util
 def show_av_dict(dfs):
@@ -51,76 +44,135 @@ def df_list():
         click.echo('')
 
 
-# \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
 # ---------------------------------------------------------------------------------------
 #                                   CREATE
 # ---------------------------------------------------------------------------------------
-# TODO rel path 
-@click.command(name='create')
-@click.option('--df', '-d', help='Name of the dataset', required = False)
 
-@click.option('--fs_prefix', '-f', help='Filesystem prefix. If none path to current dir will be used', required=False)
+def check_df_name_avialability(df):
+    
+    dfs_in_db = assnake.api.loaders.load_dfs_from_db('')
+    if df in dfs_in_db:
+        click.secho('Dataset with such name already exists!. Aborting.')
+        exit()
+    return df
+
+def validate_df_prefix(df, fs_prefix, create_prefix = False, allow_not_empty_full_path = False):
+    """
+    Ensures that can write to full_df_path and it is empty
+    """
+    df = check_df_name_avialability(df)
+    if df is None:
+        exit()
+
+    if not os.path.isabs(fs_prefix):
+        click.secho('fs_prefix is not absolute!') 
+        exit()
+    full_df_path = os.path.join(fs_prefix, df)
+
+    if os.path.isdir(full_df_path):
+        if not os.listdir(full_df_path) and os.access(full_df_path, os.W_OK):
+            click.echo('Great! ' + full_df_path + ' exists, is empty and assnake can write to that folder, initializing dataset here')
+            return full_df_path
+        elif os.listdir(full_df_path):
+            if allow_not_empty_full_path:
+                click.echo(full_df_path + ' exists, but it is not empty. allow_not_empty_full_path is true, existance logic will be handled downstream.')
+                return full_df_path
+            else:
+                click.echo('Oops =( ' + full_df_path + ' exists, but it is not empty. Aborting.')
+                return None
+        elif not os.access(full_df_path, os.W_OK):
+            click.echo('Oops =( ' + full_df_path + ' exists, but assnake doesnt have permissions to write there. Aborting.')
+            return None
+    else:
+        click.echo('Oops =( ' + full_df_path + ' exists, but it is not directory. Aborting.')
+
+        
+    if os.path.isdir(fs_prefix):
+        if os.access(fs_prefix, os.W_OK):
+            click.echo('Great! ' + fs_prefix + ' exists, and assnake can write to that folder, initializing dataset in:')
+            click.echo(full_df_path + '  (Will be created)')
+            return full_df_path
+    else:
+        if not create_prefix:
+            click.echo('Oops =( ' + fs_prefix + ' doesnt exist, and create_prefix is set to False. Aborting.')
+        else:
+            click.echo('Great! ' + fs_prefix + ' will be created, and dataset will be initialized in:')
+            click.echo(full_df_path + '  (Will be created)')
+            return full_df_path
+
+    return None
+
+def check_absolute_path(path, path_name):
+    path = path.rstrip('\/')
+    if not os.path.isabs(path):
+        click.secho(path_name + ' is not absolute!') 
+        exit()
+    return path
+
+@click.command(name='create')
+
+@click.option('--df-name', '-d', help='Name of the dataset', required = False)
+
+@click.option('--data-storage-folder', '-f', 
+    help='Folder where you want to store your data. \
+        Directory with provided df-name will be created inside this folder. MUST exist, may be not empty.\
+        Resulting {storage-folder}/{df-name} directory MUST be empty, may not exist. \
+        For regestiring existing datasets inside new Assnake instance use assnake dataset register', required=False)
+
+@click.option('--full-path-to-df', '-p', 
+    help='Full path to dataset folder. \
+    Last part of the path (basename) will be used as df-name. MUST be empty, may not exist. \
+    For regestiring existing datasets inside new Assnake instance use assnake dataset register', required=False)
+
 @click.option('--description', '-D', nargs=2, multiple=True, required=False, type=click.Tuple([str, str]),
               help='Add some description in this way ` assnake dataset create ... -D property_1 value_1 ... -D property_n value_n`')
+
 @click.option('--quietly', '-q', is_flag=True, help='Doing it quietly. No questions.')
 @click.option('--test-data', '-t', is_flag=True, help='Download test data from Humann2 tutorial')
-@click.argument('df_arg', required=False)
 @click.pass_obj
-def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
+def df_create(config, df_name, data_storage_folder, full_path_to_df, description, quietly, test_data):
     """Register your dataset inside ASSNAKE!\n
         You can use it in interactive mode.
         Usage: assnake dataset create [dataset] or -d [dataset] ..
 
-        """
-    if not (bool(df is None)^bool(df_arg is None)):
-        click.echo('Please, specify dataset either as option or argument')
-        df = click.prompt('Type the name in')
-    if df is None:
-        df = df_arg
-    there_is_prpties = False
-    if fs_prefix is None and (not quietly):
-        if click.confirm('You have not specified the path to dir. Current path will be used, change it?', abort=False):
-            fs_prefix = click.prompt('Please, type in the path')
+    """
+    
+    if ((df_name is None) or (data_storage_folder is None)):
+        if full_path_to_df is None:
+            click.echo('You must specify df_name AND data_storage_folder, OR full_path_to_df')
+            exit()
+        
+        else: # full_path_to_df road
+            # click.echo('df-name or data-storage-folder not set, using full_path_to_df')
+            click.echo('Using full_path_to_df')
+            full_path_to_df = check_absolute_path(full_path_to_df, 'full_path_to_df')
+            df = os.path.basename(full_path_to_df)
+            fs_prefix = os.path.dirname(full_path_to_df)
+            full_df_path = validate_df_prefix(df, fs_prefix, True)
 
-    fs_prefix = pathizer(fs_prefix)
+    # df_name AND data_storage_folder road
+    elif (df_name is not None) and (data_storage_folder is not None):
+        if full_path_to_df is not None:
+            click.echo('df-name AND data-storage-folder are set, ignoring full_path_to_df')
 
-    assnake_db_search = os.path.join(config['config']['assnake_db'], 'datasets/*')
-    dfs = [d.split('/')[-1] for d in glob.glob(os.path.join(assnake_db_search))]
+        click.secho('Using df_name AND data_storage_folder')
+        data_storage_folder = check_absolute_path(data_storage_folder, 'data_storage_folder')
+        df = df_name # TODO VALIDATE
+        fs_prefix = data_storage_folder
+        full_df_path = validate_df_prefix(df, fs_prefix, True)
 
-    prpts = dict()
-    if len(description) != 0:
-        prpts.update(dict(description))
-        quietly = True
-        there_is_prpties = True
-    while (not quietly) and click.confirm('Add property', abort=False):
-        if not there_is_prpties:
-            there_is_prpties = True
-        prpts.update({click.prompt('Name of property'): click.prompt('Value of property')})
+    os.makedirs(full_df_path, exist_ok=True)
+    os.makedirs(os.path.join(full_df_path, 'reads/raw'), exist_ok=True)
+    df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
 
-    if df not in dfs:
-        os.makedirs(os.path.join(fs_prefix, df), exist_ok=True)
-        df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': prpts}
-        os.makedirs(os.path.join(config['config']['assnake_db'], 'datasets/' + df), exist_ok=True)
-        with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'), 'w') as info_file:
-            yaml.dump(df_info, info_file, default_flow_style=False)
-        click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
+    assnake_db = config['config']['assnake_db']
+    df_path_in_assnake = os.path.join(assnake_db, 'datasets', df)
+    os.symlink(full_df_path, df_path_in_assnake, target_is_directory = True)
 
+    with open(os.path.join(df_path_in_assnake, 'df_info.yaml'), 'w') as info_file:
+        yaml.dump(df_info, info_file, default_flow_style=False)
+    click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
 
-    else:
-        click.secho('Duplicate name!', fg='red')
-        if there_is_prpties:
-            click.secho('Description updated', fg='green')
-            with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'),
-                      'r') as info_file_old:
-                df_info_old = yaml.load(info_file_old)
-            try:
-                df_info_old['description'].update(prpts)
-            except KeyError as e:
-                df_info_old['description'] = prpts
-            with open(os.path.join(config['config']['assnake_db'], 'datasets/' + df, 'df_info.yaml'), 'w') as info_file:
-                yaml.dump(df_info_old, info_file, default_flow_style=False)
 
     if test_data:
         download_from_url('http://kronos.pharmacology.dal.ca/public_files/tutorial_datasets/mgs_tutorial_Oct2017.zip', 
@@ -135,9 +187,44 @@ def df_create(config, df, fs_prefix, description, quietly, test_data, df_arg):
         # TODO cleanup
         shutil.rmtree(os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017'), ignore_errors=True)
 
+# ---------------------------------------------------------------------------------------
+#                                   INIT
+# ---------------------------------------------------------------------------------------
 
-# \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+@click.command(name='init')
+@click.option('--df-name', '-d', help='Name of the dataset. If provided, folder with this name will be created in current dir.', required = False)
+@click.pass_obj
+def df_init(config, df_name):
+    cwd = os.getcwd()
 
+    if df_name is None:
+        df = os.path.basename(cwd)
+        fs_prefix = os.path.dirname(cwd)
+        full_df_path = validate_df_prefix(df, fs_prefix, True, True)
+    else:
+        df = df_name
+        fs_prefix = cwd
+        full_df_path = validate_df_prefix(df, fs_prefix, True, True)
+
+    full_path_empty = True
+    if os.path.isdir(full_df_path) and not os.listdir(full_df_path):
+        click.echo(full_df_path + ' not empty!')
+        click.echo('Trying to import as existing Assnake dataset (Not properly implemented)')
+        full_path_empty = False
+ 
+
+    os.makedirs(os.path.join(full_df_path, 'reads/raw'), exist_ok=True)
+    df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
+
+    assnake_db = config['config']['assnake_db']
+    df_path_in_assnake = os.path.join(assnake_db, 'datasets', df)
+    os.symlink(full_df_path, df_path_in_assnake, target_is_directory = True)
+
+    df_info_loc = os.path.join(df_path_in_assnake, 'df_info.yaml')
+    if not os.path.isfile(df_info_loc):
+        with open(df_info_loc, 'w') as info_file:
+            yaml.dump(df_info, info_file, default_flow_style=False)
+    click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
 
 # ---------------------------------------------------------------------------------------
 #                                   INFO
@@ -195,10 +282,6 @@ def df_info(config, df, preproc, df_arg):
         samples_pd = pd.DataFrame(preprocessing[preproc])
         # print(samples_pd)
         click.echo(tabulate(samples_pd.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
-
-
-# \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
 
 
 # ---------------------------------------------------------------------------------------
