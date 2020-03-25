@@ -170,6 +170,7 @@ def df_create(config, df_name, data_storage_folder, full_path_to_df,first_prepro
     df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
 
     assnake_db = config['config']['assnake_db']
+    os.makedirs(os.path.join(assnake_db, 'datasets'), exist_ok=True)
     df_path_in_assnake = os.path.join(assnake_db, 'datasets', df)
     os.symlink(full_df_path, df_path_in_assnake, target_is_directory = True)
 
@@ -224,6 +225,7 @@ def df_init(config, df_name, first_preprocessing_name):
     df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
 
     assnake_db = config['config']['assnake_db']
+    os.makedirs(os.path.join(assnake_db, 'datasets'), exist_ok=True)
     df_path_in_assnake = os.path.join(assnake_db, 'datasets', df)
     os.symlink(full_df_path, df_path_in_assnake, target_is_directory = True)
 
