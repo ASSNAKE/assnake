@@ -179,7 +179,8 @@ def update_fs_samples_csv(dataset):
     fs_samples_tsv_loc = '{config}/datasets/{df}/fs_samples.tsv'.format(config=assnake.utils.load_config_file()['assnake_db'], df=dataset)
     df = assnake.Dataset(dataset)
     fs_samples_pd = pd.concat(list(df.sample_sets.values()))
-    fs_samples_pd['Final'] = 'never_set'
+    fs_samples_pd = df.sample_sets['raw']
+    fs_samples_pd['final_preprocessing'] = 'never_set'
     fs_samples_pd.to_csv(fs_samples_tsv_loc, sep='\t', index = False)
 
     return True
