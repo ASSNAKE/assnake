@@ -14,21 +14,3 @@ fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{sample}/{sample}_{str
 
 multiqc_fastqc_wc: '{fs_prefix}/{df}/profile/multiqc/{sample_set}/{strand}/samples.list'
 sample_wc: '{directory}/{sample_name}_{strand}.{extension}'
-# multiqc_fatqc_wc: '{prefix}/{df}/multiqc/{sample_set}/{strand}/samples.list'
-
-# multiqc_report: '{prefix}/{df}/multiqc/{sample_set}/{strand}/multiqc_report.html'
-
-# dada2_fat_wc: '{prefix}/{df}/reads/{preproc}__dada2fat_{params}/{sample}/{sample}_R1.fastq.gz'
-# dada2_err_wc: '{dada2_dir}/{sample_set}/{params}/err{strand}.rds'
-# dada2_merged_wc: '{prefix}/{df}/reads/{preproc}/{sample}/{sample}__{sample_set}.merged.rds'
-
-# sam_wc: ''
-
-# assembly_table_wc: '{prefix}/{df}/assembly/{assembler}__{params}/{sample_set}/sample_set.tsv'
-# final_contigs_wc: '{fs_prefix}/{df}/assembly/{assembler}__{assembler_version}__{assembler_params}/{sample_set}/final_contigs__{mod}.fa'
-
-
-
-
-
-# rm_hm_bbmap: '{fs_prefix}/{df}/reads/{preproc}__rmhum_bbmap/{sample}_R1.fastq.gz'

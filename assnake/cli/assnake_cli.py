@@ -1,6 +1,5 @@
 import sys, os, glob, yaml, shutil
 import click
-# # from sys import argv
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.init as commands_init
@@ -18,7 +17,6 @@ from pkg_resources import iter_entry_points
 @click.group()
 @click.version_option()
 @click.pass_context
-# @graph_of_calls('cli_cli.png')
 def cli(ctx):
     """\b
    ___    ____   ____   _  __   ___    __ __   ____
@@ -83,15 +81,8 @@ def init_group():
     """
     pass
 
-# Add start command (assnake init start) from assnake.cli.commands.init.py (./cli/commands/init.py)
 init_group.add_command(commands_init.init_start)
 init_group.add_command(commands_init.current_config)
-
-
-
-# init_group.command( name = 'tt' )(tt)
-# init_group.add_command(tt)
-
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
@@ -118,20 +109,16 @@ def result():
     check_if_assnake_is_initialized()
 
 
-# @click.group(chain = True, help = 'Used to request and run results')
-# @click.pass_obj
-# def request(config):
-#     pass
-# result.add_command(request)
-
 for entry_point in iter_entry_points('assnake.plugins'):
     module_class = entry_point.load()
     for cmd in module_class.invocation_commands:
         result.add_command(cmd)
     for cmd in module_class.initialization_commands:
         init_group.add_command(cmd)
+    for snakeresult in module_class.results:
+        result.add_command(snakeresult.invocation_command)
 
-# add run command to request group
+
 result.add_command(run)
 
 
@@ -149,12 +136,5 @@ result.add_command(request_sample_set)
 
 
 def main():
-    # TODO Here we should manually parse and check that if we request result `run` command is last
-    # print('======IN MAIN===========')
-    # print(argv[:])
-    # try:
-    #     print(argv[:].index('run'))
-    # except:
-    #     print('no run in index')
     cli()
 

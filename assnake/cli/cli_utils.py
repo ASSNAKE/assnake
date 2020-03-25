@@ -74,6 +74,13 @@ def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column
                 for column_value in column_values:
                     sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
                     sample_sets_dict.update({sample_set_name: sample_set})
+        else:
+            sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+            sample_sets_dict.update({sample_set_name: sample_set})
+    else:
+        sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+        sample_sets_dict.update({sample_set_name: sample_set})
+
     return sample_sets_dict
 
 def generic_command_individual_samples(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
@@ -92,7 +99,6 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
     """
     exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
-    print(exclude_samples)
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
 
     df_loaded = assnake.api.loaders.load_df_from_db(df)
@@ -111,7 +117,6 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
 
     sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
-
     if len(exclude_samples) > 0 :  
         sample_set = sample_set.loc[~sample_set['fs_name'].isin(exclude_samples), ]
 
