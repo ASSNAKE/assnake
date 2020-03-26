@@ -11,7 +11,7 @@ with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+')
     config_internal.write(configfile)
 
 setup(name='assnake', 
-    version='0.8.7',
+    version='0.8.8',
     license='MIT',        
     description = 'System for metagenomics data analysis',   
     author = 'Dmitry Fedorov',                  
