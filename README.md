@@ -7,18 +7,46 @@ As of pre-alpha release Assnake is capable of full-blown metagenomic data analys
 
 Assnake was born in an effort to provide userfriendly, scalable and reproducable system for NGS data analysis accessible to researches without advanced computer skills, but at the same time make such system flexible, easy to modify and extend with your own pipelines or analysis code.
 
-Chances are, you work with more than one NGS dataset, and maybe you are not the only one working on a server/cluster. How many times have you found yourself searching for the data all over the filesystem and asking your collegues if they remember where someone put that data? When you finally find raw data, the result files and code are most proably in a state of creative chaos and gatehring them together may be a tough task. If you want to compare results of different studies, validate your findings using external data or provide your readers with an easy way to reproduce your analysis, all you code and files should be in strict order. Moreover, it is hard to keep track of all software dependecies and conflicts, versions of tools and pipelines, deploying your environment on a new machine may be a real pain in the ass. ASSnake solves all these problems in an userfriendly and extendable way, by allowing you to catalogue your data, run and reproduce pipelines and statistical analysis. 
+## Available Modules
 
-### Assnake Quick Start:
+* [assnake-core-preprocessing](https://github.com/ASSNAKE/assnake-core-preprocessing)
+  * [Trimmomatic](http://www.usadellab.org/cms/index.php?page=trimmomatic) 
+  * [Remove Human reads with bbmap](http://seqanswers.com/forums/showthread.php?t=42552)
+  * [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+  * [MultiQC](https://multiqc.info/)
+* [assnake-core-taxonomy](https://github.com/ASSNAKE/assnake-core-taxonomy)
+  * [Metaphlan2](http://huttenhower.sph.harvard.edu/metaphlan2)
+  * [Centrifuge](https://ccb.jhu.edu/software/centrifuge/)
+  * [Kraken2](https://ccb.jhu.edu/software/kraken2/)
+  * [CAT / BAT](https://github.com/dutilh/CAT)
+* [assnake-core-assembly](https://github.com/ASSNAKE/assnake-core-assembly)
+  * [Megahit](https://github.com/voutcn/megahit)
+  * [(meta) Spades](http://cab.spbu.ru/software/spades/)
+* [assnake-core-mapping](https://github.com/ASSNAKE/assnake-core-mapping)
+  * [BWA](http://bio-bwa.sourceforge.net/)
+  * [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+  * [BBmap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/)
+* [assnake-core-binning](https://github.com/ASSNAKE/assnake-core-binning)
+  * [MetaBAT2](https://www.ncbi.nlm.nih.gov/pubmed/31388474)
+* [assnake-dada2](https://github.com/ASSNAKE/assnake-dada2)
+  * [DADA2 full pipeline](https://www.nature.com/articles/nmeth.3869)
+* [assnake-core-transcriptome](https://github.com/ASSNAKE/assnake-transcriptome)
+  * [Salmon](https://combine-lab.github.io/salmon/)
+
+
+## Assnake Quick Start:
 
 1. Install through conda. (Now only installation by cloning GitHub repo is available)
 2. Initialize your installation `assnake init start --just-do-it` (1 minute)
-3. Create Assnake Dataset `assnake dataset create -f {PREFIX_OF_DOLDER} -d {DATASET_NAME}` (1 minute)
+3. Navigate to the folder where you want to store data for study and init assnake Dataset `assnake dataset init` (1 minute)
 4. Import reads into Dataset `assnake dataset import-reads -d {DATASET_NAME} -r {FOLDER_WITH_READS}` (1 minute)
 5. Run the pipeline of your choice! `assnake result dada2-full -d {DATASET_NAME} gather -j 8 --run`
 
+## Motivation
 
-### Assnake Main Concepts:
+Chances are, you work with more than one NGS dataset, and maybe you are not the only one working on a server/cluster. How many times have you found yourself searching for the data all over the filesystem and asking your collegues if they remember where someone put that data? When you finally find raw data, the result files and code are most proably in a state of creative chaos and gatehring them together may be a tough task. If you want to compare results of different studies, validate your findings using external data or provide your readers with an easy way to reproduce your analysis, all you code and files should be in strict order. Moreover, it is hard to keep track of all software dependecies and conflicts, versions of tools and pipelines, deploying your environment on a new machine may be a real pain in the ass. ASSnake solves all these problems in an userfriendly and extendable way, by allowing you to catalogue your data, run and reproduce pipelines and statistical analysis. 
+
+## Assnake Main Concepts:
 
 * You store reads of your *Samples* inside *Datasets*.
     Techincallly *Datasets* are just folders on your file system, and you need to tell Assnake about their existence.  
@@ -83,6 +111,30 @@ Run command without `< >` symbols around your dataset name.
 You are done! You can find dada2 results at `{FS_PREFIX}/{YOUR_DF}/dada2/sample_set/learn_erros__def/seqtab_nochim__20.rds` and `{FS_PREFIX}/{YOUR_DF}/dada2/sample_set/learn_erros__def/taxa_20.rds`.
 Just load this files in R using `readRDS()` function.
 
+## Comparison with other systems
+
+| Feature | Assnake | QIIME2 |
+| ------ | ------ | Assnake |
+| Dropbox | [plugins/dropbox/README.md][PlDb] | Assnake |
+
+
+| GitHub | [plugins/github/README.md][PlGh] |
+| Google Drive | [plugins/googledrive/README.md][PlGd] |
+| OneDrive | [plugins/onedrive/README.md][PlOd] |
+| Medium | [plugins/medium/README.md][PlMe] |
+| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
+
+## Development
+
+Command Line Interface is built using Click library. Heavily relies on pandas for data flow and management. Snakemake obviously. 
+
+### Extending Assnake
+
+Result has only 2 necessary files: `workflow.smk` - for all the snakemake rules and necessary code and `wc_config.yaml` with all necessary wildcard strings.
+You can build and structure your project as you like, if you need subworkflows, just gather them all in `workflow.smk`, using snakemakes `include` directive.
+If your Results has one of the standart inputs, like `illumina_sample`, CLI command for invocing the result can be built for you automatically. Or, you can take full control and pass your CLI invocation command as a property when creating Result class instance.
+
+Results are packed into SnakeModules, which are parsed by Assnake later on. You just need to import all your created Results and add them to the SnakeModule when creating SnakeModule class instance (Passed in a list now, will be chnged to dict). Assnake knows about results by dynamically parsing SnakeModules and programmatically importing all the necessary parts.
 
 <!-- # OLD
 

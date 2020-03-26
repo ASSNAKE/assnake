@@ -11,12 +11,14 @@ with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+')
     config_internal.write(configfile)
 
 setup(name='assnake', 
-    version='0.6.0',
+    version='0.8.7',
     license='MIT',        
     description = 'System for metagenomics data analysis',   
-    author = 'Dmitry Fedorov',                   # Type in your name
-    author_email = 'fedorov.de@gmail.com',      # Type in your E-Mail
-    url = 'https://github.com/Fedorov113/assnake',   # Provide either the link to your github or to your website
+    author = 'Dmitry Fedorov',                  
+    author_email = 'fedorov.de@gmail.com',      
+    url = 'https://github.com/ASSNAKE/assnake',   
+    download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # I explain this later on
+    keywords = ['ILLUMINA', 'NGS', 'METAGENOMIC', 'DATA'], 
     packages=find_packages(),
     install_requires=[
         'numpy', 'Click', 'pyyaml', 'pandas', 
@@ -27,4 +29,12 @@ setup(name='assnake',
         [console_scripts]
         assnake=assnake.cli.assnake_cli:main
     ''',
+
+    classifiers=[
+        'Development Status :: 3 - Alpha',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
+        'Intended Audience :: Developers',      # Define that your audience are developers
+        'Topic :: NGS Data analysis',
+        'License :: OSI Approved :: MIT License',   # Again, pick a license
+        'Programming Language :: Python :: 3.6',
+        ],
     )

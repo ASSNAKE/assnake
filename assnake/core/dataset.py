@@ -28,14 +28,12 @@ class Dataset:
 
         preprocs = info['preprocs']
         preprocessing = {}
-
         for p in preprocs:
             samples = SampleSet(self.fs_prefix, self.df, p)
-            if len(samples.samples_pd):
+            if len(samples.samples_pd) > 0:
                 samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']]
-            else:
-                break
-            preprocessing.update({p:samples})
+                preprocessing.update({p:samples})
+            
 
         self.sample_sets = preprocessing
         self.sample_containers = pd.concat(self.sample_sets.values())
