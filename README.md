@@ -113,16 +113,12 @@ Just load this files in R using `readRDS()` function.
 
 ## Comparison with other systems
 
-| Feature | Assnake | QIIME2 |
-| ------ | ------ | Assnake |
-| Dropbox | [plugins/dropbox/README.md][PlDb] | Assnake |
-
-
-| GitHub | [plugins/github/README.md][PlGh] |
-| Google Drive | [plugins/googledrive/README.md][PlGd] |
-| OneDrive | [plugins/onedrive/README.md][PlOd] |
-| Medium | [plugins/medium/README.md][PlMe] |
-| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
+| Feature                                  | Assnake                            | Anvio                               | QIIME2              | nf-core                    | snakePipes                                                         | StaG                                |
+|------------------------------------------|------------------------------------|-------------------------------------|---------------------|----------------------------|--------------------------------------------------------------------|-------------------------------------|
+| Link                                     | https://github.com/ASSNAKE/assnake | http://merenlab.org/software/anvio/ | https://qiime2.org/ | https://github.com/nf-core | https://academic.oup.com/bioinformatics/article/35/22/4757/5499080 | https://github.com/ctmrbio/stag-mwc |
+| Data Management                          | YES                                | NO                                  | NO                  | NO                         | ?                                                                  | NO                                  |
+| Modularity (without editing source code) | FULL                               | PARTIAL?                            | FULL                | FULL                       | NO                                                                 | NO                                  |
+| Metagenomic pipeline                     | YES                                | ONLY BINNING                        | ONLY 16s            | In development             | NO                                                                 | PARTIAL                             |
 
 ## Development
 
