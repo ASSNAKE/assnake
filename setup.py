@@ -4,15 +4,15 @@ import os
 import configparser
 
 # Creating config_internal.ini
-dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-config_internal = configparser.ConfigParser()
-config_internal['GENERAL'] = {'config_loc': 'None'}
-with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+') as configfile:
-    config_internal.write(configfile)
+# dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+# config_internal = configparser.ConfigParser()
+# config_internal['GENERAL'] = {'config_loc': 'None'}
+# with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+') as configfile:
+#     config_internal.write(configfile)
 
 setup(name='assnake', 
-    version='0.8.9.2',
-    license='MIT',        
+    version='0.8.9.4',
+    license='MIT',         
     description = 'System for metagenomics data analysis',   
     author = 'Dmitry Fedorov',                  
     author_email = 'fedorov.de@gmail.com',      
