@@ -11,7 +11,8 @@ import configparser
 #     config_internal.write(configfile)
 
 setup(name='assnake', 
-    version='0.8.9.4',
+    version='0.8.9.8',
+    include_package_data=True,
     license='MIT',         
     description = 'System for metagenomics data analysis',   
     author = 'Dmitry Fedorov',                  
@@ -19,7 +20,7 @@ setup(name='assnake',
     url = 'https://github.com/ASSNAKE/assnake',   
     download_url = 'https://github.com/ASSNAKE/assnake/archive/v0.8.8.tar.gz',    # I explain this later on
     keywords = ['ILLUMINA', 'NGS', 'METAGENOMIC', 'DATA'], 
-    packages=['assnake'],
+    packages=find_packages(),
     install_requires=[
         'numpy', 'Click', 'pyyaml>=5', 'pandas', 
         'tabulate', 'snakemake', 'drmaa', 
