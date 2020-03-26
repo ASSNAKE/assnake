@@ -55,6 +55,7 @@ Chances are, you work with more than one NGS dataset, and maybe you are not the 
 * Data needs quality control and cleaning before being analyzed. When *preprocessing* your reads, say, removing low quality or contaminant sequences, you get new read files. Theay are stored inside `{fs_prefix}/{df}/reads/{preprocessing}` folders. So, the name of the folder is the name of your preprocessing! For raw reads the name of preprocessing would be `raw`, name `raw__tmtic_def` means that raw reads were preprocessed with Trimmomatic with default parameters. `preprocessing` name fully describes all the steps that were apllied to the reads inside the folder, steps are separated using double underscore `__`
 * Everything that generates meaningful and useful data produces Result, which you can request from Assnake using `assnake result <RESULT_NAME>` command. For example command `assnake result fastqc --df bat_microbiome run` will produce fastqc reports for all samples in Dataset bat_microbiome. By the way, by performing *preprocessing* results you get Result in form of reads! `{sample}_R1.fastq.gz {sample}_R2.fastq.gz`
 * *Results* are provided by *SnakeModules*. They implement all the logic connected with the Result and one Module can implemet any number of results. For example, assnake-dada2 module implements DADA2 pipeline. It extends Assnake with 2 Results - `dada2-filter-and-trim` for trimming reads and `dada2-full` for running full pipeline and generate table with ASVs (Amplicon Sequence Variants (link to github issue about the term)) abundances across samples and table with taxonomic annotation of ASVs. It also exposes API that allows you to easy access, manipulate and vizualise this data (Heatmaps, Barplots, PCA plots) from Python or R (Notebooks are great!) *More on that in Extending Assnake section* - not written
+* *Pipelines* are builr from several *Results* that comes from *SnakeModules*
 
 This four concepts are the foundation of the Assnake. This assumtions are pretty general and applicable for many types of data. Actually snakemake is a *framework* for creating data-processing pipelines with the primary focus on NGS and other omics data. 
 
@@ -69,6 +70,10 @@ Assnake is entirely open sourced and is built with great open-source tools. We e
 ### Conda part
 
 1. Install conda https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
+  I Download package from [here](https://docs.conda.io/en/latest/miniconda.html#linux-installers) using wget. You need Linux x64. [Direct link](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh)
+  II. Run downloaded file with bash `bash Miniconda3-latest-Linux-x86_64.sh` and follow the instructions.
+  III. Close and reopen you terminal in order to changes take effect
+  IV. Verify installation by executing `conda list`
 2. Create new environment `conda create -n assnake python=3.6`
 3. Activate your new environment `source activate assnake`
 
