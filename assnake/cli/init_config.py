@@ -4,7 +4,8 @@ from assnake.utils import read_yaml, get_internal_config
 
 # @graph_of_calls('fill_n_write_config.png')
 def fill_and_write_config(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, config_location):
-    config_internal = get_internal_config()
+    # config_internal = get_internal_config()
+
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     assnake_install_dir = (dir_of_this_file.replace('assnake/commands', 'snake'))
 
@@ -30,6 +31,6 @@ def fill_and_write_config(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drma
     with open(config_location, 'w+') as file:
         _ = yaml.dump(config_template, file, sort_keys=False)
 
-    config_internal['GENERAL']['config_loc'] = config_location
-    with open(os.path.join(dir_of_this_file, './../config_internal.ini'), 'w') as configfile:
-        config_internal.write(configfile)
+
+    with open(os.path.join(dir_of_this_file, './../config_internal.py'), 'w') as configfile:
+        configfile.write('config_loc = "' + config_location + '"')

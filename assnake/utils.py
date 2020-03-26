@@ -1,13 +1,9 @@
 import yaml, configparser, os, click
-
-# try:
-#     from pycallgraph import PyCallGraph
-#     from pycallgraph.output import GraphvizOutput
-# except ModuleNotFoundError:
-#     pass
 import os, sys
 import requests, urllib
 from tqdm import tqdm
+import assnake.config_internal
+
 
 
 def read_yaml(file_location):
@@ -25,6 +21,12 @@ def get_internal_config():
     config_internal = configparser.ConfigParser()
 
     config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
+    
+
+    print('===', assnake.config_internal.config_loc)
+
+
+
     return config_internal
 
 
@@ -34,18 +36,18 @@ def load_wc_config():
 
 
 def load_config_file():
-    config_internal = get_internal_config()
-    config_loc = config_internal['GENERAL']['config_loc']
+    config_loc = assnake.config_internal.config_loc
     return (read_yaml(config_loc))
 
 
 def get_config_loc():
     config_internal = get_internal_config()
-    return (config_internal['GENERAL']['config_loc'])
+    return (assnake.config_internal.config_loc)
 
 
 def check_if_assnake_is_initialized():
-    if not os.path.isfile(get_config_loc()):
+    config_loc = assnake.config_internal.config_loc
+    if config_loc is None or not os.path.isfile(get_config_loc()):
         click.secho("You need to init your installation!", fg='red', bold=True)
         click.echo("Don't worry, it won't take long.")
         click.echo('Just run ' + click.style('assnake init start', bg='blue', fg='bright_white'))
@@ -59,23 +61,6 @@ def update_config(dict_to_add):
         _ = yaml.dump(config, file, sort_keys=False)
 
 
-# decorator to saving graph of calls of the function
-def graph_of_calls(image2safe):
-    def real_decorator(function):
-        def wrapper(*args, **kwargs):
-            if "pycallgraph" in sys.modules:
-                graphviz = GraphvizOutput()
-                graphviz.output_file = image2safe
-                try:
-                    with PyCallGraph(output=graphviz):
-                        function(*args, **kwargs)
-                except Exception as e:
-                    click.echo("It seems you have not graphviz -- it is not crucial. Graphviz is being used for some future functionality")
-            else:
-                function(*args, **kwargs)
-        return wrapper
-
-    return real_decorator
 
 
 def pathizer(path):
