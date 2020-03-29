@@ -31,13 +31,13 @@ class Dataset:
         for p in preprocs:
             samples = SampleSet(self.fs_prefix, self.df, p)
             if len(samples.samples_pd) > 0:
-                samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'fs_name', 'reads']]
+                samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
                 preprocessing.update({p:samples})
             
 
         self.sample_sets = preprocessing
         self.sample_containers = pd.concat(self.sample_sets.values())
-        self.self_reads_info = self.sample_containers.pivot(index='fs_name', columns='preproc', values='reads')
+        self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
   
 
     def plot_reads_loss(self, preprocs = [], sort = 'raw'):

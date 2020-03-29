@@ -24,12 +24,12 @@ def prepare_set_for_assembly(df, preproc, samples_to_add,set_name):
     df = assnake.api.loaders.load_df_from_db(df)
     ss = assnake.SampleSet.SampleSet(df['fs_prefix'], df['df'], preproc, samples_to_add=samples_to_add)
 
-    click.echo(tabulate(ss.samples_pd[['fs_name', 'reads', 'preproc', 'df']].sort_values('reads'), 
+    click.echo(tabulate(ss.samples_pd[['df_sample', 'reads', 'preproc', 'df']].sort_values('reads'), 
         headers='keys', tablefmt='fancy_grid'))
 
     set_dir = os.path.join(df['fs_prefix'], df['df'], 'assembly', set_name)
     os.makedirs(set_dir, exist_ok=True)
 
     set_loc = os.path.join(set_dir, 'sample_set.tsv')
-    ss.samples_pd[['df', 'preproc', 'fs_name']].to_csv(set_loc, sep='\t', index=False)
+    ss.samples_pd[['df', 'preproc', 'df_sample']].to_csv(set_loc, sep='\t', index=False)
 

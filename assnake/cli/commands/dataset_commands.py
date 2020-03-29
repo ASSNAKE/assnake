@@ -278,8 +278,8 @@ def df_info(config, df, preproc, df_arg):
     for p in preprocs:
         samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
         # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
-        all_samples += (list(samples.samples_pd['fs_name']))
-        samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
+        all_samples += (list(samples.samples_pd['df_sample']))
+        samples = samples.samples_pd[['df_sample', 'reads']].to_dict(orient='records')
         # click.secho(p + ' ' + str(len(samples)) + ' samples')
         preprocessing.update({p: samples})
 
@@ -403,7 +403,7 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
         modify_name=lambda arg: arg.replace('-', '_')
 
     samples_in_run = fs_helpers.get_samples_from_dir(reads, modify_name)
-    samples_in_run['fs_name'] = samples_in_run['modified_name']
+    samples_in_run['df_sample'] = samples_in_run['modified_name']
     fs_helpers.create_links(target,  samples_in_run, hard=copy)
 
     update_fs_samples_csv(df_info['df'])

@@ -12,8 +12,8 @@ class SampleSet:
         samples_pd (:obj:`pandas.DataFrame`): Pandas DataFrame with information about samples
     """
 
-    # prefix, df, preproc, fs_name
-    samples_pd = pd.DataFrame(columns=['df', 'fs_name', 'preproc', 'reads', 'sample'])
+    # prefix, df, preproc, df_sample
+    samples_pd = pd.DataFrame(columns=['df', 'df_sample', 'preproc', 'reads', 'sample'])
     reads_info = pd.DataFrame()
 
     # ==Do we really need this here?==
@@ -52,27 +52,27 @@ class SampleSet:
         samples = []
         fastq_gz_file_loc = self.wc_config['fastq_gz_file_wc'].format(
             fs_prefix=fs_prefix, df=df, preproc=preproc, 
-            strand='R1',sample = '*')
-        fs_names = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
+            strand='R1',df_sample = '*')
+        df_samples = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
 
         if pattern != '':
-            fs_names = [f.split('/')[-1] for f in 
-            glob.glob(self.wc_config['sample_dir_wc'].format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample = pattern))]
+            df_samples = [f.split('/')[-1] for f in 
+            glob.glob(self.wc_config['sample_dir_wc'].format(fs_prefix=fs_prefix, df=df, preproc=preproc, df_sample = pattern))]
 
         sample_dir_wc = self.wc_config['sample_dir_wc']
         fastq_gz_file_wc = self.wc_config['fastq_gz_file_wc']
         count_wc = self.wc_config['count_wc']
 
-        fs_names = list(set(fs_names) - set(do_not_add))
+        fs_names = list(set(df_samples) - set(do_not_add))
         if len(samples_to_add) > 0:
-            fs_names = fs_names and samples_to_add
+            df_samples = df_samples and samples_to_add
 
-        samples = [loaders.load_sample(fs_prefix, df, preproc, fs_name,
+        samples = [loaders.load_sample(fs_prefix, df, preproc, df_sample,
                         sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, 
-                        count_wc=count_wc) for fs_name in fs_names]
+                        count_wc=count_wc) for df_sample in df_samples]
         
         samples_pd = pd.DataFrame(samples)
-        # samples_pd.index = samples_pd['fs_name'] + ':' + samples_pd['preproc'] # We can debate on this
+        # samples_pd.index = samples_pd['df_sample'] + ':' + samples_pd['preproc'] # We can debate on this
 
         self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
 

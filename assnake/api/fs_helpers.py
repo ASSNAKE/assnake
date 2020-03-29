@@ -86,7 +86,7 @@ def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = Fa
         )
         dst_r1 = new_file_wc.format(
             import_dir = import_dir, 
-            name_in_dataset = sample['fs_name'],
+            name_in_dataset = sample['df_sample'],
             strand = '_R1',
             extension = sample['extension']
         )
@@ -99,7 +99,7 @@ def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = Fa
         )
         dst_r2 = new_file_wc.format(
             import_dir = import_dir, 
-            name_in_dataset = sample['fs_name'],
+            name_in_dataset = sample['df_sample'],
             strand = '_R2',
             extension = sample['extension']
         )

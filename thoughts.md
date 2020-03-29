@@ -91,10 +91,10 @@ assnake
     
     construct_sample_table()
 
-    df  preproc fs_name
+    df  preproc df_sample
 
 # 29 MARCH 2020
-First of all, there is an idea to rename `fs_name` into `illumina_sample`.
+First of all, there is an idea to rename `df_sample` into `illumina_sample`.
 When importing we have:
 
 * `name_in_run` - this is the full name in run folder including all the stuff: name in sample sheet, lane, _001 on the end in the case of illumina.
@@ -102,4 +102,6 @@ When importing we have:
 * `name_in_dataset` - name that will be used in the dataset, may be constructed purely from metadata and serves for the convinience. 
 
 Let's take a look at the current wc_string for sample: `{fs_prefix}/{df}/reads/{preproc}/{sample}_{strand}.fastq.gz`.
-Suggestion is to replace it with                       `{fs_prefix}/{df}/reads/{preproc}/{illumina_sample_name_in_dataset}_{strand}.fastq.gz`.
+Suggestion is to replace it with something like with:  `{fs_prefix}/{df}/reads/{preproc}/{illumina_sample_name_in_dataset}_{strand}.fastq.gz`.
+Or maybe `df_sample`?                                  `{fs_prefix}/{df}/reads/{preproc}/{df_sample}_{strand}.fastq.gz`.
+The problem actually is with pupulating wc_strings in generics...

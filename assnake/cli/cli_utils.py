@@ -118,9 +118,9 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
     sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
     if len(exclude_samples) > 0 :  
-        sample_set = sample_set.loc[~sample_set['fs_name'].isin(exclude_samples), ]
+        sample_set = sample_set.loc[~sample_set['df_sample'].isin(exclude_samples), ]
 
-    # click.echo(tabulate(sample_set[['fs_name', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+    # click.echo(tabulate(sample_set[['df_sample', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
 
     # construct sample set name for fs
     if meta_column is None and column_value is None:
@@ -144,7 +144,7 @@ def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_va
             fs_prefix = s['fs_prefix'].rstrip('\/'),    
             df = s['df'],
             preproc = preprocessing,
-            fs_name = s['fs_name'],
+            df_sample = s['df_sample'],
             **kwargs
         ))
     return res_list

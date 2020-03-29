@@ -9,14 +9,14 @@ import assnake.utils
 
 from assnake.utils import bytes2human
 
-def load_count(fs_prefix, df, preproc, sample, report_bps=False, verbose=False, count_wc=''):
+def load_count(fs_prefix, df, preproc, df_sample, report_bps=False, verbose=False, count_wc=''):
     """
     Loads information about read and bp count in paired-end sample.
     """
     strands = ['R1', 'R2']
     
-    count_loc1 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand=strands[0])
-    count_loc2 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand=strands[1])
+    count_loc1 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, df_sample=df_sample, strand=strands[0])
+    count_loc2 = count_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, df_sample=df_sample, strand=strands[1])
     
     count_dict = {'reads': -1}
 
@@ -82,13 +82,13 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     preprocessing = {}
     if include_preprocs:
         for p in preprocs:
-            samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
-            samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
-            preprocessing.update({p:samples})
+            df_samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
+            df_samples = df_samples.samples_pd[['df_sample', 'reads']].to_dict(orient='records')
+            preprocessing.update({p:df_samples})
     df_info.update({"preprocs": preprocessing})
     return df_info
 
-def load_sample(fs_prefix, df, preproc, sample,
+def load_sample(fs_prefix, df, preproc, df_sample,
                 report_bps=False, report_size=False, verbose=False,
                 sample_dir_wc = '', fastq_gz_file_wc = '', count_wc=''):
     '''
@@ -107,13 +107,13 @@ def load_sample(fs_prefix, df, preproc, sample,
     # Now select what preprocessing we want to use
     if preproc == 'longest':
         preprocs = [p.split('/')[-2] for p in 
-                    glob.glob(fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc='*', sample=sample, strand='R1'))]
+                    glob.glob(fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc='*', df_sample=df_sample, strand='R1'))]
     else:
         preprocs = [p.split('/')[-2] for p in 
-                    glob.glob(fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, sample=sample, strand='R1'))]
+                    glob.glob(fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=preproc, df_sample=df_sample, strand='R1'))]
     for p in preprocs:
-        r1 = fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=p, sample=sample, strand=strands[0])
-        r2 = fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=p, sample=sample, strand=strands[1])
+        r1 = fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=p, df_sample=df_sample, strand=strands[0])
+        r2 = fastq_gz_file_wc.format(fs_prefix=fs_prefix, df=df, preproc=p, df_sample=df_sample, strand=strands[1])
 
         if os.path.isfile(r1) and os.path.isfile(r2):
             containers.append(p)
@@ -123,12 +123,12 @@ def load_sample(fs_prefix, df, preproc, sample,
                     size = os.path.getsize(r1) + os.path.getsize(r2)
                     sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
     return {'df':df, 
-            'fs_name':sample, 
-            'sample':sample,  
+            'df_sample':df_sample, 
+            'df_sample':df_sample,  
             'preproc':final_preproc, 
             'fs_prefix': fs_prefix,
             #'preprocs':containers, 
-            **load_count(fs_prefix, df, final_preproc, sample, verbose, count_wc=count_wc)}
+            **load_count(fs_prefix, df, final_preproc, df_sample, verbose, count_wc=count_wc)}
 
 
 def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = '*'):
@@ -146,21 +146,21 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
     samples = []
     fastq_gz_file_loc = wc_config['fastq_gz_file_wc'].format(
         fs_prefix=fs_prefix, df=df, preproc=preproc, 
-        strand='R1', sample = pattern)
+        strand='R1', df_sample = pattern)
     
-    fs_names = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
+    df_samples = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
 
     sample_dir_wc    = wc_config['sample_dir_wc']
     fastq_gz_file_wc = wc_config['fastq_gz_file_wc']
     count_wc         = wc_config['count_wc']
 
-    fs_names = list(set(fs_names) - set(do_not_add))
+    df_samples = list(set(df_samples) - set(do_not_add))
 
-    if len(samples_to_add) > 0: fs_names = fs_names and samples_to_add
+    if len(samples_to_add) > 0: df_samples = df_samples and samples_to_add
 
-    samples = [load_sample(fs_prefix, df, preproc, fs_name,
+    samples = [load_sample(fs_prefix, df, preproc, df_sample,
                     sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, 
-                    count_wc=count_wc) for fs_name in fs_names]
+                    count_wc=count_wc) for df_sample in df_samples]
     
     sample_set = pd.DataFrame(samples)
     return sample_set
@@ -176,7 +176,7 @@ def update_fs_samples_csv(dataset):
     :return: Returns sample dict in loc
     
     '''
-    fs_samples_tsv_loc = '{config}/datasets/{df}/fs_samples.tsv'.format(config=assnake.utils.load_config_file()['assnake_db'], df=dataset)
+    fs_samples_tsv_loc = '{config}/datasets/{df}/assnake_samples.tsv'.format(config=assnake.utils.load_config_file()['assnake_db'], df=dataset)
     df = assnake.Dataset(dataset)
     fs_samples_pd = pd.concat(list(df.sample_sets.values()))
     fs_samples_pd = df.sample_sets['raw']
@@ -184,12 +184,6 @@ def update_fs_samples_csv(dataset):
     fs_samples_pd.to_csv(fs_samples_tsv_loc, sep='\t', index = False)
 
     return True
-
-def samples_to_pd(samples):
-    meta_df = pd.DataFrame(columns=['fs_name', 'df', 'preproc', 'size', 'bytes', 'reads','bps'])
-    for s in samples:
-        meta_df.loc[s['sample']]=[s['fs_name'], s['df'], s['preproc'], s['size'], s['bytes'], s['reads'],s['bps']]
-    return meta_df.sort_values('fs_name')
 
 
 

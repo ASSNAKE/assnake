@@ -57,7 +57,7 @@ def plot_centr(centr, subtitle=''):
     fig = go.Figure(data=data, layout=layout)
     if False: plotly.offline.iplot(fig)
 
-def plot_mds(mds, feature_name, meta, title='MDS', select_by='fs_name'):
+def plot_mds(mds, feature_name, meta, title='MDS', select_by='df_sample'):
     features = set(meta[feature_name])
     colors = list(mcolors.CSS4_COLORS.values())
     traces = []
