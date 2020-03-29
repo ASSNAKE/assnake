@@ -92,3 +92,11 @@ assnake
     construct_sample_table()
 
     df  preproc fs_name
+
+# 29 MARCH 2020
+First of all, there is an idea to rename `fs_name` into `illumina_sample`.
+When importing we have:
+
+* `name_in_run` - this is the full name in run folder including all the stuff: name in sample sheet, lane, _001 on the end in the case of illumina.
+* `modified_name` - name o the sample after modifications provided by `modify_name` lambda function
+* `name_in_dataset` - name that will be used in the dataset, may be constructed purely from metadata and serves for the convinience. 

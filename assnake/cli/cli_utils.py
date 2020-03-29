@@ -135,13 +135,16 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
 def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
     res_list = []
+    print(kwargs)
     for s in sample_set.to_dict(orient='records'):
         preprocessing = s['preproc']
+        print(s)
+        print(wc_str)
         res_list.append(wc_str.format(
             fs_prefix = s['fs_prefix'].rstrip('\/'),    
             df = s['df'],
             preproc = preprocessing,
-            sample = s['fs_name'],
+            fs_name = s['fs_name'],
             **kwargs
         ))
     return res_list
