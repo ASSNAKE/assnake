@@ -23,10 +23,6 @@ def get_internal_config():
     config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
     
 
-    print('===', assnake.config_internal.config_loc)
-
-
-
     return config_internal
 
 

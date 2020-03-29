@@ -3,7 +3,7 @@ import click
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.init_commands as init_commands
-from assnake.cli.commands.cmd_run import run
+from assnake.cli.commands.execute_commands import gather
 
 from assnake.utils import read_yaml, check_if_assnake_is_initialized, get_config_loc
 from assnake.cli.cli_utils import sample_set_construction_options, add_options
@@ -119,8 +119,7 @@ for entry_point in iter_entry_points('assnake.plugins'):
     for snakeresult in module_class.results:
         result.add_command(snakeresult.invocation_command)
 
-
-result.add_command(run)
+result.add_command(gather)
 
 
 @click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
