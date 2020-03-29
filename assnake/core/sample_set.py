@@ -1,82 +1,129 @@
-import yaml, os, pkg_resources, glob
+import assnake.api.loaders
+import assnake
+from tabulate import tabulate
+import click, os, datetime
 import pandas as pd
-import assnake.api.loaders as loaders
-import assnake.utils
 
-class SampleSet:
+
+def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
+    df_loaded = assnake.api.loaders.load_df_from_db(df)
+    
+    sample_sets_dict = {}
+
+    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
+    if os.path.isfile(meta_loc):
+        meta = pd.read_csv(meta_loc, sep = '\t')
+        if meta_column is not None:
+            if column_value is not None:
+                sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+                sample_sets_dict.update({sample_set_name: sample_set})
+            else: # treat empty column_value as creating multiple sample_sets for each column_value
+                column_values = list(meta[meta_column].unique())
+                for column_value in column_values:
+                    sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+                    sample_sets_dict.update({sample_set_name: sample_set})
+        else:
+            sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+            sample_sets_dict.update({sample_set_name: sample_set})
+    else:
+        sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+        sample_sets_dict.update({sample_set_name: sample_set})
+
+    return sample_sets_dict
+
+def generic_command_individual_samples(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
     """
-    Class that agglomerates samples and provides convinience functions for different tasks, 
-    such as constructing list of desired results locations, or preparing lists of files for rules.
+    Construct sample sets, has multiple options.
+    Returns dict or sample_sets based on the provided options.
     
-    Attributes:
-        samples_pd (:obj:`pandas.DataFrame`): Pandas DataFrame with information about samples
+    meta_column - factor column in sample metadata sheet. Cannot be combined with samples_to_add. exclude_samples has higher proirity. 
+    column_value - value of column to select by. \
+        Can be multiple - separated by commas without whitespace. \
+        If meta_column is provided, bot no column_value is provided \
+        - treat it like select all unique values of that column. 
+        If multiple - one value - one sample_set. If --merge enabled - all values go in one sample_set
+
+    assnake result request megahit -d FMT_FHM -c source run 
+
     """
+    exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
+    samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
 
-    # prefix, df, preproc, df_sample
-    samples_pd = pd.DataFrame(columns=['df', 'df_sample', 'preproc', 'reads', 'sample'])
-    reads_info = pd.DataFrame()
+    df_loaded = assnake.api.loaders.load_df_from_db(df)
+    config['requested_dfs'] += [df_loaded['df']]
 
-    # ==Do we really need this here?==
-    wc_config = {}
-    config = {}
-
-    
-    def __init__(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
-
-        self.wc_config = assnake.utils.load_wc_config()
-        self.config = assnake.utils.load_config_file()
-
-        discovered_plugins = {
-            entry_point.name: entry_point.load()
-            for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
-        }
-        for module_name, module_class in discovered_plugins.items():
-            for wc_config in module_class.wc_configs:
-                if wc_config is not None:
-                    self.wc_config.update(wc_config)
-                
-        self.add_samples(fs_prefix, df, preproc, samples_to_add, do_not_add, pattern)
-
-    def add_samples(self, fs_prefix, df, preproc, samples_to_add = [], do_not_add = [], pattern = ''):
-        '''
-        This function is used to add samples into the SampleSet.
-
-        Args:
-            fs_prefix: Prefix of the dataset on filesystem
-            df: Name of the dataset
-            preproc: Preprocessing you want to use
-            samples_to_add: List of sample names to add
-            do_not_add: list of sample names NOT to add
-            pattern: sample names must match this glob pattern to be included. 
-        '''
-        samples = []
-        fastq_gz_file_loc = self.wc_config['fastq_gz_file_wc'].format(
-            fs_prefix=fs_prefix, df=df, preproc=preproc, 
-            strand='R1',df_sample = '*')
-        df_samples = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
-
-        if pattern != '':
-            df_samples = [f.split('/')[-1] for f in 
-            glob.glob(self.wc_config['sample_dir_wc'].format(fs_prefix=fs_prefix, df=df, preproc=preproc, df_sample = pattern))]
-
-        sample_dir_wc = self.wc_config['sample_dir_wc']
-        fastq_gz_file_wc = self.wc_config['fastq_gz_file_wc']
-        count_wc = self.wc_config['count_wc']
-
-        fs_names = list(set(df_samples) - set(do_not_add))
-        if len(samples_to_add) > 0:
-            df_samples = df_samples and samples_to_add
-
-        samples = [loaders.load_sample(fs_prefix, df, preproc, df_sample,
-                        sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, 
-                        count_wc=count_wc) for df_sample in df_samples]
-        
-        samples_pd = pd.DataFrame(samples)
-        # samples_pd.index = samples_pd['df_sample'] + ':' + samples_pd['preproc'] # We can debate on this
-
-        self.samples_pd = pd.concat([self.samples_pd, samples_pd], sort=True)
+    # Now for the meta column stuff
+    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
+    if os.path.isfile(meta_loc):
+        meta = pd.read_csv(meta_loc, sep = '\t')
+        if meta_column is not None:
+            if column_value is not None:
+                subset_by_col_value = meta.loc[meta[meta_column] == column_value]
+                if len(subset_by_col_value) > 0:
+                    samples_to_add = list(subset_by_col_value['new_sample_name'])
 
 
+
+    sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
+    if len(exclude_samples) > 0 :  
+        sample_set = sample_set.loc[~sample_set['df_sample'].isin(exclude_samples), ]
+
+    # click.echo(tabulate(sample_set[['df_sample', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+
+    # construct sample set name for fs
+    if meta_column is None and column_value is None:
+        curr_date = datetime.datetime.now()
+        def_name = '{month}{year}'.format(month=curr_date.strftime("%b"), year=curr_date.strftime("%y"))
+        sample_set_name = def_name
+    else:
+        sample_set_name = meta_column + '__' + column_value
+
+    return sample_set, sample_set_name
     
 
-    
+def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
+    res_list = []
+    print(kwargs)
+    for s in sample_set.to_dict(orient='records'):
+        preprocessing = s['preproc']
+        print(s)
+        print(wc_str)
+        res_list.append(wc_str.format(
+            fs_prefix = s['fs_prefix'].rstrip('\/'),    
+            df = s['df'],
+            preproc = preprocessing,
+            df_sample = s['df_sample'],
+            **kwargs
+        ))
+    return res_list
+
+def prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df, sample_sets, overwrite,**kwargs):
+    res_list = []
+
+    df_loaded = assnake.api.loaders.load_df_from_db(df)
+
+    for sample_set_name in sample_sets.keys():
+        sample_set_dir = sample_set_dir_wc.format(fs_prefix = df_loaded['fs_prefix'], df = df, sample_set = sample_set_name)
+        sample_set_loc = os.path.join(sample_set_dir, 'sample_set.tsv')
+
+        print(sample_set_loc)
+        sample_set = sample_sets[sample_set_name]
+        if not os.path.exists(sample_set_dir):
+            os.makedirs(sample_set_dir, exist_ok=True)
+
+        if not os.path.isfile(sample_set_loc):
+            sample_set.to_csv(sample_set_loc, sep='\t', index=False)
+        else:
+            click.secho('Sample set with this name already exists!')
+            if overwrite:
+                sample_set.to_csv(sample_set_loc, sep='\t', index=False)
+                click.secho('Overwritten')
+
+        res_list += [result_wc.format(
+            fs_prefix = df_loaded['fs_prefix'],
+            df = df_loaded['df'],
+            sample_set = sample_set_name,
+            **kwargs
+        )]
+
+    return res_list

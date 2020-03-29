@@ -1,8 +1,8 @@
-from assnake.core.sample_set import SampleSet
 import os, glob, yaml, time
 import pandas as pd
-from assnake.api.loaders import load_df_from_db, load_sample
-from assnake.utils import load_config_file
+from assnake.api.loaders import load_df_from_db, load_sample, load_sample_set
+
+from assnake.utils import load_config_file,load_wc_config
 from assnake.viz import plot_reads_count_change
 import click
 
@@ -20,6 +20,7 @@ class Dataset:
 
     def __init__(self, df):
         config = load_config_file()
+        wc_config = load_wc_config()
         info = load_df_from_db(df, include_preprocs = True)
 
         self.df =  info['df']
@@ -29,9 +30,9 @@ class Dataset:
         preprocs = info['preprocs']
         preprocessing = {}
         for p in preprocs:
-            samples = SampleSet(self.fs_prefix, self.df, p)
-            if len(samples.samples_pd) > 0:
-                samples = samples.samples_pd[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
+            samples = load_sample_set(wc_config, self.fs_prefix, self.df, p)
+            if len(samples) > 0:
+                samples = samples[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
                 preprocessing.update({p:samples})
             
 

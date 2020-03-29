@@ -66,6 +66,7 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     Returns one dictionary with df info
     """
     config = assnake.utils.load_config_file()
+    wc_config = assnake.utils.load_wc_config()
 
     df_info_loc = config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
     df_info = {}
@@ -82,8 +83,9 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     preprocessing = {}
     if include_preprocs:
         for p in preprocs:
-            df_samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
-            df_samples = df_samples.samples_pd[['df_sample', 'reads']].to_dict(orient='records')
+            df_samples = load_sample_set(wc_config, df_info['fs_prefix'], df_info['df'], p)
+            
+            df_samples = df_samples[['df_sample', 'reads']].to_dict(orient='records')
             preprocessing.update({p:df_samples})
     df_info.update({"preprocs": preprocessing})
     return df_info
@@ -143,6 +145,10 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
         do_not_add: list of sample names NOT to add
         pattern: sample names must match this glob pattern to be included. 
     '''
+
+    if wc_config is None:
+        wc_config = assnake.utils.load_wc_config()
+
     samples = []
     fastq_gz_file_loc = wc_config['fastq_gz_file_wc'].format(
         fs_prefix=fs_prefix, df=df, preproc=preproc, 
