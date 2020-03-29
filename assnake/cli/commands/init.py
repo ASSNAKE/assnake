@@ -1,7 +1,7 @@
 import click, os
 from assnake.utils import get_config_loc, get_internal_config, pathizer
 from assnake.cli.init_config import fill_and_write_config
-
+from assnake.config_internal import config_loc
 
 @click.command(name='start')
 @click.option('--assnake_db', '-d', type=click.Path(),
@@ -24,7 +24,8 @@ from assnake.cli.init_config import fill_and_write_config
 def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, config_location, forced, verbose):
     # TODO Rework assnake install dir
     assnake_db = assnake_db.rstrip('/')
-    if not os.path.isfile(get_config_loc()):
+
+    if config_loc is None or not os.path.isfile(config_loc):
         if not os.path.exists(assnake_db):
             os.mkdir(assnake_db)
         fna_db_dir = fna_db_dir.format(assnake_db=assnake_db)
