@@ -61,7 +61,7 @@ assnake dataset create"""
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
     config_loc = get_config_loc() 
 
-    if not os.path.isfile(config_loc):
+    if config_loc is None or not os.path.isfile(config_loc):
             pass
     else:
         config = read_yaml(config_loc)

@@ -4,15 +4,16 @@ import os
 import configparser
 
 # Creating config_internal.ini
-dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-config_internal = configparser.ConfigParser()
-config_internal['GENERAL'] = {'config_loc': 'None'}
-with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+') as configfile:
-    config_internal.write(configfile)
+# dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
+# config_internal = configparser.ConfigParser()
+# config_internal['GENERAL'] = {'config_loc': 'None'}
+# with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+') as configfile:
+#     config_internal.write(configfile)
 
 setup(name='assnake', 
-    version='0.8.8',
-    license='MIT',        
+    version='0.8.9.8',
+    include_package_data=True,
+    license='MIT',         
     description = 'System for metagenomics data analysis',   
     author = 'Dmitry Fedorov',                  
     author_email = 'fedorov.de@gmail.com',      
@@ -21,7 +22,7 @@ setup(name='assnake',
     keywords = ['ILLUMINA', 'NGS', 'METAGENOMIC', 'DATA'], 
     packages=find_packages(),
     install_requires=[
-        'numpy', 'Click', 'pyyaml', 'pandas', 
+        'numpy', 'Click', 'pyyaml>=5', 'pandas', 
         'tabulate', 'snakemake', 'drmaa', 
         'parse', 'pycallgraph', 'tqdm', 'scipy', 'plotly', 'matplotlib'
     ],
