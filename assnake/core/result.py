@@ -1,6 +1,8 @@
 import os, click, glob
-from assnake.cli.cli_utils import generic_command_individual_samples, generate_result_list, sample_set_construction_options, add_options
+
 from assnake.utils import read_yaml
+from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
+from assnake.cli.cli_utils import sample_set_construction_options, add_options
 
 class Result:
 
@@ -51,7 +53,8 @@ class Result:
         wc_config = os.path.join(location, 'wc_config.yaml')
 
         if len(workflows) > 0:
-            [print(w) for w in workflows]
+            # [print(w) for w in workflows]
+            pass
         else:
             print('===', name)
             print('No workflow files found')

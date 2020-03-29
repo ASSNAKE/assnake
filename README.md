@@ -53,7 +53,7 @@ Chances are, you work with more than one NGS dataset, and maybe you are not the 
     Assnake assumes that raw reads are stored inside `{PATH_TO_DATASET_FOLDER}/{YOUR_DATASET_NAME}/reads/raw`.
     So, for example you may have your reads stored at `/home/ozzy/bat_microbiome/reads/raw`. `/home/ozzy` is the prefix of your Dataset and `bat_microbiome` is its name. You need to register your dataset inside Assnake with `assnake dataset create -f /home/ozzy -d bat_microbiome` Don't be afraid, Assnake is very careful and will never overwrite or delete your data!
 * Data needs quality control and cleaning before being analyzed. When *preprocessing* your reads, say, removing low quality or contaminant sequences, you get new read files. Theay are stored inside `{fs_prefix}/{df}/reads/{preprocessing}` folders. So, the name of the folder is the name of your preprocessing! For raw reads the name of preprocessing would be `raw`, name `raw__tmtic_def` means that raw reads were preprocessed with Trimmomatic with default parameters. `preprocessing` name fully describes all the steps that were apllied to the reads inside the folder, steps are separated using double underscore `__`
-* Everything that generates meaningful and useful data produces Result, which you can request from Assnake using `assnake result <RESULT_NAME>` command. For example command `assnake result fastqc --df bat_microbiome run` will produce fastqc reports for all samples in Dataset bat_microbiome. By the way, by performing *preprocessing* results you get Result in form of reads! `{sample}_R1.fastq.gz {sample}_R2.fastq.gz`
+* Everything that generates meaningful and useful data produces Result, which you can request from Assnake using `assnake result <RESULT_NAME>` command. For example command `assnake result fastqc --df bat_microbiome run` will produce fastqc reports for all samples in Dataset bat_microbiome. By the way, by performing *preprocessing* results you get Result in form of reads! `{df_sample}_R1.fastq.gz {df_sample}_R2.fastq.gz`
 * *Results* are provided by *SnakeModules*. They implement all the logic connected with the Result and one Module can implemet any number of results. For example, assnake-dada2 module implements DADA2 pipeline. It extends Assnake with 2 Results - `dada2-filter-and-trim` for trimming reads and `dada2-full` for running full pipeline and generate table with ASVs (Amplicon Sequence Variants (link to github issue about the term)) abundances across samples and table with taxonomic annotation of ASVs. It also exposes API that allows you to easy access, manipulate and vizualise this data (Heatmaps, Barplots, PCA plots) from Python or R (Notebooks are great!) *More on that in Extending Assnake section* - not written
 * *Pipelines* are builr from several *Results* that comes from *SnakeModules*
 
@@ -184,20 +184,20 @@ Consider the following: you have your samples, and you want to assemble them and
 ```
 rule assemble:
     input: 
-        r1 = '{sample}_R1.fastq.gz',
-        r2 = '{sample}_R2.fastq.gz'
+        r1 = '{df_sample}_R1.fastq.gz',
+        r2 = '{df_sample}_R2.fastq.gz'
     output:
-        contigs = '{sample}_assembly.fasta'
+        contigs = '{df_sample}_assembly.fasta'
     run:
         shell('megahit -1 {input.r1} -2 {input.r2} -o {output.contigs}')
 
 rule map_on_contigs:
     input: 
-        r1 = '{sample}_R1.fastq.gz',
-        r2 = '{sample}_R2.fastq.gz',
+        r1 = '{df_sample}_R1.fastq.gz',
+        r2 = '{df_sample}_R2.fastq.gz',
         contigs = {assembled_sample}_assembly.fasta
     output:
-        sam = '{sample}_vs_{assembled_sample}_assembly.sam'
+        sam = '{df_sample}_vs_{assembled_sample}_assembly.sam'
     run:
         shell('bwa {input.r1} {input.r2} > {output.sam')
 
@@ -210,7 +210,7 @@ What we have in curly braces is called *wildcards*. *wildcards* take some user d
 
 ## Data structure
 
-Metagenomic data is stored in `{prefix}/{df}/reads/{preproc}/{sample}/{sample}_{strand}.fastq.gz`. Let's break down the wildcards:
+Metagenomic data is stored in `{prefix}/{df}/reads/{preproc}/{df_sample}/{df_sample}_{strand}.fastq.gz`. Let's break down the wildcards:
 
 * `prefix` - denotes absolute directory where your dataset is stored. Usage of prefix allows you to store data on different disks, or structure your data by host species, and generally provides more flexibility.
 * `df` - name of your dataset.
@@ -247,7 +247,7 @@ Meta-information is stored inside `assnake_db` directory of your choice. The str
     * `description`
 * `mg_samples.tsv`
     * `biospecimen`
-    * `fs_name`
+    * `df_sample`
 
 
 
@@ -259,11 +259,11 @@ Reference data is stored inside the `database` directory. It includes various da
 #### Prepocessing
 
 * Trimmomatic
-    * Resulting file to request: `{prefix}/{df}/reads/{preproc}__tmtic_{params}/{sample}/{sample}_R1.fastq.gz`
+    * Resulting file to request: `{prefix}/{df}/reads/{preproc}__tmtic_{params}/{df_sample}/{df_sample}_R1.fastq.gz`
 * FastQC
-    * Resulting file to request: `{prefix}/{df}/reads/{preproc}/{sample}/profile/{sample}_{strand}_fastqc.zip`
+    * Resulting file to request: `{prefix}/{df}/reads/{preproc}/{df_sample}/profile/{df_sample}_{strand}_fastqc.zip`
 * BBmap repair
-    * Resulting file to request: `{prefix}/{df}/reads/{preproc}__repair/{sample}/{sample}/_R1.fastq.gz`
+    * Resulting file to request: `{prefix}/{df}/reads/{preproc}__repair/{df_sample}/{df_sample}/_R1.fastq.gz`
 
 #### Taxonomic profiling
 

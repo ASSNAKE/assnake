@@ -197,12 +197,16 @@ def df_create(config, df_name, data_storage_folder, full_path_to_df,first_prepro
 # ---------------------------------------------------------------------------------------
 
 @click.command(name='init', help = 'Register dataset in Assnake based on the folder from where you called the command. (Working directory)')
+@click.option('--data-type', '-t', 
+            help='Name of the dataset. If provided, folder with this name will be created in current dir.', 
+            required = False,
+            type=click.Choice(['METAGENOMIC_16s', 'METAGENOMIC_WGS', 'VIROME', 'RNA_SEQ'], case_sensitive=False))
 @click.option('--df-name', '-d', help='Name of the dataset. If provided, folder with this name will be created in current dir.', required = False)
 @click.option('--first-preprocessing-name', 
     help='Name of your first preprocessing. raw by default. You want to set it to sra, for exaple if yoo are planning to download from NCBI. Purely cosmetic effect.', required=False, default = 'raw')
 
 @click.pass_obj
-def df_init(config, df_name, first_preprocessing_name):
+def df_init(config, data_type, df_name, first_preprocessing_name):
     cwd = os.getcwd()
 
     if df_name is None:
@@ -222,7 +226,7 @@ def df_init(config, df_name, first_preprocessing_name):
  
 
     os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
-    df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
+    df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}, 'data_type': data_type}
 
     assnake_db = config['config']['assnake_db']
     os.makedirs(os.path.join(assnake_db, 'datasets'), exist_ok=True)
@@ -277,10 +281,8 @@ def df_info(config, df, preproc, df_arg):
     all_samples = []
     for p in preprocs:
         samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
-        # samples.add_samples(df_info['fs_prefix'], df_info['df'], p)
-        all_samples += (list(samples.samples_pd['fs_name']))
-        samples = samples.samples_pd[['fs_name', 'reads']].to_dict(orient='records')
-        # click.secho(p + ' ' + str(len(samples)) + ' samples')
+        all_samples += (list(samples.samples_pd['df_sample']))
+        samples = samples.samples_pd[['df_sample', 'reads']].to_dict(orient='records')
         preprocessing.update({p: samples})
 
     click.echo('\nTotal samples: ' + str(len(set(all_samples))) + '\n')
@@ -403,7 +405,7 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
         modify_name=lambda arg: arg.replace('-', '_')
 
     samples_in_run = fs_helpers.get_samples_from_dir(reads, modify_name)
-    samples_in_run['fs_name'] = samples_in_run['modified_name']
+    samples_in_run['df_sample'] = samples_in_run['modified_name']
     fs_helpers.create_links(target,  samples_in_run, hard=copy)
 
     update_fs_samples_csv(df_info['df'])

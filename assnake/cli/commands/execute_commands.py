@@ -11,7 +11,7 @@ from assnake.api.loaders import update_fs_samples_csv
 #                                     RUN
 #---------------------------------------------------------------------------------------
 
-@click.command('run', short_help='Runs snakemake for requested results')
+@click.command('gather', short_help='Gathers requested results and passes them to Snakemake')
 @click.option('--threads','-t', help='Threads per job', default=4)
 @click.option('--jobs','-j', help='Number of jobs', default=1)
 @click.option('--drmaa/--no-drmaa', default=False)
@@ -19,7 +19,7 @@ from assnake.api.loaders import update_fs_samples_csv
 @click.option('--touch/--no-touch', default=False)
 @click.pass_obj
 
-def run(config, threads, jobs, drmaa, run, touch):
+def gather(config, threads, jobs, drmaa, run, touch):
     import snakemake # Moved import here because it is slow as fucking fuck
     # print(config['requests'])
 
@@ -46,12 +46,6 @@ def run(config, threads, jobs, drmaa, run, touch):
         touch = touch,
         cores=jobs, nodes=jobs)
     if run:
-        print(config['requested_dfs'])
-        if type(config['requested_dfs']) is list:
-            for requested_df in config['requested_dfs']:
-                update_fs_samples_csv(requested_df)
-        else:
-            update_fs_samples_csv(config['requested_dfs'])
-
-
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+        click.echo('Updating Datasets:' + str(config['requested_dfs']))
+        for requested_df in set(config['requested_dfs']):
+            update_fs_samples_csv(requested_df)
