@@ -51,7 +51,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
     df_loaded = assnake.api.loaders.load_df_from_db(df)
     config['requested_dfs'] += [df_loaded['df']]
-
+    df_df = assnake.Dataset(df)
     # Now for the meta column stuff
     meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
     if os.path.isfile(meta_loc):
@@ -62,7 +62,9 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
                 if len(subset_by_col_value) > 0:
                     samples_to_add = list(subset_by_col_value['df_sample'])
 
-
+    if preproc is None:
+        # LONGEST
+        preproc = max(list(df_df.sample_sets.keys()), key=len)
 
     sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
     if len(exclude_samples) > 0 :  

@@ -45,7 +45,12 @@ def gather(config, threads, jobs, drmaa, run, touch):
         drmaa=drmaa_param,
         touch = touch,
         cores=jobs, nodes=jobs)
+
+    print(config['requested_results']) 
+    
     if run:
         click.echo('Updating Datasets:' + str(config['requested_dfs']))
         for requested_df in set(config['requested_dfs']):
             update_fs_samples_csv(requested_df)
+
+        print(config['requested_results']) 

@@ -35,10 +35,10 @@ class Result:
 
                 self.invocation_command = result_invocation
             elif self.input_type == 'illumina_sample':
-                @click.command(self.name + '_fff', short_help=self.name)
+                @click.command(self.name, short_help=self.name)
                 @add_options(sample_set_construction_options)
                 @click.pass_obj
-                def trimmomatic_invocation(config, params, **kwargs):
+                def result_invocation(config, params, **kwargs):
                     kwargs.update({'params': params})
                     sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
                     config['requests'] += generate_result_list(sample_set, self.result_wc, **kwargs)
