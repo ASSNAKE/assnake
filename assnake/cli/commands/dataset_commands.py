@@ -280,9 +280,9 @@ def df_info(config, df, preproc, df_arg):
     preprocessing = {}
     all_samples = []
     for p in preprocs:
-        samples = assnake.core.sample_set.SampleSet(df_info['fs_prefix'], df_info['df'], p)
-        all_samples += (list(samples.samples_pd['df_sample']))
-        samples = samples.samples_pd[['df_sample', 'reads']].to_dict(orient='records')
+        samples = assnake.api.loaders.load_sample_set(config['wc_config'], df_info['fs_prefix'], df_info['df'], p)
+        all_samples += (list(samples['df_sample']))
+        samples = samples[['df_sample', 'reads']].to_dict(orient='records')
         preprocessing.update({p: samples})
 
     click.echo('\nTotal samples: ' + str(len(set(all_samples))) + '\n')

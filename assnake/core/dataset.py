@@ -42,7 +42,8 @@ class Dataset:
   
 
     def plot_reads_loss(self, preprocs = [], sort = 'raw'):
-        # preprocs = list(self.self_reads_info.columns)
+        if len(preprocs) == 0: 
+            preprocs = list(self.self_reads_info.columns)
         plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=True)
 
     def __str__(self):

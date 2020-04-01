@@ -53,7 +53,6 @@ class Result:
         wc_config = os.path.join(location, 'wc_config.yaml')
 
         if len(workflows) > 0:
-            # [print(w) for w in workflows]
             pass
         else:
             print('===', name)
