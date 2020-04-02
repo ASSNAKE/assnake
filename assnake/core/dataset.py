@@ -5,6 +5,7 @@ from assnake.api.loaders import load_df_from_db, load_sample, load_sample_set
 from assnake.utils import load_config_file,load_wc_config
 from assnake.viz import plot_reads_count_change
 import click
+from pkg_resources import iter_entry_points 
 
 class Dataset:
 
@@ -67,3 +68,10 @@ class Dataset:
             'fs_prefix': self.fs_prefix,
             'preprocs': preprocs
         }
+
+
+
+for entry_point in iter_entry_points('assnake.plugins'):
+    module_class = entry_point.load()
+    for k, v in module_class.dataset_methods.items():
+        setattr(Dataset, k,v)
