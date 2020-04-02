@@ -8,7 +8,7 @@ import pandas as pd
 sample_set_construction_options = []
 
 sample_set_construction_options = [
-    click.option('--df','-d', help='Name of the dataset', required=True ),
+    click.option('--df','-d', help='Name of the dataset'),
     click.option('--preproc','-p', help='Preprocessing to use' ),
 
     click.option('--meta-column', '-c', help='Select samples based on metadata column' ),

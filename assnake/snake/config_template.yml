@@ -16,11 +16,8 @@ debug: True # For print messages
 BLAST_NCBI_NT: '/data5/bio/runs-jeniaole/tools/NCBI_nt'
 NCBI_TAX: '/data5/bio/runs-jeniaole/tools/NCBI_tax'
 CHECKM: '/data5/bio/databases/checkm'
-QIIME2_SILVA99: '/data5/bio/databases/qiime2/silva-132-99-nb-classifier.qza'
-QIIME2_GG99: '/data5/bio/databases/qiime2/gg-13-8-99-nb-classifier.qza'
 CAT_BAT_DB: '/data5/bio/databases/CAT_BAT/CAT_prepare_20190108/2019-01-08_CAT_database'
 CAT_BAT_TAXA: '/data5/bio/databases/CAT_BAT/CAT_prepare_20190108/2019-01-08_taxonomy'
-picrust2_pro: '/data5/bio/databases/picrust2/default_files/prokaryotic/pro_ref'
 cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
 
 centrifuge:
@@ -32,10 +29,3 @@ kraken:
 
 kraken.db.human: '/data7a/bio/BacGenomeSoft/tmp/metagenome/human_db'
 kraken.db.gb: '/data5/bio/runs-jeniaole/kraken/kr.db'    
-MetaPhlAn2:
-    mpa_v29: '/data5/bio/databases/MetaPhlAn2/mpa_v29_CHOCOPhlAn_201901/mpa_v29_CHOCOPhlAn_201901.pkl'
-    mpa_v29_bt: '/data5/bio/databases/MetaPhlAn2/mpa_v29_CHOCOPhlAn_201901'
-
-
-    # mpa_v20_m200: '/data5/bio/databases/MetaPhlAn2/mpa_v20_m200/mpa_v20_m200.pkl'
-    # BOWTIE2DB: '/data5/bio/databases/MetaPhlAn2/mpa_v20_m200'
