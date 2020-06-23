@@ -3,7 +3,7 @@
 #############################################
 
 import click, os
-from assnake.utils import get_config_loc, load_config_file
+from assnake.utils import read_internal_config
 from assnake.api.loaders import update_fs_samples_csv
 
 
@@ -21,7 +21,10 @@ from assnake.api.loaders import update_fs_samples_csv
 
 def gather(config, threads, jobs, drmaa, run, touch):
     import snakemake # Moved import here because it is slow as fucking fuck
-    # print(config['requests'])
+    
+    
+    internal_config = read_internal_config()
+    
 
     click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')
 
@@ -37,7 +40,7 @@ def gather(config, threads, jobs, drmaa, run, touch):
         printshellcmds=True,
         dryrun=not run, 
         # config = load_config_file(),
-        configfiles=[get_config_loc()],
+        configfiles=[internal_config['instance_config_loc']],
         drmaa_log_dir = config['config']['drmaa_log_dir'],
         use_conda = True,
         latency_wait = 120,

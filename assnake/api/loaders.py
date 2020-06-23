@@ -48,8 +48,8 @@ def load_dfs_from_db(db_loc):
     """
     dfs = {}
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    config = assnake.utils.load_config_file()
-    df_info_locs = glob.glob(config['assnake_db']+'/datasets/*/df_info.yaml')
+    internal_config = assnake.utils.read_internal_config()
+    df_info_locs = glob.glob(internal_config['assnake_db']+'/datasets/*/df_info.yaml')
     
     for df_info in df_info_locs:
         with open(df_info, 'r') as stream:
@@ -65,10 +65,10 @@ def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     """
     Returns one dictionary with df info
     """
-    config = assnake.utils.load_config_file()
+    internal_config = assnake.utils.read_internal_config()
     wc_config = assnake.utils.load_wc_config()
 
-    df_info_loc = config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
+    df_info_loc = internal_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
     df_info = {}
     with open(df_info_loc, 'r') as stream:
         try:
@@ -182,7 +182,7 @@ def update_fs_samples_csv(dataset):
     :return: Returns sample dict in loc
     
     '''
-    fs_samples_tsv_loc = '{config}/datasets/{df}/assnake_samples.tsv'.format(config=assnake.utils.load_config_file()['assnake_db'], df=dataset)
+    fs_samples_tsv_loc = '{config}/datasets/{df}/assnake_samples.tsv'.format(config=assnake.utils.read_internal_config()['assnake_db'], df=dataset)
     df = assnake.Dataset(dataset)
     fs_samples_pd = pd.concat(list(df.sample_sets.values()))
     fs_samples_pd = df.sample_sets['raw']

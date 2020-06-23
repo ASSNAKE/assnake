@@ -5,7 +5,8 @@ import assnake.cli.commands.dataset_commands as dataset_commands # snakemake mak
 import assnake.cli.commands.init_commands as init_commands
 from assnake.cli.commands.execute_commands import gather
 
-from assnake.utils import read_yaml, check_if_assnake_is_initialized, get_config_loc
+import assnake.utils
+from assnake.utils import read_assnake_instance_config, read_internal_config, read_yaml, check_if_assnake_is_initialized
 from assnake.cli.cli_utils import sample_set_construction_options, add_options
 from pkg_resources import iter_entry_points 
 from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
@@ -51,23 +52,16 @@ or create an issue or PR on GitHub.
 \b
 Start by initializing ASSNAKE with
 assnake init command
-\b
-Here is it how it goes.
-Somewhere on your filesystem you create a folder, and put your reads inside the ./<your_folder>/reads/raw folder.
-<your_folder> is also the name of the Dataset, so choose wisely!
-Than register yor dataset in the assnake with
-assnake dataset create"""
+\b"""
 
 
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_loc = get_config_loc() 
 
-    if config_loc is None or not os.path.isfile(config_loc):
-            pass
-    else:
-        config = read_yaml(config_loc)
+    instance_config = read_assnake_instance_config()
+
+    if instance_config is not None:
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
-        ctx.obj = {'config': config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
+        ctx.obj = {'config': instance_config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
 
 
 #---------------------------------------------------------------------------------------
@@ -83,7 +77,6 @@ def init_group():
     pass
 
 init_group.add_command(init_commands.init_start)
-init_group.add_command(init_commands.current_config)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
@@ -134,6 +127,27 @@ def request_sample_set(config, message, **kwargs):
     config['sample_sets'].append(sample_set.samples_pd.copy())
 result.add_command(request_sample_set)
 
+
+@cli.group(name = 'config')
+def config_group():
+    """Configuration related commands"""
+    pass
+
+@config_group.command(name = 'show-internal')
+def show_internal_config():
+    """
+    Show your current internal configuration
+    """
+    # click.echo('CURRENT CONFIG LOCATION')
+    print(assnake.utils.read_internal_config())
+
+@config_group.command(name = 'show-instance')
+def show_internal_config():
+    """
+    Show your current instance configuration
+    """
+    # click.echo('CURRENT CONFIG LOCATION')
+    print(assnake.utils.read_assnake_instance_config())
 
 def main():
     cli()

@@ -5,7 +5,10 @@ from assnake.core.sample_set import generic_command_individual_samples, generate
 from assnake.cli.cli_utils import sample_set_construction_options, add_options
 
 class Result:
-
+    '''
+    This class is used to create InvocationCommand for CLI.
+     
+    '''
     name = '' # This name will be used as command name and in web-service
     result_wc = '' # Just ONE wc that will be populated with data and passed to snakemake, so it can understand what it needs to do
     input_type = '' # sample_file, sample, sample_set ...

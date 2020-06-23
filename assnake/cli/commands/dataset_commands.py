@@ -198,7 +198,7 @@ def df_create(config, df_name, data_storage_folder, full_path_to_df,first_prepro
 
 @click.command(name='init', help = 'Register dataset in Assnake based on the folder from where you called the command. (Working directory)')
 @click.option('--data-type', '-t', 
-            help='Name of the dataset. If provided, folder with this name will be created in current dir.', 
+            help='Type of NGS data. Illumina Metagenomic WGS and 16s are supported.', 
             required = False,
             type=click.Choice(['METAGENOMIC_16s', 'METAGENOMIC_WGS', 'VIROME', 'RNA_SEQ'], case_sensitive=False))
 @click.option('--df-name', '-d', help='Name of the dataset. If provided, folder with this name will be created in current dir.', required = False)
@@ -225,7 +225,7 @@ def df_init(config, data_type, df_name, first_preprocessing_name):
         full_path_empty = False
  
 
-    os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
+    # os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
     df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}, 'data_type': data_type}
 
     assnake_db = config['config']['assnake_db']
@@ -393,11 +393,6 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
             exit(2)
     target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
     os.makedirs(target, exist_ok=True)
-    # def rename(sample):
-    #     new_name_wc = 'Rst{}_{}_B2'
-    #     splitted = sample.split('_')
-    #     splitted[2] = (1 if len(splitted) == 3 else a)
-    #     return new_name_wc.format(splitted[1], splitted[2])
 
     if rename_method == 'removeSending':
         modify_name=lambda arg: '_'.join(arg.replace('-', '_').split('_')[0:-1])
@@ -410,27 +405,6 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
 
     update_fs_samples_csv(df_info['df'])
     click.secho("SUCCESSFULLY IMPORTED READS!", bg='green') 
-    # sample_names = {d['sample_name'] for d in dicts}
-    # if arg_s:
-    #     samples_of_interest = sample_set.split(',')
-    # elif arg_l:
-    #     sample_list = pathizer(sample_list)
-    #     if os.path.exists(sample_list):
-    #         with open(sample_list, 'r') as ls_file:
-    #             samples_of_interest = ls_file.readlines()
-    #     else:
-    #         click.secho("Provided sample-list file couldn't be detected", err=True)
-    # else:
-    #     samples_of_interest = sample_names
-
-    # # Such a mess! check if specified samples are in directory
-    # if (arg_s or arg_l) and (len(set(samples_of_interest) - {d['sample_name'] for d in dicts}) != 0):
-    #     click.secho("Warning! Samples, been specified, are not in reads file", err=True)
-    #     click.confirm('Continue?', abort=True)
-    # if copy:
-    #     click.secho("Please, keep in mind, that hard copying may take plenty of time")
-
-    # Here the logic -- just call create_links
     
 
 

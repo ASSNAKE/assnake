@@ -2,7 +2,7 @@ import os, glob, yaml, time
 import pandas as pd
 from assnake.api.loaders import load_df_from_db, load_sample, load_sample_set
 
-from assnake.utils import load_config_file,load_wc_config
+from assnake.utils import load_wc_config
 from assnake.viz import plot_reads_count_change
 import click
 from pkg_resources import iter_entry_points 
@@ -20,7 +20,7 @@ class Dataset:
 
 
     def __init__(self, df):
-        config = load_config_file()
+        # config = load_config_file()
         wc_config = load_wc_config()
         info = load_df_from_db(df, include_preprocs = True)
 
