@@ -77,12 +77,7 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir,s
             instance_config_loc = fill_and_write_instance_config(*map(os.path.abspath, [assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, os.path.join(assnake_db, 'config.yaml')]))
 
             if instance_config_loc is not None:
-                internal_config = update_internal_config({
-                    'instance_config_loc': instance_config_loc,
-                    'assnake_db': assnake_db, 
-                    'fna_db_dir': fna_db_dir,
-                    'conda_dir': conda_dir
-                    })
+                internal_config = update_internal_config({ 'instance_config_loc': instance_config_loc })
                 if internal_config is not None:
                     click.secho('We created assnake database instance at ' + assnake_db, fg='green')
                     click.secho('== SUCCESS ==', bg='green', fg='white')
@@ -91,7 +86,6 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir,s
             click.secho('We will set it as assnake instance configuration with no changes', fg='yellow')
             internal_config = update_internal_config({
                     'instance_config_loc': os.path.join(assnake_db, 'config.yaml'),
-                    'assnake_db': assnake_db
                     })
             if internal_config is not None:
                 click.secho('== SUCCESS ==', bg='green', fg='white')

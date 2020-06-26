@@ -35,8 +35,8 @@ def read_internal_config():
 
         if not os.path.isfile(internal_config_loc):
             with open(internal_config_loc, 'w+') as file:
-                _ = yaml.dump({'assnake_db' : '', 'instance_config_loc': ''}, file, sort_keys=False)
-        return {'assnake_db' : '', 'instance_config_loc': ''}
+                _ = yaml.dump({'instance_config_loc': 'not_set'}, file, sort_keys=False)
+        return {'instance_config_loc': ''}
 
 def read_assnake_instance_config():
     '''
@@ -44,7 +44,7 @@ def read_assnake_instance_config():
     :return: Returns dict if instance config exists, None otherwise.
     '''
     internal_config = read_internal_config()
-    instance_config_loc = os.path.join(internal_config['assnake_db'], 'config.yaml')
+    instance_config_loc = internal_config['instance_config_loc']
 
     if os.path.isfile(instance_config_loc):
         return read_yaml(instance_config_loc)

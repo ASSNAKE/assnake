@@ -6,11 +6,14 @@ import pandas as pd
 
 
 def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
+    '''
+    This returns several sample sets.
+    '''
     df_loaded = assnake.api.loaders.load_df_from_db(df)
     
     sample_sets_dict = {}
 
-    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
+    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'df_samples.tsv')
     if os.path.isfile(meta_loc):
         meta = pd.read_csv(meta_loc, sep = '\t')
         if meta_column is not None:
@@ -53,7 +56,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     config['requested_dfs'] += [df_loaded['df']]
     df_df = assnake.Dataset(df)
     # Now for the meta column stuff
-    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'mg_samples.tsv')
+    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'df_samples.tsv')
     if os.path.isfile(meta_loc):
         meta = pd.read_csv(meta_loc, sep = '\t')
         if meta_column is not None:
@@ -108,7 +111,7 @@ def prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df, sam
         sample_set_dir = sample_set_dir_wc.format(fs_prefix = df_loaded['fs_prefix'], df = df, sample_set = sample_set_name)
         sample_set_loc = os.path.join(sample_set_dir, 'sample_set.tsv')
 
-        print(sample_set_loc)
+
         sample_set = sample_sets[sample_set_name]
         if not os.path.exists(sample_set_dir):
             os.makedirs(sample_set_dir, exist_ok=True)

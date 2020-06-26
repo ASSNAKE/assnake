@@ -22,7 +22,7 @@ def write_internal_config():
 
     if not os.path.isfile(internal_config_loc):
         with open(internal_config_loc, 'w+') as file:
-            _ = yaml.dump({'assnake_db' : '', 'instance_config_loc': ''}, file, sort_keys=False)
+            _ = yaml.dump({'instance_config_loc': 'not_set'}, file, sort_keys=False)
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
