@@ -7,7 +7,7 @@ from assnake.api import fs_helpers
 from assnake.utils.general import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
 from assnake.api.loaders import update_fs_samples_csv
-
+from pathlib import Path
 # some util
 def show_av_dict(dfs):
     '''
@@ -318,7 +318,7 @@ def df_delete(config, df, hard, df_arg):
 # ---------------------------------------------------------------------------------------
 # DONE decide if we need either d and t or proceed both arguments as one and automatically choose path or not
 @click.command(name='import-reads')
-@click.option('--reads', '-r', prompt='Location of folder with read files',
+@click.option('--reads-dir', '-r', prompt='Location of folder with read files',
               help='Location of folder with read files', type=click.Path())
 @click.option('--dataset', '-d', help='Assnake dataset name. If -t is not specified', required=False)
 @click.option('--rename-method', help='How to rename samples', type=click.Choice(['replace-', 'removeSending'], case_sensitive=False), required=False)
@@ -329,13 +329,15 @@ def df_delete(config, df, hard, df_arg):
               type=click.Path())
 @click.option('--copy', help='If is set, hard copying will be used instead of symbolic links ', is_flag=True)
 @click.pass_obj
-def df_import_reads(config, reads, dataset, rename_method, target, sample_set, sample_list, copy):
+def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_set, sample_list, copy):
     """
     Import reads from directory to assnake dataset. Currently local text files are supported. The --target argument
     point to location (relative or absolute) of assnake dataset in your file system. Please, pay attention,
     that -t and -d  arguments are excclusive for each over -- specify only one of them -- as well as -s and -l.
     With -s `sample_1,sample_2,...,sample_n` notation is implied (no whitespaces between sample names)
     """
+
+    reads_dir = str(Path(reads_dir).resolve())
     # stuff about presence of arguments
     arg_d = not bool(dataset is None)
     arg_t = not bool(target is None)
@@ -378,13 +380,15 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
     else:
         modify_name=lambda arg: arg.replace('-', '_')
 
-    samples_in_run = fs_helpers.get_samples_from_dir(reads, modify_name)
-    samples_in_run['df_sample'] = samples_in_run['modified_name']
-    fs_helpers.create_links(target,  samples_in_run, hard=copy)
+    samples_in_run = fs_helpers.get_samples_from_dir(reads_dir, modify_name)
+    if len(samples_in_run) > 0:
+        samples_in_run['df_sample'] = samples_in_run['modified_name']
+        fs_helpers.create_links(target,  samples_in_run, hard=copy)
 
-    update_fs_samples_csv(df_info['df'])
-    click.secho("SUCCESSFULLY IMPORTED READS!", bg='green') 
-    
+        update_fs_samples_csv(df_info['df'])
+        click.secho("SUCCESSFULLY IMPORTED READS!", fg='green') 
+    else: 
+        click.secho('No reads in directory ' + reads_dir, fg='yellow')
 
 
 @click.command(name='rescan')

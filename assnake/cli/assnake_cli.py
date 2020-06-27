@@ -3,14 +3,16 @@ import click
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.config_commands as config_commands
+import assnake.cli.commands.module_commands as module_commands
 from assnake.cli.commands.execute_commands import gather
 
-
 from assnake.utils.general import read_yaml
+
 from assnake.core.config import read_assnake_instance_config, read_internal_config, check_if_assnake_is_initialized
 from assnake.core.command_builder import sample_set_construction_options, add_options
-from pkg_resources import iter_entry_points 
 from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
+
+from pkg_resources import iter_entry_points 
 
 
 #---------------------------------------------------------------------------------------
@@ -138,6 +140,15 @@ def config_group():
 config_group.add_command(config_commands.init_config)
 config_group.add_command(config_commands.show_internal_config)
 config_group.add_command(config_commands.show_instance_config)
+
+@cli.group(name = 'module')
+def config_group():
+    """Commands to view and interact with assnake modules installed in current env"""
+    pass
+
+config_group.add_command(module_commands.show_installed_results)
+config_group.add_command(module_commands.show_installed_modules)
+
 
 def main():
     cli()

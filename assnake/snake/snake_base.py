@@ -1,6 +1,6 @@
-import glob, os, pkg_resources, time
+import glob, os, time
 from assnake.core.config import load_wc_config
-
+from pkg_resources import iter_entry_points 
 wc_config = load_wc_config()
 
 start = time.time()
@@ -8,7 +8,7 @@ start = time.time()
 # Discover plugins
 discovered_plugins = {
     entry_point.name: entry_point.load()
-    for entry_point in pkg_resources.iter_entry_points('assnake.plugins')
+    for entry_point in iter_entry_points('assnake.plugins')
 }
 
 # We need to update wc_config first

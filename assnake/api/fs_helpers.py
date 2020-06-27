@@ -113,11 +113,14 @@ def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = Fa
             copy2(src_r1, dst_r1)
             copy2(src_r2, dst_r2)
             return
-        # print('---')
-        # print(src_r1, dst_r1)
-        # print(src_r2, dst_r2)
-        os.symlink(src_r1, dst_r1)
-        os.symlink(src_r2, dst_r2)
+
+        try:
+            os.symlink(src_r1, dst_r1)
+            os.symlink(src_r2, dst_r2)
+        except FileExistsError as e:
+            print(e)
+            
+
 
 def delete_ds(dataset):
     """

@@ -4,6 +4,10 @@ from assnake.utils.general import read_yaml
 from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
 from assnake.core.command_builder import sample_set_construction_options, add_options
 
+from pkg_resources import iter_entry_points 
+
+from assnake.core.snake_module import get_all_modules_as_dict
+
 class Result:
     '''
     This class is used to create InvocationCommand for CLI.
@@ -17,14 +21,16 @@ class Result:
     workflows = [] # List of files with snakemake workflow files (.smk)
 
     imvocation_command = None
+    params_preparation = None # Functions that defines how to prepare and store params for this result. On installation, it checks if assnake is configured, and deploys params and necessary static files to the database. If assnake is not configured, this commands will be run during configuration.
 
-    def __init__(self, name, workflows, result_wc, input_type, additional_inputs, invocation_command = None, wc_config = None): 
+    def __init__(self, name, workflows, result_wc, input_type, additional_inputs, invocation_command = None, wc_config = None, params_preparation = None): 
         self.name = name
         self.result_wc = result_wc
         self.input_type = input_type
         self.additional_inputs = additional_inputs
         self.workflows = workflows
         self.wc_config = wc_config
+        self.params_preparation = params_preparation
 
         if invocation_command == None:
             if self.input_type == 'illumina_strand_file':
@@ -49,7 +55,7 @@ class Result:
             self.invocation_command = invocation_command
 
     @classmethod
-    def from_location(cls, name, location, input_type, additional_inputs = None, invocation_command = None):
+    def from_location(cls, name, location, input_type, additional_inputs = None, invocation_command = None, params_preparation = None):
 
         # Try to find all needed files for Result
         workflows = glob.glob(os.path.join(location, 'workflow*.smk'))
@@ -74,7 +80,8 @@ class Result:
             input_type =  input_type,
             additional_inputs = additional_inputs,
             invocation_command = invocation_command,
-            wc_config=wc_config
+            params_preparation = params_preparation,
+            wc_config = wc_config
         )
 
         return x
@@ -84,4 +91,23 @@ class Result:
 
         return res_list
 
-    
+
+def get_all_results_as_list():
+    # Discover plugins
+    discovered_plugins = get_all_modules_as_dict()
+    for module_name, module_class in discovered_plugins.items():
+        print(module_name)
+        for res in module_class.results:
+            
+            # print('\t' + str(res.invocation_command))
+
+            if res.params_preparation is not None:
+                print('\t' + res.name)
+                print('\t' + str(res.params_preparation))
+                res.params_preparation()
+        # config.update({module_name:module_class.install_dir})
+        # for wc_conf in module_class.wc_configs:
+        #     if wc_conf is not None:
+        #         wc_config.update(wc_conf)
+        
+    return discovered_plugins
