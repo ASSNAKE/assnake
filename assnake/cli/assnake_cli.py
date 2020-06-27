@@ -2,12 +2,13 @@ import sys, os, glob, yaml, shutil
 import click
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
-import assnake.cli.commands.init_commands as init_commands
+import assnake.cli.commands.config_commands as config_commands
 from assnake.cli.commands.execute_commands import gather
 
-import assnake.utils
-from assnake.utils import read_assnake_instance_config, read_internal_config, read_yaml, check_if_assnake_is_initialized
-from assnake.cli.cli_utils import sample_set_construction_options, add_options
+
+from assnake.utils.general import read_yaml
+from assnake.core.config import read_assnake_instance_config, read_internal_config, check_if_assnake_is_initialized
+from assnake.core.command_builder import sample_set_construction_options, add_options
 from pkg_resources import iter_entry_points 
 from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
 
@@ -64,19 +65,19 @@ assnake init command
         ctx.obj = {'config': instance_config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
 
 
-#---------------------------------------------------------------------------------------
-#                                  assnake  INIT ***  group
-#---------------------------------------------------------------------------------------
+# #---------------------------------------------------------------------------------------
+# #                                  assnake  INIT ***  group
+# #---------------------------------------------------------------------------------------
 
-@cli.group(name='init')
-def init_group():
-    """Commands to initialize the ASSNAKE\n
-    \bYou need to configure where assnake will store it's data and download databases.
-    Assnake has internal configuration file 
-    """
-    pass
+# @cli.group(name='init')
+# def init_group():
+#     """Commands to initialize the ASSNAKE\n
+#     \bYou need to configure where assnake will store it's data and download databases.
+#     Assnake has internal configuration file 
+#     """
+#     pass
 
-init_group.add_command(init_commands.init_start)
+# init_group.add_command(init_commands.init_start)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
@@ -133,21 +134,10 @@ def config_group():
     """Configuration related commands"""
     pass
 
-@config_group.command(name = 'show-internal')
-def show_internal_config():
-    """
-    Show your current internal configuration
-    """
-    # click.echo('CURRENT CONFIG LOCATION')
-    print(assnake.utils.read_internal_config())
 
-@config_group.command(name = 'show-instance')
-def show_internal_config():
-    """
-    Show your current instance configuration
-    """
-    # click.echo('CURRENT CONFIG LOCATION')
-    print(assnake.utils.read_assnake_instance_config())
+config_group.add_command(config_commands.init_config)
+config_group.add_command(config_commands.show_internal_config)
+config_group.add_command(config_commands.show_instance_config)
 
 def main():
     cli()

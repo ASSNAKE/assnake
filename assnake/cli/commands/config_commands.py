@@ -1,12 +1,10 @@
 import click, os
 
-from assnake.utils import read_internal_config, read_assnake_instance_config, update_internal_config
-
-from assnake.cli.init_config import fill_and_write_instance_config
+from assnake.core.config import read_internal_config, read_assnake_instance_config, update_internal_config, fill_and_write_instance_config
 
 from pathlib import Path
 
-@click.command(name='start')
+@click.command(name='init')
 @click.option('--assnake-db', '-d', type=click.Path(),
               prompt='Which directory do you like to use for assnake database?',
               help='Assnake database stores information about your datasets, installed tools and parameters.')
@@ -28,7 +26,8 @@ from pathlib import Path
               help='Force and confirm all in quite mode.')
 @click.option('--verbose', '-v', count=True)
 
-def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir,start_over, forced, verbose):
+def init_config(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir,start_over, forced, verbose):
+    "Initialize your Assnake installation"
     internal_config = read_internal_config()
 
     assnake_db = str(Path(assnake_db).expanduser().resolve())
@@ -94,9 +93,18 @@ def init_start(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir,s
         click.secho('We are already properly configured, assnake database is here: ' + assnake_db, fg='yellow')
         click.secho('If you want to start over, add flag --start-over', fg='yellow')
 
-@click.command(name = 'current-config')
-def current_config():
+@click.command(name = 'show-internal')
+def show_internal_config():
     """
-    Just print your current config location
+    Show your current internal configuration
     """
-    click.echo('CURRENT CONFIG LOCATION')
+    # click.echo('CURRENT CONFIG LOCATION')
+    print(read_internal_config())
+
+@click.command(name = 'show-instance')
+def show_instance_config():
+    """
+    Show your current instance configuration
+    """
+    # click.echo('CURRENT CONFIG LOCATION')
+    print(read_assnake_instance_config())

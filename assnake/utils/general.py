@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from pathlib import Path
 
+
 def read_yaml(file_location):
     yaml_file = {}
     with open(file_location, 'r') as stream:
@@ -13,98 +14,6 @@ def read_yaml(file_location):
             return yaml_file
         except yaml.YAMLError as exc:
             print(exc)
-
-def load_wc_config():
-    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    return (read_yaml(os.path.join(dir_of_this_file, './snake/wc_config.yaml')))
-
-
-def read_internal_config():
-    '''
-    Reads the config at ~/.config/assnake/internal_config.yaml and returns as dict
-    '''
-    internal_config_loc = os.path.join(str(Path.home()), '.config/assnake/internal_config.yaml')
-    
-    if os.path.isfile(internal_config_loc):
-        internal_config = read_yaml(internal_config_loc)
-        return internal_config
-    else:
-        internal_config_dir = os.path.join(str(Path.home()), '.config/assnake/')
-
-        os.makedirs(internal_config_dir, exist_ok=True)
-
-        if not os.path.isfile(internal_config_loc):
-            with open(internal_config_loc, 'w+') as file:
-                _ = yaml.dump({'instance_config_loc': 'not_set'}, file, sort_keys=False)
-        return {'instance_config_loc': ''}
-
-def read_assnake_instance_config():
-    '''
-    Reads particular assnake instance config. It is stored inside assnake database as config.yaml (Name subject to change). 
-    :return: Returns dict if instance config exists, None otherwise.
-    '''
-    internal_config = read_internal_config()
-    instance_config_loc = internal_config['instance_config_loc']
-
-    if os.path.isfile(instance_config_loc):
-        return read_yaml(instance_config_loc)
-    else:
-        return None
-
-def update_internal_config(update_dict):
-    '''
-    Updates internal config with provided dictionary
-
-    :return: updated internal config if everything is ok, None otherwise
-    '''
-    internal_config = read_internal_config()
-    internal_config.update(update_dict)
-    internal_config_loc = os.path.join(str(Path.home()), '.config/assnake/internal_config.yaml')
-    with open(internal_config_loc, 'w+') as file:
-        _ = yaml.dump(internal_config, file, sort_keys=False)
-
-    return internal_config
-
-def check_if_assnake_is_initialized():
-    '''
-    Just tries to read assnake instance config, and prints an error if there is no instance config.
-    '''
-    instance_config = read_assnake_instance_config()
-
-    if instance_config is None:
-        click.secho("You need to init your installation!", fg='red', bold=True)
-        click.echo("Don't worry, it won't take long.")
-        click.echo('Just run ' + click.style('assnake init start', bg='blue', fg='bright_white'))
-        exit()
-
-
-
-
-## ====RENAME THIS === update_instance_config
-def update_config(update_dict):
-    '''
-    Updates instance config with provided dictionary
-
-    :return: updated instance config if everything is ok, None otherwise
-    '''
-
-    instance_config = read_assnake_instance_config()
-    instance_config.update(update_dict)
-
-    internal_config_loc = os.path.join(str(Path.home()), '.config/assnake/internal_config.yaml')
-
-    with open(internal_config_loc, 'w+') as file:
-        _ = yaml.dump(instance_config, file, sort_keys=False)
-
-    return instance_config
-
-
-## ============================================
-
-
-
-
-
 
 def pathizer(path):
     """

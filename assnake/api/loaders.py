@@ -5,9 +5,18 @@ import pandas as pd
 import numpy as np
 import yaml
 import assnake
-import assnake.utils
+from assnake.core.config import read_assnake_instance_config, load_wc_config
+from assnake.utils.general import bytes2human
 
-from assnake.utils import bytes2human
+class InputError(Exception):
+    """Exception raised for errors in the input.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, message):
+        self.message = message
 
 def load_count(fs_prefix, df, preproc, df_sample, report_bps=False, verbose=False, count_wc=''):
     """
@@ -48,7 +57,7 @@ def load_dfs_from_db(db_loc):
     """
     dfs = {}
     curr_dir = os.path.dirname(os.path.abspath(__file__))
-    instance_config = assnake.utils.read_assnake_instance_config()
+    instance_config = read_assnake_instance_config()
     df_info_locs = glob.glob(instance_config['assnake_db']+'/datasets/*/df_info.yaml')
     
     for df_info in df_info_locs:
@@ -63,13 +72,17 @@ def load_dfs_from_db(db_loc):
 
 def load_df_from_db(df_name, db_loc='', include_preprocs = False):
     """
-    Returns one dictionary with df info
+    :returns: Dict with dataset if exists, raises InputError Exception
     """
-    instance_config = assnake.utils.read_assnake_instance_config()
-    wc_config = assnake.utils.load_wc_config()
+    instance_config = read_assnake_instance_config()
+    wc_config = load_wc_config()
 
     df_info_loc = instance_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
     df_info = {}
+
+    if not os.path.isfile(df_info_loc):
+        raise InputError('NO DATASET ' + df_name)
+
     with open(df_info_loc, 'r') as stream:
         try:
             info = yaml.load(stream, Loader=yaml.FullLoader)
@@ -147,7 +160,7 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
     '''
 
     if wc_config is None:
-        wc_config = assnake.utils.load_wc_config()
+        wc_config = load_wc_config()
 
     samples = []
     fastq_gz_file_loc = wc_config['fastq_gz_file_wc'].format(
@@ -182,7 +195,7 @@ def update_fs_samples_csv(dataset):
     :return: Returns sample dict in loc
     
     '''
-    fs_samples_tsv_loc = '{assnake_db}/datasets/{df}/assnake_samples.tsv'.format(assnake_db=assnake.utils.read_assnake_instance_config()['assnake_db'], df=dataset)
+    fs_samples_tsv_loc = '{assnake_db}/datasets/{df}/assnake_samples.tsv'.format(assnake_db=read_assnake_instance_config()['assnake_db'], df=dataset)
     df = assnake.Dataset(dataset)
     fs_samples_pd = pd.concat(list(df.sample_sets.values()))
     fs_samples_pd = df.sample_sets['raw']

@@ -5,7 +5,7 @@ import sys
 import glob
 import fnmatch
 from shutil import copy2, rmtree
-from assnake import utils
+from assnake.core.config import read_assnake_instance_config
 import traceback
 import parse
 from assnake.api.loaders import load_df_from_db
@@ -125,7 +125,7 @@ def delete_ds(dataset):
     """
     try:
         os.remove(
-            '{config}/datasets/{df}/df_info.yaml'.format(config=utils.load_config_file()['assnake_db'], df=dataset))
+            '{config}/datasets/{df}/df_info.yaml'.format(config=read_assnake_instance_config()['assnake_db'], df=dataset))
         return (True,)
     except Exception as e:
         return (False, traceback.format_exc())

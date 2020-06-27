@@ -2,7 +2,7 @@ import os, glob, yaml, time
 import pandas as pd
 from assnake.api.loaders import load_df_from_db, load_sample, load_sample_set
 
-from assnake.utils import load_wc_config
+from assnake.core.config import load_wc_config
 from assnake.viz import plot_reads_count_change
 import click
 from pkg_resources import iter_entry_points 
@@ -48,7 +48,13 @@ class Dataset:
         plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=True)
 
     def __str__(self):
-        return self.df + '\n' + self.fs_prefix +'\n' + str(self.sample_sets)
+        preprocessing_info = ''
+        preprocs = list(self.sample_sets.keys())
+        for preproc in preprocs:
+            preprocessing_info = preprocessing_info + 'Samples in ' + preproc + ' - ' + str(len(self.sample_sets[preproc])) + '\n'
+        return 'Dataset name: ' + self.df + '\n' + \
+            'Filesystem prefix: ' + self.fs_prefix +'\n' + \
+            'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
 
     def __repr__(self):
         preprocessing_info = ''

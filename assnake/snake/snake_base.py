@@ -1,7 +1,7 @@
 import glob, os, pkg_resources, time
-import assnake.utils 
+from assnake.core.config import load_wc_config
 
-wc_config = assnake.utils.load_wc_config()
+wc_config = load_wc_config()
 
 start = time.time()
 

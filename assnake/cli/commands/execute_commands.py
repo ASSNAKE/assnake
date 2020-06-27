@@ -3,7 +3,7 @@
 #############################################
 
 import click, os
-from assnake.utils import read_internal_config
+from assnake.core.config import read_internal_config
 from assnake.api.loaders import update_fs_samples_csv
 
 

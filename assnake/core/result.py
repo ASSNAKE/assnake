@@ -1,8 +1,8 @@
 import os, click, glob
 
-from assnake.utils import read_yaml
+from assnake.utils.general import read_yaml
 from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
-from assnake.cli.cli_utils import sample_set_construction_options, add_options
+from assnake.core.command_builder import sample_set_construction_options, add_options
 
 class Result:
     '''

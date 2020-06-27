@@ -4,7 +4,7 @@ import assnake.api.loaders
 import assnake.core.sample_set
 from tabulate import tabulate
 from assnake.api import fs_helpers
-from assnake.utils import pathizer, dict_norm_print, download_from_url
+from assnake.utils.general import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
 from assnake.api.loaders import update_fs_samples_csv
 
@@ -245,54 +245,33 @@ def df_init(config, data_type, df_name, first_preprocessing_name):
 @click.command(name='info')
 @click.option('--df', '-d', help='Name of the dataset', required=False)
 @click.option('--preproc', '-p', help='Show samples for preprocessing', required=False)
-@click.argument('df_arg', required=True)
+@click.argument('df_arg', required=False)
 @click.pass_obj
 def df_info(config, df, preproc, df_arg):
     """View info for the specific dataset
         Usage: assnake dataset info [dataset] or -d [dataset] ...
 
     """
+    # df argument/option logic
     if not (bool(df is None) ^ bool(df_arg is None)):
         click.echo('Please, specify dataset either as option or argument')
         df = click.prompt('Type the name in')
     if df is None:
         df = df_arg
-    dfs = assnake.api.loaders.load_dfs_from_db('')
+    
+    # Trying to load dataset and display information
     try:
-        df_info = dfs[df]
-    except KeyError as e:
-        click.echo('Can`t reach database with such name')
-        show_av_dict(dfs)
-    click.echo(click.style('' * 2 + df_info['df'] + ' ' * 2, fg='green', bold=True))
-    click.echo('Filesystem prefix: ' + df_info.get('fs_prefix', ''))
-    click.echo('Full path: ' + os.path.join(df_info.get('fs_prefix', ''), df))
-    click.echo('Description: ')
-    dict_norm_print(df_info.get('description', ''))
-
-    mg_samples_loc = os.path.join(config['config']['assnake_db'], 'datasets', df_info['df'], 'mg_samples.tsv')
-
-    if os.path.isfile(mg_samples_loc):
-        click.echo(tabulate(pd.read_csv(mg_samples_loc, sep='\t'), headers='keys', tablefmt='fancy_grid'))
-
-    reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-    preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
-    preprocs.sort()
-    preprocessing = {}
-    all_samples = []
-    for p in preprocs:
-        samples = assnake.api.loaders.load_sample_set(config['wc_config'], df_info['fs_prefix'], df_info['df'], p)
-        all_samples += (list(samples['df_sample']))
-        samples = samples[['df_sample', 'reads']].to_dict(orient='records')
-        preprocessing.update({p: samples})
-
-    click.echo('\nTotal samples: ' + str(len(set(all_samples))) + '\n')
-
-    for key, value in preprocessing.items():
-        click.echo('Samples in ' + click.style(key, bold=True) + ': ' + str(len(value)))
-    if preproc is not None:
-        samples_pd = pd.DataFrame(preprocessing[preproc])
-        # print(samples_pd)
-        click.echo(tabulate(samples_pd.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+        df = assnake.Dataset(df)
+        click.echo(click.style('='*2 + ' '*3 + df.df + ' '*3 + '=' * 2, fg='green', bold=True))
+        click.echo(str(df))
+        if preproc is not None:
+            samples = df.sample_sets[preproc]
+            samples = samples.set_index('df_sample')
+            click.echo(tabulate(samples.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+        return
+    except assnake.api.loaders.InputError as e:
+        print(e.message)
+        return
 
 
 # ---------------------------------------------------------------------------------------
@@ -357,9 +336,6 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
     that -t and -d  arguments are excclusive for each over -- specify only one of them -- as well as -s and -l.
     With -s `sample_1,sample_2,...,sample_n` notation is implied (no whitespaces between sample names)
     """
-    # print(os.getcwd())
-    # This is cli wrapping over create_links from fs_helpers
-
     # stuff about presence of arguments
     arg_d = not bool(dataset is None)
     arg_t = not bool(target is None)
@@ -379,6 +355,7 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
 
     # some stuffff to ensure correctness of source and destination (how philosophical)
     if arg_d:
+        # TODO rewrite with Dataset
         try:
             df_info = assnake.api.loaders.load_df_from_db(dataset)
         except Exception as e:
@@ -387,10 +364,12 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
             show_av_dict(dfs)
         target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
     else:
+        # Whaaat
         target = pathizer(target)
         if not os.path.exists(target):
             click.secho("Provided sample-list file couldn't be detected", err=True)
             exit(2)
+
     target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
     os.makedirs(target, exist_ok=True)
 
