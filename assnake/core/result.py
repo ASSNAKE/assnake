@@ -16,7 +16,7 @@ class Result:
     name = '' # This name will be used as command name and in web-service
     result_wc = '' # Just ONE wc that will be populated with data and passed to snakemake, so it can understand what it needs to do
     input_type = '' # sample_file, sample, sample_set ...
-    additional_inputs = '' # db, fasta_ref ...
+    additional_inputs = ''  # db, fasta_ref ...
     git_results = [] # List of files that will be added to git repo
     workflows = [] # List of files with snakemake workflow files (.smk)
 
@@ -69,14 +69,16 @@ class Result:
 
         if os.path.isfile(wc_config):
             wc_config = read_yaml(wc_config)
+            result_wc = wc_config[name + '_wc']
         else:
-            print('No config file found')
-            exit()
+            print('No wc config file found for result', name)
+            wc_config = {}
+            result_wc = ''
 
         x = cls(
             name = name, 
             workflows = workflows,
-            result_wc = wc_config[name + '_wc'],
+            result_wc = result_wc,
             input_type =  input_type,
             additional_inputs = additional_inputs,
             invocation_command = invocation_command,

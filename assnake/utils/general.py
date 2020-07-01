@@ -2,9 +2,20 @@ import yaml, configparser, os, click
 import os, sys
 import requests, urllib
 from tqdm import tqdm
-
+import json
+import zlib
 from pathlib import Path
 
+def compute_crc32_of_dumped_dict(dict_loc, format = 'json'):
+    '''
+    Computes zlib.crc32() of json file and returns hex string without 0x
+    '''
+    with open(dict_loc) as dict_file:
+        loaded = json.load(dict_file)
+        dict_str = bytes(str(loaded), encoding='ascii')
+        # CRC32 
+        dict_crc32_hex = hex(zlib.crc32(dict_str))[2:]
+        return dict_crc32_hex
 
 def read_yaml(file_location):
     yaml_file = {}

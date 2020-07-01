@@ -148,6 +148,7 @@ def config_group():
 
 config_group.add_command(module_commands.show_installed_results)
 config_group.add_command(module_commands.show_installed_modules)
+config_group.add_command(module_commands.refresh_params)
 
 
 def main():
