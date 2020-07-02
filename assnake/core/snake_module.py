@@ -13,7 +13,7 @@ class SnakeModule:
     dataset_methods = {}
     vizualisation_methods = {}
 
-    def __init__(self, name, install_dir, snakefiles, invocation_commands, initialization_commands = [], wc_configs = [], results = [], dataset_methods = {}):
+    def __init__(self, name, install_dir, snakefiles, invocation_commands = [], initialization_commands = [], wc_configs = [], results = [], dataset_methods = {}):
 
         self.name = name
         self.install_dir = install_dir

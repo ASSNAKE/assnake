@@ -9,11 +9,11 @@ def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column
     '''
     This returns several sample sets.
     '''
-    df_loaded = assnake.api.loaders.load_df_from_db(df)
+    df_loaded = assnake.Dataset(df)
     
     sample_sets_dict = {}
 
-    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'df_samples.tsv')
+    meta_loc = os.path.join(df_loaded.full_path, 'df_samples.tsv')
     if os.path.isfile(meta_loc):
         meta = pd.read_csv(meta_loc, sep = '\t')
         if meta_column is not None:

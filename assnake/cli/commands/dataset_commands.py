@@ -11,7 +11,7 @@ from pathlib import Path
 # some util
 def show_av_dict(dfs):
     '''
-    print out available datasets from dict of db's (assnake.api.loaders.load_dfs_from_db(''))
+    print out available datasets from dict of db's
     '''
     avail_dfs = ''
     for i, item in enumerate(dfs.keys()):
@@ -29,7 +29,7 @@ def show_av_dict(dfs):
 @click.command(name='list')
 def df_list():
     """List datasets in database"""
-    dfs = assnake.api.loaders.load_dfs_from_db('')
+    dfs = assnake.Dataset.list_in_db()
     if len(list(dfs.keys())) == 0:
         click.echo('No datasets in your system yet!\nYou can create one by running\n' +
                    click.style('  assnake dataset create  ', bg='blue', fg='white', bold=True))
@@ -50,7 +50,7 @@ def df_list():
 
 def check_df_name_avialability(df):
     
-    dfs_in_db = assnake.api.loaders.load_dfs_from_db('')
+    dfs_in_db = assnake.Dataset.list_in_db()
     if df in dfs_in_db:
         click.secho('Dataset with such name already exists!. Aborting.')
         exit()
@@ -280,7 +280,7 @@ def df_info(config, df, preproc, df_arg):
 @click.command(name='delete')
 @click.option('--df', '-d',
               help='Name of dataset to delete.', type=click.STRING )
-@click.option('--hard', help='If is set, hard removing will be used instead of modifying congig file', is_flag=True)
+@click.option('--hard', help='If is set, hard removing will be used instead of modifying config file', is_flag=True)
 @click.argument('df_arg', required=False)
 @click.pass_obj
 def df_delete(config, df, hard, df_arg):
@@ -293,7 +293,7 @@ def df_delete(config, df, hard, df_arg):
         df = click.prompt('Type the name in:')
     if df is None:
         df = df_arg
-    dfs = assnake.api.loaders.load_dfs_from_db('')
+    dfs = assnake.Dataset.list_in_db()
     try:
         df_info = dfs[df]
     except KeyError as e:
@@ -357,14 +357,13 @@ def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_se
 
     # some stuffff to ensure correctness of source and destination (how philosophical)
     if arg_d:
-        # TODO rewrite with Dataset
         try:
-            df_info = assnake.api.loaders.load_df_from_db(dataset)
-        except Exception as e:
-            dfs = assnake.api.loaders.load_dfs_from_db('')
+            df_info = assnake.Dataset(dataset)
+        except assnake.loaders.InputError as e:
+            dfs = assnake.Dataset.list_in_db()
             click.echo('Can`t reach database with such name', err=True)
             show_av_dict(dfs)
-        target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
+        target = '{}/reads/raw'.format(df_info.full_path)
     else:
         # Whaaat
         target = pathizer(target)
@@ -372,7 +371,7 @@ def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_se
             click.secho("Provided sample-list file couldn't be detected", err=True)
             exit(2)
 
-    target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
+    target = '{}/reads/raw'.format(df_info.full_path)
     os.makedirs(target, exist_ok=True)
 
     if rename_method == 'removeSending':
@@ -385,7 +384,7 @@ def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_se
         samples_in_run['df_sample'] = samples_in_run['modified_name']
         fs_helpers.create_links(target,  samples_in_run, hard=copy)
 
-        update_fs_samples_csv(df_info['df'])
+        update_fs_samples_csv(df_info.df)
         click.secho("SUCCESSFULLY IMPORTED READS!", fg='green') 
     else: 
         click.secho('No reads in directory ' + reads_dir, fg='yellow')

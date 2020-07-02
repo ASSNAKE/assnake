@@ -2,7 +2,7 @@ import os, glob, yaml, time
 import pandas as pd
 from assnake.api.loaders import load_df_from_db, load_sample, load_sample_set
 
-from assnake.core.config import load_wc_config
+from assnake.core.config import load_wc_config, read_assnake_instance_config
 from assnake.viz import plot_reads_count_change
 import click
 from pkg_resources import iter_entry_points 
@@ -38,9 +38,29 @@ class Dataset:
             
 
         self.sample_sets = preprocessing
-        self.sample_containers = pd.concat(self.sample_sets.values())
-        self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
+        
+        # self.sample_containers = pd.concat(self.sample_sets.values())
+        # self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
   
+    @staticmethod
+    def list_in_db():
+        """
+        Returns dict of dictionaries with info about datasets from fs database. Key - df name
+        Mandatory fields: df, prefix
+        """
+        dfs = {}
+        instance_config = read_assnake_instance_config()
+        df_info_locs = glob.glob(instance_config['assnake_db']+'/datasets/*/df_info.yaml')
+        
+        for df_info in df_info_locs:
+            with open(df_info, 'r') as stream:
+                try:
+                    info = yaml.load(stream, Loader=yaml.FullLoader)
+                    if 'df' in info:
+                        dfs.update({info['df']: info})
+                except yaml.YAMLError as exc:
+                    print(exc)
+        return dfs
 
     def plot_reads_loss(self, preprocs = [], sort = 'raw'):
         if len(preprocs) == 0: 

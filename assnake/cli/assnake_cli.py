@@ -67,17 +67,17 @@ assnake init command
         ctx.obj = {'config': instance_config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
 
 
-# #---------------------------------------------------------------------------------------
-# #                                  assnake  INIT ***  group
-# #---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
+#                                  assnake  INIT ***  group
+#---------------------------------------------------------------------------------------
 
-# @cli.group(name='init')
-# def init_group():
-#     """Commands to initialize the ASSNAKE\n
-#     \bYou need to configure where assnake will store it's data and download databases.
-#     Assnake has internal configuration file 
-#     """
-#     pass
+@cli.group(name='init')
+def init_group():
+    """Commands to initialize the ASSNAKE\n
+    \bYou need to configure where assnake will store it's data and download databases.
+    Assnake has internal configuration file 
+    """
+    pass
 
 # init_group.add_command(init_commands.init_start)
 
@@ -96,6 +96,7 @@ dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
 dataset.add_command(dataset_commands.df_delete)
 dataset.add_command(dataset_commands.rescan_dataset)
+
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group
@@ -129,6 +130,7 @@ def request_sample_set(config, message, **kwargs):
     sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
     config['sample_sets'].append(sample_set.samples_pd.copy())
 result.add_command(request_sample_set)
+
 
 
 @cli.group(name = 'config')

@@ -14,13 +14,13 @@ class Result:
      
     '''
     name = '' # This name will be used as command name and in web-service
-    result_wc = '' # Just ONE wc that will be populated with data and passed to snakemake, so it can understand what it needs to do
+    result_wc = '' # Just ONE wc that will be populated with data and passed to snakemake, so it can understand what actions it needs to take
     input_type = '' # sample_file, sample, sample_set ...
     additional_inputs = ''  # db, fasta_ref ...
     git_results = [] # List of files that will be added to git repo
     workflows = [] # List of files with snakemake workflow files (.smk)
 
-    imvocation_command = None
+    invocation_command = None
     params_preparation = None # Functions that defines how to prepare and store params for this result. On installation, it checks if assnake is configured, and deploys params and necessary static files to the database. If assnake is not configured, this commands will be run during configuration.
 
     def __init__(self, name, workflows, result_wc, input_type, additional_inputs, invocation_command = None, wc_config = None, params_preparation = None): 

@@ -8,7 +8,6 @@ from shutil import copy2, rmtree
 from assnake.core.config import read_assnake_instance_config
 import traceback
 import parse
-from assnake.api.loaders import load_df_from_db
 import pandas as pd
 
 
