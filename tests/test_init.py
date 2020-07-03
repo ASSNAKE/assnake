@@ -1,5 +1,5 @@
 import pytest
-from assnake.api.init_config import fill_and_write_config
+from assnake.api.init_config import fill_and_write_instance_config
 import pathlib
 from util_for_test import random_path
 
@@ -15,7 +15,7 @@ def test_api_init_start_simple_random(test_assn_data, paths2check):
     path_to_db = test_assn_data['db']
     paths2compare = list(map(lambda rel: '{pre}/{rel}'.format(pre=path_to_db, rel=rel), paths2check))
     print(paths2compare)
-    fill_and_write_config(*paths2compare)
+    fill_and_write_instance_config(*paths2compare)
     paths2compare[5] = paths2compare[5]+'/config.yaml'
     for i in range(1,6):
         assert pathlib.Path(paths2compare[i]).exists()
@@ -33,7 +33,7 @@ def test_api_init_start_nested(test_assn_data):
         './fictive/../target/5'
     ]
     paths2compare = list(map(lambda rel: '{pre}/{rel}'.format(pre=path_to_db, rel=rel), paths2check))
-    fill_and_write_config(*paths2compare)
+    fill_and_write_instance_config(*paths2compare)
 
     assert (path_to_db / 'target').exists()
     for i in range(1,5):

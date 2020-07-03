@@ -5,10 +5,9 @@ import sys
 import glob
 import fnmatch
 from shutil import copy2, rmtree
-from assnake import utils
+from assnake.core.config import read_assnake_instance_config
 import traceback
 import parse
-from assnake.api.loaders import load_df_from_db
 import pandas as pd
 
 
@@ -113,20 +112,10 @@ def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = Fa
             copy2(src_r1, dst_r1)
             copy2(src_r2, dst_r2)
             return
-        # print('---')
-        # print(src_r1, dst_r1)
-        # print(src_r2, dst_r2)
-        os.symlink(src_r1, dst_r1)
-        os.symlink(src_r2, dst_r2)
 
-def delete_ds(dataset):
-    """
-    Remove assnake dataset from database
-    """
-    try:
-        os.remove(
-            '{config}/datasets/{df}/df_info.yaml'.format(config=utils.load_config_file()['assnake_db'], df=dataset))
-        return (True,)
-    except Exception as e:
-        return (False, traceback.format_exc())
-
+        try:
+            os.symlink(src_r1, dst_r1)
+            os.symlink(src_r2, dst_r2)
+        except FileExistsError as e:
+            print(e)
+            

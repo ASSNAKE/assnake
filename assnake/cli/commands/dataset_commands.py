@@ -4,14 +4,14 @@ import assnake.api.loaders
 import assnake.core.sample_set
 from tabulate import tabulate
 from assnake.api import fs_helpers
-from assnake.utils import pathizer, dict_norm_print, download_from_url
+from assnake.utils.general import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
 from assnake.api.loaders import update_fs_samples_csv
-
+from pathlib import Path
 # some util
 def show_av_dict(dfs):
     '''
-    print out available datasets from dict of db's (assnake.api.loaders.load_dfs_from_db(''))
+    print out available datasets from dict of db's
     '''
     avail_dfs = ''
     for i, item in enumerate(dfs.keys()):
@@ -29,7 +29,7 @@ def show_av_dict(dfs):
 @click.command(name='list')
 def df_list():
     """List datasets in database"""
-    dfs = assnake.api.loaders.load_dfs_from_db('')
+    dfs = assnake.Dataset.list_in_db()
     if len(list(dfs.keys())) == 0:
         click.echo('No datasets in your system yet!\nYou can create one by running\n' +
                    click.style('  assnake dataset create  ', bg='blue', fg='white', bold=True))
@@ -37,10 +37,10 @@ def df_list():
     for df in dfs.values():
         df_name = df['df']
         click.echo(click.style('' * 2 + df_name + ' ' * 2, fg='green', bold=True))
-        click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
+        # click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
         click.echo('  Full path: ' + os.path.join(df.get('fs_prefix', ''), df['df']))
-        click.echo('  Description: ')
-        dict_norm_print(df.get('description', ''))
+        # click.echo('  Description: ')
+        # dict_norm_print(df.get('description', ''))
         click.echo('')
 
 
@@ -50,7 +50,7 @@ def df_list():
 
 def check_df_name_avialability(df):
     
-    dfs_in_db = assnake.api.loaders.load_dfs_from_db('')
+    dfs_in_db = assnake.Dataset.list_in_db()
     if df in dfs_in_db:
         click.secho('Dataset with such name already exists!. Aborting.')
         exit()
@@ -198,7 +198,7 @@ def df_create(config, df_name, data_storage_folder, full_path_to_df,first_prepro
 
 @click.command(name='init', help = 'Register dataset in Assnake based on the folder from where you called the command. (Working directory)')
 @click.option('--data-type', '-t', 
-            help='Name of the dataset. If provided, folder with this name will be created in current dir.', 
+            help='Type of NGS data. Illumina Metagenomic WGS and 16s are supported.', 
             required = False,
             type=click.Choice(['METAGENOMIC_16s', 'METAGENOMIC_WGS', 'VIROME', 'RNA_SEQ'], case_sensitive=False))
 @click.option('--df-name', '-d', help='Name of the dataset. If provided, folder with this name will be created in current dir.', required = False)
@@ -225,7 +225,7 @@ def df_init(config, data_type, df_name, first_preprocessing_name):
         full_path_empty = False
  
 
-    os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
+    # os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
     df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}, 'data_type': data_type}
 
     assnake_db = config['config']['assnake_db']
@@ -245,54 +245,33 @@ def df_init(config, data_type, df_name, first_preprocessing_name):
 @click.command(name='info')
 @click.option('--df', '-d', help='Name of the dataset', required=False)
 @click.option('--preproc', '-p', help='Show samples for preprocessing', required=False)
-@click.argument('df_arg', required=True)
+@click.argument('df_arg', required=False)
 @click.pass_obj
 def df_info(config, df, preproc, df_arg):
     """View info for the specific dataset
         Usage: assnake dataset info [dataset] or -d [dataset] ...
 
     """
+    # df argument/option logic
     if not (bool(df is None) ^ bool(df_arg is None)):
         click.echo('Please, specify dataset either as option or argument')
         df = click.prompt('Type the name in')
     if df is None:
         df = df_arg
-    dfs = assnake.api.loaders.load_dfs_from_db('')
+    
+    # Trying to load dataset and display information
     try:
-        df_info = dfs[df]
-    except KeyError as e:
-        click.echo('Can`t reach database with such name')
-        show_av_dict(dfs)
-    click.echo(click.style('' * 2 + df_info['df'] + ' ' * 2, fg='green', bold=True))
-    click.echo('Filesystem prefix: ' + df_info.get('fs_prefix', ''))
-    click.echo('Full path: ' + os.path.join(df_info.get('fs_prefix', ''), df))
-    click.echo('Description: ')
-    dict_norm_print(df_info.get('description', ''))
-
-    mg_samples_loc = os.path.join(config['config']['assnake_db'], 'datasets', df_info['df'], 'mg_samples.tsv')
-
-    if os.path.isfile(mg_samples_loc):
-        click.echo(tabulate(pd.read_csv(mg_samples_loc, sep='\t'), headers='keys', tablefmt='fancy_grid'))
-
-    reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-    preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
-    preprocs.sort()
-    preprocessing = {}
-    all_samples = []
-    for p in preprocs:
-        samples = assnake.api.loaders.load_sample_set(config['wc_config'], df_info['fs_prefix'], df_info['df'], p)
-        all_samples += (list(samples['df_sample']))
-        samples = samples[['df_sample', 'reads']].to_dict(orient='records')
-        preprocessing.update({p: samples})
-
-    click.echo('\nTotal samples: ' + str(len(set(all_samples))) + '\n')
-
-    for key, value in preprocessing.items():
-        click.echo('Samples in ' + click.style(key, bold=True) + ': ' + str(len(value)))
-    if preproc is not None:
-        samples_pd = pd.DataFrame(preprocessing[preproc])
-        # print(samples_pd)
-        click.echo(tabulate(samples_pd.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+        df = assnake.Dataset(df)
+        click.echo(click.style('='*2 + ' '*3 + df.df + ' '*3 + '=' * 2, fg='green', bold=True))
+        click.echo(str(df))
+        if preproc is not None:
+            samples = df.sample_sets[preproc]
+            samples = samples.set_index('df_sample')
+            click.echo(tabulate(samples.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
+        return
+    except assnake.api.loaders.InputError as e:
+        print(e.message)
+        return
 
 
 # ---------------------------------------------------------------------------------------
@@ -301,7 +280,7 @@ def df_info(config, df, preproc, df_arg):
 @click.command(name='delete')
 @click.option('--df', '-d',
               help='Name of dataset to delete.', type=click.STRING )
-@click.option('--hard', help='If is set, hard removing will be used instead of modifying congig file', is_flag=True)
+@click.option('--hard', help='If is set, hard removing will be used instead of modifying config file', is_flag=True)
 @click.argument('df_arg', required=False)
 @click.pass_obj
 def df_delete(config, df, hard, df_arg):
@@ -309,37 +288,38 @@ def df_delete(config, df, hard, df_arg):
     Delete datasets
     Usage: assnake dataset delete [dataset] or -d [dataset] ...
     """
-    if not (bool(df is None) ^ bool(df_arg is None)):
-        click.echo('Please, specify dataset either as option or argument')
-        df = click.prompt('Type the name in:')
-    if df is None:
-        df = df_arg
-    dfs = assnake.api.loaders.load_dfs_from_db('')
-    try:
-        df_info = dfs[df]
-    except KeyError as e:
-        click.echo('Can`t reach database with such name')
-        show_av_dict(dfs)
+    click.echo('NOT IMPLEMENTED')
+    # if not (bool(df is None) ^ bool(df_arg is None)):
+    #     click.echo('Please, specify dataset either as option or argument')
+    #     df = click.prompt('Type the name in:')
+    # if df is None:
+    #     df = df_arg
+    # dfs = assnake.Dataset.list_in_db()
+    # try:
+    #     df_info = dfs[df]
+    # except KeyError as e:
+    #     click.echo('Can`t reach database with such name')
+    #     show_av_dict(dfs)
 
-    respond = fs_helpers.delete_ds(df)
-    if respond[0]:
-        click.secho('Successfully deleted', fg='bright_white', bg='green')
-    else:
-        click.secho('ERROR', bg='red')
-        click.echo('For details see traceback below')
-        click.echo(respond[1])
+    # respond = fs_helpers.delete_ds(df)
+    # if respond[0]:
+    #     click.secho('Successfully deleted', fg='bright_white', bg='green')
+    # else:
+    #     click.secho('ERROR', bg='red')
+    #     click.echo('For details see traceback below')
+    #     click.echo(respond[1])
 
-    if hard and click.confirm(
-        'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
-        abort=True):
-        shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), df))
+    # if hard and click.confirm(
+    #     'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
+    #     abort=True):
+    #     shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), df))
 
 # ---------------------------------------------------------------------------------------
 #                                   IMPORT-READS
 # ---------------------------------------------------------------------------------------
 # DONE decide if we need either d and t or proceed both arguments as one and automatically choose path or not
 @click.command(name='import-reads')
-@click.option('--reads', '-r', prompt='Location of folder with read files',
+@click.option('--reads-dir', '-r', prompt='Location of folder with read files',
               help='Location of folder with read files', type=click.Path())
 @click.option('--dataset', '-d', help='Assnake dataset name. If -t is not specified', required=False)
 @click.option('--rename-method', help='How to rename samples', type=click.Choice(['replace-', 'removeSending'], case_sensitive=False), required=False)
@@ -350,16 +330,15 @@ def df_delete(config, df, hard, df_arg):
               type=click.Path())
 @click.option('--copy', help='If is set, hard copying will be used instead of symbolic links ', is_flag=True)
 @click.pass_obj
-def df_import_reads(config, reads, dataset, rename_method, target, sample_set, sample_list, copy):
+def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_set, sample_list, copy):
     """
     Import reads from directory to assnake dataset. Currently local text files are supported. The --target argument
     point to location (relative or absolute) of assnake dataset in your file system. Please, pay attention,
     that -t and -d  arguments are excclusive for each over -- specify only one of them -- as well as -s and -l.
     With -s `sample_1,sample_2,...,sample_n` notation is implied (no whitespaces between sample names)
     """
-    # print(os.getcwd())
-    # This is cli wrapping over create_links from fs_helpers
 
+    reads_dir = str(Path(reads_dir).resolve())
     # stuff about presence of arguments
     arg_d = not bool(dataset is None)
     arg_t = not bool(target is None)
@@ -380,58 +359,36 @@ def df_import_reads(config, reads, dataset, rename_method, target, sample_set, s
     # some stuffff to ensure correctness of source and destination (how philosophical)
     if arg_d:
         try:
-            df_info = assnake.api.loaders.load_df_from_db(dataset)
-        except Exception as e:
-            dfs = assnake.api.loaders.load_dfs_from_db('')
+            df_info = assnake.Dataset(dataset)
+        except assnake.loaders.InputError as e:
+            dfs = assnake.Dataset.list_in_db()
             click.echo('Can`t reach database with such name', err=True)
             show_av_dict(dfs)
-        target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
+        target = '{}/reads/raw'.format(df_info.full_path)
     else:
+        # Whaaat
         target = pathizer(target)
         if not os.path.exists(target):
             click.secho("Provided sample-list file couldn't be detected", err=True)
             exit(2)
-    target = '{}/{}/reads/raw'.format(df_info['fs_prefix'], df_info['df'])
+
+    target = '{}/reads/raw'.format(df_info.full_path)
     os.makedirs(target, exist_ok=True)
-    # def rename(sample):
-    #     new_name_wc = 'Rst{}_{}_B2'
-    #     splitted = sample.split('_')
-    #     splitted[2] = (1 if len(splitted) == 3 else a)
-    #     return new_name_wc.format(splitted[1], splitted[2])
 
     if rename_method == 'removeSending':
         modify_name=lambda arg: '_'.join(arg.replace('-', '_').split('_')[0:-1])
     else:
         modify_name=lambda arg: arg.replace('-', '_')
 
-    samples_in_run = fs_helpers.get_samples_from_dir(reads, modify_name)
-    samples_in_run['df_sample'] = samples_in_run['modified_name']
-    fs_helpers.create_links(target,  samples_in_run, hard=copy)
+    samples_in_run = fs_helpers.get_samples_from_dir(reads_dir, modify_name)
+    if len(samples_in_run) > 0:
+        samples_in_run['df_sample'] = samples_in_run['modified_name']
+        fs_helpers.create_links(target,  samples_in_run, hard=copy)
 
-    update_fs_samples_csv(df_info['df'])
-    click.secho("SUCCESSFULLY IMPORTED READS!", bg='green') 
-    # sample_names = {d['sample_name'] for d in dicts}
-    # if arg_s:
-    #     samples_of_interest = sample_set.split(',')
-    # elif arg_l:
-    #     sample_list = pathizer(sample_list)
-    #     if os.path.exists(sample_list):
-    #         with open(sample_list, 'r') as ls_file:
-    #             samples_of_interest = ls_file.readlines()
-    #     else:
-    #         click.secho("Provided sample-list file couldn't be detected", err=True)
-    # else:
-    #     samples_of_interest = sample_names
-
-    # # Such a mess! check if specified samples are in directory
-    # if (arg_s or arg_l) and (len(set(samples_of_interest) - {d['sample_name'] for d in dicts}) != 0):
-    #     click.secho("Warning! Samples, been specified, are not in reads file", err=True)
-    #     click.confirm('Continue?', abort=True)
-    # if copy:
-    #     click.secho("Please, keep in mind, that hard copying may take plenty of time")
-
-    # Here the logic -- just call create_links
-    
+        update_fs_samples_csv(df_info.df)
+        click.secho("SUCCESSFULLY IMPORTED READS!", fg='green') 
+    else: 
+        click.secho('No reads in directory ' + reads_dir, fg='yellow')
 
 
 @click.command(name='rescan')

@@ -10,22 +10,3 @@ drmaa_log_dir: '' # Where to store drmma log files
 config_location: '' # This guy should go to internal_config.ini
 
 debug: True # For print messages
-
-
-# DATABSES
-BLAST_NCBI_NT: '/data5/bio/runs-jeniaole/tools/NCBI_nt'
-NCBI_TAX: '/data5/bio/runs-jeniaole/tools/NCBI_tax'
-CHECKM: '/data5/bio/databases/checkm'
-CAT_BAT_DB: '/data5/bio/databases/CAT_BAT/CAT_prepare_20190108/2019-01-08_CAT_database'
-CAT_BAT_TAXA: '/data5/bio/databases/CAT_BAT/CAT_prepare_20190108/2019-01-08_taxonomy'
-cogs_dir : '/data5/bio/databases/ANVIO-COGs/'
-
-centrifuge:
-    index : '/data5/bio/databases/centrifuge/p+h+v/p+h+v'
-kraken:
-    v1.1: '/data6/bio/TFM/soft/bioinf/taxa/kraken-1.1/kraken'
-    db:
-        minikraken4GB: '/data6/bio/TFM/databases/kraken/minikraken_20171013_4GB'
-
-kraken.db.human: '/data7a/bio/BacGenomeSoft/tmp/metagenome/human_db'
-kraken.db.gb: '/data5/bio/runs-jeniaole/kraken/kr.db'    

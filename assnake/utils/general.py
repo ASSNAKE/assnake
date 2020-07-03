@@ -2,9 +2,20 @@ import yaml, configparser, os, click
 import os, sys
 import requests, urllib
 from tqdm import tqdm
-import assnake.config_internal
+import json
+import zlib
+from pathlib import Path
 
-
+def compute_crc32_of_dumped_dict(dict_loc, format = 'json'):
+    '''
+    Computes zlib.crc32() of json file and returns hex string without 0x
+    '''
+    with open(dict_loc) as dict_file:
+        loaded = json.load(dict_file)
+        dict_str = bytes(str(loaded), encoding='ascii')
+        # CRC32 
+        dict_crc32_hex = hex(zlib.crc32(dict_str))[2:]
+        return dict_crc32_hex
 
 def read_yaml(file_location):
     yaml_file = {}
@@ -14,50 +25,6 @@ def read_yaml(file_location):
             return yaml_file
         except yaml.YAMLError as exc:
             print(exc)
-
-
-def get_internal_config():
-    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    config_internal = configparser.ConfigParser()
-
-    config_internal.read(os.path.join(dir_of_this_file, './config_internal.ini'))
-    
-
-    return config_internal
-
-
-def load_wc_config():
-    dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-    return (read_yaml(os.path.join(dir_of_this_file, './snake/wc_config.yaml')))
-
-
-def load_config_file():
-    config_loc = assnake.config_internal.config_loc
-    return (read_yaml(config_loc))
-
-
-def get_config_loc():
-    config_internal = get_internal_config()
-    return (assnake.config_internal.config_loc)
-
-
-def check_if_assnake_is_initialized():
-    config_loc = assnake.config_internal.config_loc
-    if config_loc is None or not os.path.isfile(get_config_loc()):
-        click.secho("You need to init your installation!", fg='red', bold=True)
-        click.echo("Don't worry, it won't take long.")
-        click.echo('Just run ' + click.style('assnake init start', bg='blue', fg='bright_white'))
-        exit()
-
-def update_config(dict_to_add):
-    config = load_config_file()
-    config.update(dict_to_add)
-    config_location = get_config_loc()
-    with open(config_location, 'w+') as file:
-        _ = yaml.dump(config, file, sort_keys=False)
-
-
-
 
 def pathizer(path):
     """

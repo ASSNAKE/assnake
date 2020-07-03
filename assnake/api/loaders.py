@@ -5,10 +5,22 @@ import pandas as pd
 import numpy as np
 import yaml
 import assnake
-import assnake.utils
+from assnake.core.config import read_assnake_instance_config, load_wc_config
+from assnake.utils.general import bytes2human
 
-from assnake.utils import bytes2human
 
+# TODO this goes to Exceptions 
+class InputError(Exception):
+    """Exception raised for errors in the input.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, message):
+        self.message = message
+
+# TODO this goes to assnake-core-preprocessing
 def load_count(fs_prefix, df, preproc, df_sample, report_bps=False, verbose=False, count_wc=''):
     """
     Loads information about read and bp count in paired-end sample.
@@ -40,55 +52,6 @@ def load_count(fs_prefix, df, preproc, df_sample, report_bps=False, verbose=Fals
     
     return count_dict
         
-
-def load_dfs_from_db(db_loc):
-    """
-    Returns dict of dictionaries with info about datasets from fs database. Key - df name
-    Mandatory fields: df, prefix
-    """
-    dfs = {}
-    curr_dir = os.path.dirname(os.path.abspath(__file__))
-    config = assnake.utils.load_config_file()
-    df_info_locs = glob.glob(config['assnake_db']+'/datasets/*/df_info.yaml')
-    
-    for df_info in df_info_locs:
-        with open(df_info, 'r') as stream:
-            try:
-                info = yaml.load(stream, Loader=yaml.FullLoader)
-                if 'df' in info:
-                    dfs.update({info['df']: info})
-            except yaml.YAMLError as exc:
-                print(exc)
-    return dfs
-
-def load_df_from_db(df_name, db_loc='', include_preprocs = False):
-    """
-    Returns one dictionary with df info
-    """
-    config = assnake.utils.load_config_file()
-    wc_config = assnake.utils.load_wc_config()
-
-    df_info_loc = config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
-    df_info = {}
-    with open(df_info_loc, 'r') as stream:
-        try:
-            info = yaml.load(stream, Loader=yaml.FullLoader)
-            if 'df' in info:
-                df_info =  info
-        except yaml.YAMLError as exc:
-            print(exc)
-
-    reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-    preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
-    preprocessing = {}
-    if include_preprocs:
-        for p in preprocs:
-            df_samples = load_sample_set(wc_config, df_info['fs_prefix'], df_info['df'], p)
-            
-            df_samples = df_samples[['df_sample', 'reads']].to_dict(orient='records')
-            preprocessing.update({p:df_samples})
-    df_info.update({"preprocs": preprocessing})
-    return df_info
 
 def load_sample(fs_prefix, df, preproc, df_sample,
                 report_bps=False, report_size=False, verbose=False,
@@ -147,7 +110,7 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
     '''
 
     if wc_config is None:
-        wc_config = assnake.utils.load_wc_config()
+        wc_config = load_wc_config()
 
     samples = []
     fastq_gz_file_loc = wc_config['fastq_gz_file_wc'].format(
@@ -155,7 +118,6 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
         strand='R1', df_sample = pattern)
     
     df_samples = [f.split('/')[-1].split('.')[0].replace('_R1', '') for f in glob.glob(fastq_gz_file_loc)]
-
     sample_dir_wc    = wc_config['sample_dir_wc']
     fastq_gz_file_wc = wc_config['fastq_gz_file_wc']
     count_wc         = wc_config['count_wc']
@@ -173,7 +135,7 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
 
 fields = ['sample', 'sequencing_run']
 
-
+# TODO where to put this one?
 def update_fs_samples_csv(dataset):
     '''
     Scans dataset folder and updates fs_samples.tsv if necessary
@@ -182,7 +144,7 @@ def update_fs_samples_csv(dataset):
     :return: Returns sample dict in loc
     
     '''
-    fs_samples_tsv_loc = '{config}/datasets/{df}/assnake_samples.tsv'.format(config=assnake.utils.load_config_file()['assnake_db'], df=dataset)
+    fs_samples_tsv_loc = '{assnake_db}/datasets/{df}/assnake_samples.tsv'.format(assnake_db=read_assnake_instance_config()['assnake_db'], df=dataset)
     df = assnake.Dataset(dataset)
     fs_samples_pd = pd.concat(list(df.sample_sets.values()))
     fs_samples_pd = df.sample_sets['raw']
