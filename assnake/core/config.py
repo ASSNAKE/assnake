@@ -65,7 +65,7 @@ def check_if_assnake_is_initialized():
     if instance_config is None:
         click.secho("You need to init your installation!", fg='red', bold=True)
         click.echo("Don't worry, it won't take long.")
-        click.echo('Just run ' + click.style('assnake init start', bg='blue', fg='bright_white'))
+        click.echo('Just run ' + click.style('assnake config init', bg='blue', fg='bright_white'))
         exit()
 
 

@@ -52,11 +52,11 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     exclude_samples = [] if exclude_samples == '' else [c.strip() for c in exclude_samples.split(',')]
     samples_to_add = [] if samples_to_add == '' else [c.strip() for c in samples_to_add.split(',')]
 
-    df_loaded = assnake.api.loaders.load_df_from_db(df)
-    config['requested_dfs'] += [df_loaded['df']]
-    df_df = assnake.Dataset(df)
+    df_loaded = assnake.Dataset(df)
+    config['requested_dfs'] += [df_loaded.df]
+     
     # Now for the meta column stuff
-    meta_loc = os.path.join(df_loaded['fs_prefix'], df_loaded['df'], 'df_samples.tsv')
+    meta_loc = os.path.join(df_loaded.full_path, 'df_samples.tsv')
     if os.path.isfile(meta_loc):
         meta = pd.read_csv(meta_loc, sep = '\t')
         if meta_column is not None:
@@ -68,9 +68,9 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     if preproc is None:
         # LONGEST
         click.echo('Preprocessing is not specified, using longest for now')
-        preproc = max(list(df_df.sample_sets.keys()), key=len)
+        preproc = max(list(df_loaded.sample_sets.keys()), key=len)
 
-    sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded['fs_prefix'], df_loaded['df'], preproc, samples_to_add=samples_to_add)
+    sample_set = assnake.api.loaders.load_sample_set(config['wc_config'], df_loaded.fs_prefix, df_loaded.df, preproc, samples_to_add=samples_to_add)
     if len(exclude_samples) > 0 :  
         sample_set = sample_set.loc[~sample_set['df_sample'].isin(exclude_samples), ]
 
@@ -105,10 +105,10 @@ def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_va
 def prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df, sample_sets, overwrite,**kwargs):
     res_list = []
 
-    df_loaded = assnake.api.loaders.load_df_from_db(df)
+    df_loaded = assnake.Dataset(df)
 
     for sample_set_name in sample_sets.keys():
-        sample_set_dir = sample_set_dir_wc.format(fs_prefix = df_loaded['fs_prefix'], df = df, sample_set = sample_set_name)
+        sample_set_dir = sample_set_dir_wc.format(fs_prefix = df_loaded.fs_prefix, df = df, sample_set = sample_set_name)
         sample_set_loc = os.path.join(sample_set_dir, 'sample_set.tsv')
 
 
@@ -125,8 +125,8 @@ def prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df, sam
                 click.secho('Overwritten')
 
         res_list += [result_wc.format(
-            fs_prefix = df_loaded['fs_prefix'],
-            df = df_loaded['df'],
+            fs_prefix = df_loaded.fs_prefix,
+            df = df_loaded.df,
             sample_set = sample_set_name,
             **kwargs
         )]

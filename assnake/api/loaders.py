@@ -8,6 +8,8 @@ import assnake
 from assnake.core.config import read_assnake_instance_config, load_wc_config
 from assnake.utils.general import bytes2human
 
+
+# TODO this goes to Exceptions 
 class InputError(Exception):
     """Exception raised for errors in the input.
 
@@ -18,6 +20,7 @@ class InputError(Exception):
     def __init__(self, message):
         self.message = message
 
+# TODO this goes to assnake-core-preprocessing
 def load_count(fs_prefix, df, preproc, df_sample, report_bps=False, verbose=False, count_wc=''):
     """
     Loads information about read and bp count in paired-end sample.
@@ -49,40 +52,6 @@ def load_count(fs_prefix, df, preproc, df_sample, report_bps=False, verbose=Fals
     
     return count_dict
         
-
-
-def load_df_from_db(df_name, db_loc='', include_preprocs = False):
-    """
-    :returns: Dict with dataset if exists, raises InputError Exception
-    """
-    instance_config = read_assnake_instance_config()
-    wc_config = load_wc_config()
-
-    df_info_loc = instance_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df_name)
-    df_info = {}
-
-    if not os.path.isfile(df_info_loc):
-        raise InputError('NO DATASET ' + df_name)
-
-    with open(df_info_loc, 'r') as stream:
-        try:
-            info = yaml.load(stream, Loader=yaml.FullLoader)
-            if 'df' in info:
-                df_info =  info
-        except yaml.YAMLError as exc:
-            print(exc)
-
-    reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-    preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
-    preprocessing = {}
-    if include_preprocs:
-        for p in preprocs:
-            df_samples = load_sample_set(wc_config, df_info['fs_prefix'], df_info['df'], p)
-            if len(df_samples) > 0:
-                df_samples = df_samples[['df_sample', 'reads']].to_dict(orient='records')
-                preprocessing.update({p:df_samples})
-    df_info.update({"preprocs": preprocessing})
-    return df_info
 
 def load_sample(fs_prefix, df, preproc, df_sample,
                 report_bps=False, report_size=False, verbose=False,
@@ -166,7 +135,7 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
 
 fields = ['sample', 'sequencing_run']
 
-
+# TODO where to put this one?
 def update_fs_samples_csv(dataset):
     '''
     Scans dataset folder and updates fs_samples.tsv if necessary

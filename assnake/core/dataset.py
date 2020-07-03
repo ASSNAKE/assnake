@@ -1,6 +1,6 @@
 import os, glob, yaml, time
 import pandas as pd
-from assnake.api.loaders import load_df_from_db, load_sample, load_sample_set
+from assnake.api.loaders import  load_sample, load_sample_set
 
 from assnake.core.config import load_wc_config, read_assnake_instance_config
 from assnake.viz import plot_reads_count_change
@@ -19,23 +19,40 @@ class Dataset:
     mg_samples = None
 
 
-    def __init__(self, df):
-        # config = load_config_file()
+    def __init__(self, df, include_preprocs=True):
         wc_config = load_wc_config()
-        info = load_df_from_db(df, include_preprocs = True)
+        instance_config = read_assnake_instance_config()
 
-        self.df =  info['df']
-        self.fs_prefix =  info['fs_prefix']
+        df_info_loc = instance_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)
+        df_info = {}
+
+        if not os.path.isfile(df_info_loc):
+            raise assnake.api.loaders.InputError('NO DATASET ' + df)
+
+        with open(df_info_loc, 'r') as stream:
+            try:
+                info = yaml.load(stream, Loader=yaml.FullLoader)
+                if 'df' in info:
+                    df_info =  info
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
+        preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
+        preprocessing = {}
+
+        self.df =  df_info['df']
+        self.fs_prefix =  df_info['fs_prefix']
         self.full_path = os.path.join(self.fs_prefix, self.df)
 
-        preprocs = info['preprocs']
-        preprocessing = {}
-        for p in preprocs:
-            samples = load_sample_set(wc_config, self.fs_prefix, self.df, p)
-            if len(samples) > 0:
-                samples = samples[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
-                preprocessing.update({p:samples})
-            
+        if include_preprocs:
+            preprocessing = {}
+            for p in preprocs:
+                samples = load_sample_set(wc_config, self.fs_prefix, self.df, p)
+                if len(samples) > 0:
+                    samples = samples[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
+                    preprocessing.update({p:samples})
+
 
         self.sample_sets = preprocessing
         
