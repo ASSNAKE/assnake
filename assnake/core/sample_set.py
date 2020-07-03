@@ -87,7 +87,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     return sample_set, sample_set_name
     
 
-def generate_result_list(sample_set, wc_str, df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs):
+def generate_result_list(sample_set, wc_str, **kwargs):
     res_list = []
     # print(kwargs)
     for s in sample_set.to_dict(orient='records'):

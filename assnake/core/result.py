@@ -5,7 +5,7 @@ import glob
 from assnake.core.preset_manager import PresetManager
 
 from assnake.utils.general import read_yaml
-from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
+from assnake.core.sample_set import generic_command_individual_samples, generate_result_list, generic_command_dict_of_sample_sets, prepare_sample_set_tsv_and_get_results
 from assnake.core.command_builder import sample_set_construction_options, add_options
 
 from pkg_resources import iter_entry_points
@@ -53,14 +53,13 @@ class Result:
         if self.input_type == 'illumina_strand_file':
             @click.command(self.name, short_help=self.description)
             @add_options(sample_set_construction_options)
+            @click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)
             @add_options(preset_options)
             @click.pass_obj
-            def result_invocation(config, **kwargs):
-                kwargs.update({'strand': 'R1'})
-                sample_set, sample_set_name = generic_command_individual_samples(
-                    config,  **kwargs)
-                config['requests'] += generate_result_list(
-                    sample_set, self.result_wc, **kwargs)
+            def result_invocation(config, strand, **kwargs):
+                sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
+                config['requests'] += generate_result_list(sample_set, self.result_wc, strand=strand)
+
             return result_invocation
         elif self.input_type == 'illumina_sample':
         
@@ -77,6 +76,41 @@ class Result:
 
             return result_invocation
 
+        elif self.input_type == 'illumina_strand_file_set':
+        
+            @click.command(self.name, short_help=self.description)
+            @add_options(sample_set_construction_options)
+            @add_options(preset_options)
+            @click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)
+            @click.pass_obj
+            def result_invocation(config, strand, **kwargs):
+                sample_sets = generic_command_dict_of_sample_sets(config,  **kwargs)
+                sample_set_dir_wc = self.wc_config[self.name+'_strand_file_set_dir_wc']
+                result_wc = self.wc_config[self.name + '_wc']
+                res_list = prepare_sample_set_tsv_and_get_results(
+                    sample_set_dir_wc, result_wc, df=kwargs['df'], sample_sets=sample_sets, strand=strand, overwrite=False)
+                config['requests'] += res_list
+
+            return result_invocation
+
+
+        elif self.input_type == 'illumina_sample_set':
+        
+            @click.command(self.name, short_help=self.description)
+            @add_options(sample_set_construction_options)
+            @add_options(preset_options)
+            @click.pass_obj
+            def result_invocation(config, **kwargs):
+                sample_sets = generic_command_dict_of_sample_sets(config,   **kwargs)
+
+                sample_set_dir_wc = self.wc_config[self.name+'_sample_set_tsv_wc']
+                result_wc = self.wc_config[self.name + '_wc']
+                res_list = prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df = kwargs['df'], sample_sets = sample_sets, min_len = min_len, params = params, overwrite = overwrite)
+
+                config['requests'] += res_list
+
+            return result_invocation
+
     @classmethod
     def from_location(cls, name, result_type, location, input_type,  additional_inputs= None, description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None):
         '''
@@ -85,7 +119,7 @@ class Result:
 
         :param name:       Name of the Result, will also appear as a command name.
         :param location:   Absolute location where files are stored. We need it in order to grab .smk and wc_config and all other static files.
-        :param input_type: Type of primary input for this result. Currently we use illumina_sample, illumina_strand_file, illumina_sample_set
+        :param input_type: Type of primary input for this result. Currently we use illumina_sample, illumina_sample_set, illumina_strand_file, illumina_strand_file_set 
 
         :param additional_inputs:  Any additional inputs for the Result. Usually it would be Database, Reference and their mixes.
         :param invocation_command: Users can pass custom invocation commands that will be used in CLI instead of auto-generated ones. Useful for custom logic in CLI.
