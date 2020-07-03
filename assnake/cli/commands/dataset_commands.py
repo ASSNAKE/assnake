@@ -37,10 +37,10 @@ def df_list():
     for df in dfs.values():
         df_name = df['df']
         click.echo(click.style('' * 2 + df_name + ' ' * 2, fg='green', bold=True))
-        click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
+        # click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
         click.echo('  Full path: ' + os.path.join(df.get('fs_prefix', ''), df['df']))
-        click.echo('  Description: ')
-        dict_norm_print(df.get('description', ''))
+        # click.echo('  Description: ')
+        # dict_norm_print(df.get('description', ''))
         click.echo('')
 
 
@@ -288,30 +288,31 @@ def df_delete(config, df, hard, df_arg):
     Delete datasets
     Usage: assnake dataset delete [dataset] or -d [dataset] ...
     """
-    if not (bool(df is None) ^ bool(df_arg is None)):
-        click.echo('Please, specify dataset either as option or argument')
-        df = click.prompt('Type the name in:')
-    if df is None:
-        df = df_arg
-    dfs = assnake.Dataset.list_in_db()
-    try:
-        df_info = dfs[df]
-    except KeyError as e:
-        click.echo('Can`t reach database with such name')
-        show_av_dict(dfs)
+    click.echo('NOT IMPLEMENTED')
+    # if not (bool(df is None) ^ bool(df_arg is None)):
+    #     click.echo('Please, specify dataset either as option or argument')
+    #     df = click.prompt('Type the name in:')
+    # if df is None:
+    #     df = df_arg
+    # dfs = assnake.Dataset.list_in_db()
+    # try:
+    #     df_info = dfs[df]
+    # except KeyError as e:
+    #     click.echo('Can`t reach database with such name')
+    #     show_av_dict(dfs)
 
-    respond = fs_helpers.delete_ds(df)
-    if respond[0]:
-        click.secho('Successfully deleted', fg='bright_white', bg='green')
-    else:
-        click.secho('ERROR', bg='red')
-        click.echo('For details see traceback below')
-        click.echo(respond[1])
+    # respond = fs_helpers.delete_ds(df)
+    # if respond[0]:
+    #     click.secho('Successfully deleted', fg='bright_white', bg='green')
+    # else:
+    #     click.secho('ERROR', bg='red')
+    #     click.echo('For details see traceback below')
+    #     click.echo(respond[1])
 
-    if hard and click.confirm(
-        'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
-        abort=True):
-        shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), df))
+    # if hard and click.confirm(
+    #     'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
+    #     abort=True):
+    #     shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), df))
 
 # ---------------------------------------------------------------------------------------
 #                                   IMPORT-READS

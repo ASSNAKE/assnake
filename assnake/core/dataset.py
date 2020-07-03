@@ -84,6 +84,17 @@ class Dataset:
             preprocs = list(self.self_reads_info.columns)
         plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=True)
 
+    def delete_ds(dataset):
+        """
+        Remove assnake dataset from database
+        """
+        try:
+            os.remove(
+                '{config}/datasets/{df}/df_info.yaml'.format(config=read_assnake_instance_config()['assnake_db'], df=dataset))
+            return (True,)
+        except Exception as e:
+            return (False, traceback.format_exc())
+
     def __str__(self):
         preprocessing_info = ''
         preprocs = list(self.sample_sets.keys())

@@ -119,16 +119,3 @@ def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = Fa
         except FileExistsError as e:
             print(e)
             
-
-
-def delete_ds(dataset):
-    """
-    Remove assnake dataset from database
-    """
-    try:
-        os.remove(
-            '{config}/datasets/{df}/df_info.yaml'.format(config=read_assnake_instance_config()['assnake_db'], df=dataset))
-        return (True,)
-    except Exception as e:
-        return (False, traceback.format_exc())
-
