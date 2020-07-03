@@ -10,7 +10,7 @@ from assnake.core.command_builder import sample_set_construction_options, add_op
 
 from pkg_resources import iter_entry_points
 
-from assnake.core.snake_module import get_all_modules_as_dict
+from assnake.core.snake_module import SnakeModule
 
 
 class Result:
@@ -55,6 +55,7 @@ class Result:
             @add_options(sample_set_construction_options)
             @click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)
             @add_options(preset_options)
+            @add_options(self.additional_inputs)
             @click.pass_obj
             def result_invocation(config, strand, **kwargs):
                 sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
@@ -66,6 +67,7 @@ class Result:
             @click.command(self.name, short_help=self.description)
             @add_options(sample_set_construction_options)
             @add_options(preset_options)
+            @add_options(self.additional_inputs)
             @click.pass_obj
             def result_invocation(config, **kwargs):
                 # kwargs.update({'params': params})
@@ -81,6 +83,7 @@ class Result:
             @click.command(self.name, short_help=self.description)
             @add_options(sample_set_construction_options)
             @add_options(preset_options)
+            @add_options(self.additional_inputs)
             @click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)
             @click.pass_obj
             def result_invocation(config, strand, **kwargs):
@@ -99,20 +102,21 @@ class Result:
             @click.command(self.name, short_help=self.description)
             @add_options(sample_set_construction_options)
             @add_options(preset_options)
+            @add_options(self.additional_inputs)
             @click.pass_obj
             def result_invocation(config, **kwargs):
                 sample_sets = generic_command_dict_of_sample_sets(config,   **kwargs)
 
                 sample_set_dir_wc = self.wc_config[self.name+'_sample_set_tsv_wc']
                 result_wc = self.wc_config[self.name + '_wc']
-                res_list = prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df = kwargs['df'], sample_sets = sample_sets, min_len = min_len, params = params, overwrite = overwrite)
+                res_list = prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, sample_sets = sample_sets,  **kwargs)
 
                 config['requests'] += res_list
 
             return result_invocation
 
     @classmethod
-    def from_location(cls, name, result_type, location, input_type,  additional_inputs= None, description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None):
+    def from_location(cls, name, result_type, location, input_type,  additional_inputs= [], description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None):
         '''
         This method is a wrapper for creating an instance of Result class by grabbing the snakefiles and wc_config automatically 
         from user-provided `location`. How can we make grabbing the location automatic? 
@@ -132,6 +136,9 @@ class Result:
         workflows = glob.glob(os.path.join(location, 'workflow*.smk'))
         # Find all wc_config files.
         wc_config = os.path.join(location, 'wc_config.yaml')
+        # Find default config files
+        default_config = os.path.join(location, 'default_config.yaml')
+
 
         if len(workflows) == 0:  # No workflow files found
             print('===', name)
@@ -142,9 +149,15 @@ class Result:
             wc_config = read_yaml(wc_config)
             result_wc = wc_config[name + '_wc']
         else:
-            print('No wc config file found for result', name)
+            # print('No wc config file found for result', name)
             wc_config = {}
             result_wc = ''
+
+        if os.path.isfile(default_config):
+            default_config = read_yaml(default_config)
+        else:
+            # print('No default_config file found for result', name)
+            default_config = None
 
         if with_presets:
             preset_manager = PresetManager(
@@ -170,23 +183,23 @@ class Result:
 
         return x
 
+    @staticmethod
+    def get_all_results_as_list():
+        # Discover plugins
+        discovered_plugins = SnakeModule.get_all_modules_as_dict()
+        for module_name, module_class in discovered_plugins.items():
+            print(module_name)
+            for res in module_class.results:
 
-def get_all_results_as_list():
-    # Discover plugins
-    discovered_plugins = get_all_modules_as_dict()
-    for module_name, module_class in discovered_plugins.items():
-        print(module_name)
-        for res in module_class.results:
+                # print('\t' + str(res.invocation_command))
 
-            # print('\t' + str(res.invocation_command))
+                if res.preset_preparation is not None:
+                    print('\t' + res.name)
+                    print('\t' + str(res.preset_preparation))
+                    res.preset_preparation()
+            # config.update({module_name:module_class.install_dir})
+            # for wc_conf in module_class.wc_configs:
+            #     if wc_conf is not None:
+            #         wc_config.update(wc_conf)
 
-            if res.preset_preparation is not None:
-                print('\t' + res.name)
-                print('\t' + str(res.preset_preparation))
-                res.preset_preparation()
-        # config.update({module_name:module_class.install_dir})
-        # for wc_conf in module_class.wc_configs:
-        #     if wc_conf is not None:
-        #         wc_config.update(wc_conf)
-
-    return discovered_plugins
+        return discovered_plugins

@@ -2,7 +2,6 @@ import click, os
 
 from assnake.core.config import read_internal_config, read_assnake_instance_config, update_internal_config, fill_and_write_instance_config
 
-from assnake.core.result import get_all_results_as_list
 
 from pathlib import Path
 

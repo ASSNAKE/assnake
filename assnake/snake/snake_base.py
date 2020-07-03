@@ -13,13 +13,23 @@ discovered_plugins = {
 
 # We need to update wc_config first
 for module_name, module_class in discovered_plugins.items():
-    config.update({module_name:module_class.install_dir})
+    
+    module_config = {'install_dir': module_class.install_dir}
+
+    if module_class.module_config is not None:
+        module_config.update(module_class.module_config)
+
+    config.update({module_name:module_config})
+
+
     for wc_conf in module_class.wc_configs:
         if wc_conf is not None:
             wc_config.update(wc_conf)
     for res in module_class.results:
         if res.wc_config is not None:
             wc_config.update(res.wc_config)
+
+print(config)
 
 # and now include all the stuff
 for module_name, module_class in discovered_plugins.items():
@@ -30,3 +40,7 @@ for module_name, module_class in discovered_plugins.items():
         for sn in res.workflows:
             include: os.path.normpath(sn)
             pass
+
+print('WHATSUP MOTHERFUCKERS')
+
+print(config)

@@ -2,17 +2,10 @@ from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-import yaml
 import fastentrypoints
 import os
 import configparser
 from pathlib import Path
-# Creating config_internal.ini
-# dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
-# config_internal = configparser.ConfigParser()
-# config_internal['GENERAL'] = {'config_loc': 'None'}
-# with open(os.path.join(dir_of_this_file, './assnake/config_internal.ini'), 'w+') as configfile:
-#     config_internal.write(configfile)
 
 def write_internal_config():
     internal_config_loc = os.path.join(str(Path.home()), '.config/assnake/internal_config.yaml')
@@ -22,7 +15,7 @@ def write_internal_config():
 
     if not os.path.isfile(internal_config_loc):
         with open(internal_config_loc, 'w+') as file:
-            _ = yaml.dump({'instance_config_loc': 'not_set'}, file, sort_keys=False)
+            file.write('instance_config_loc: not_set')
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
@@ -48,7 +41,7 @@ setup(name='assnake',
     keywords = ['ILLUMINA', 'NGS', 'METAGENOMIC', 'DATA'], 
     packages=find_packages(),
     install_requires=[
-        'numpy', 'Click', 'pyyaml>=5', 'pandas', 
+        'numpy', 'Click', 'pyyaml>=', 'pandas', 
         'tabulate', 'snakemake', 'drmaa', 
         'parse', 'pycallgraph', 'tqdm', 'scipy', 'plotly', 'matplotlib'
     ],
