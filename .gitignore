@@ -4,4 +4,3 @@ __pycache__
 *egg-info
 *.png
 *.snakemake
-assnake/config_internal.ini

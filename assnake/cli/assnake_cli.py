@@ -41,21 +41,8 @@ O---o The tools that are presented here
   O   You can check quality and preprocess your data, 
  o-O  assemble it, map, bin the contigs, 
 o---O make taxonomic annotations, functional annotations,
-O---o
- O-o  and work with 16s rRNA data.
-  O
- o-O
-o---O
-
-\b
-Please, feel free to check out all the commands. 
-Please, read the help messages and if you have any questions, 
-write me directly on my email fedorov.de@gmail.com, 
-or create an issue or PR on GitHub.
-\b
-Start by initializing ASSNAKE with
-assnake init command
-\b"""
+O---o and work with 16s rRNA data.
+"""
 
 
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
@@ -109,27 +96,27 @@ def result():
 
 for entry_point in iter_entry_points('assnake.plugins'):
     module_class = entry_point.load()
+    for snakeresult in module_class.results:
+        result.add_command(snakeresult.invocation_command)
     for cmd in module_class.invocation_commands:
         result.add_command(cmd)
     for cmd in module_class.initialization_commands:
         init_group.add_command(cmd)
-    for snakeresult in module_class.results:
-        result.add_command(snakeresult.invocation_command)
 
 result.add_command(gather)
 
 
-@click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
-@add_options(sample_set_construction_options)
-@click.option('--params', help='Parameters to use', default='def', type=click.STRING )
-@click.option('--message', '-m', multiple=True)
+# @click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
+# @add_options(sample_set_construction_options)
+# @click.option('--params', help='Parameters to use', default='def', type=click.STRING )
+# @click.option('--message', '-m', multiple=True)
 
-@click.pass_obj
-def request_sample_set(config, message, **kwargs):
-    click.echo('\n'.join(message))
-    sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
-    config['sample_sets'].append(sample_set.samples_pd.copy())
-result.add_command(request_sample_set)
+# @click.pass_obj
+# def request_sample_set(config, message, **kwargs):
+#     click.echo('\n'.join(message))
+#     sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
+#     config['sample_sets'].append(sample_set.samples_pd.copy())
+# result.add_command(request_sample_set)
 
 
 

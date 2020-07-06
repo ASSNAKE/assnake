@@ -24,7 +24,7 @@ def gather(config, threads, jobs, drmaa, run, touch):
     
     
     internal_config = read_internal_config()
-    
+    print(internal_config['instance_config_loc'])
 
     click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')
 

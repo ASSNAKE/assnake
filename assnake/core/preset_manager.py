@@ -64,12 +64,17 @@ class PresetManager:
             presets = [p.split('/')[-1].replace('.json', '')
                        for p in glob.glob(presets_glob)]
 
+            if len(presets) > 0:
+                help_m = 'Preset to use. Available presets: ' + str([p.split('.')[0] for p in presets])
+                default = presets[0]
+            else:
+                help_m = 'No presets in database!'
+                default = 'No presets in database!'
 
             return [click.option('--preset',
-                        help='Preset to use. Available presets: ' +
-                        str([p.split('.')[0] for p in presets]),
+                        help=help_m,
                         required=False,
-                        default=presets[0])]
+                        default = default)]
         
         else: 
             return []

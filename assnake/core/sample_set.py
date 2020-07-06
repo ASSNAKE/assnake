@@ -90,6 +90,8 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 def generate_result_list(sample_set, wc_str, **kwargs):
     res_list = []
     # print(kwargs)
+    kwargs.pop('df')
+    kwargs.pop('preproc')
     for s in sample_set.to_dict(orient='records'):
         preprocessing = s['preproc']
 
@@ -124,6 +126,8 @@ def prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, df, sam
                 sample_set.to_csv(sample_set_loc, sep='\t', index=False)
                 click.secho('Overwritten')
 
+        print(result_wc)
+        print(kwargs)
         res_list += [result_wc.format(
             fs_prefix = df_loaded.fs_prefix,
             df = df_loaded.df,

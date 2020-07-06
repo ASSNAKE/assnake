@@ -2,8 +2,10 @@ import click, os, glob, json, zlib
 import pandas as pd
 from assnake.core.config import read_internal_config, read_assnake_instance_config, update_internal_config, fill_and_write_instance_config
 
-from assnake.core.result import get_all_results_as_list
-from assnake.core.snake_module import get_all_modules_as_dict
+from assnake.core.result import Result
+from assnake.core.snake_module import SnakeModule
+import importlib
+
 from assnake.utils.general import compute_crc32_of_dumped_dict
 from pathlib import Path
 
@@ -15,7 +17,7 @@ def show_installed_modules():
     Show available assnake modules in your env
     """
     
-    modules = get_all_modules_as_dict()
+    modules = SnakeModule.get_all_modules_as_dict()
     click.echo(modules)
 
 @click.command(name = 'results')
@@ -24,8 +26,18 @@ def show_installed_results():
     Show available results in your installation
     """
     
-    results = get_all_results_as_list()
+    results = Result.get_all_results_as_list()
     click.echo(results)
+
+@click.command(name = 'redeploy')
+@click.option('--module','-m', help='Snake Module to redeploy')
+def show_installed_results(module):
+    """
+    Redeploys Snake Module into database
+    """
+    sm = SnakeModule.get_all_modules_as_dict()[module]
+
+    click.echo(sm)
 
 @click.command(name = 'refresh-params')
 def refresh_params():
@@ -88,4 +100,5 @@ def refresh_params():
                         if len(is_unique_hash) == 1:
                             click.secho('It has duplicate name, but contents are different.\nThis might lead to confusion', fg='yellow')  
                             click.secho('It is STRONGLY advised to give your presets a prject specific unique name.', fg='yellow')  
+
 

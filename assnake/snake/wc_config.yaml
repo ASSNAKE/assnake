@@ -7,10 +7,3 @@ md5_fastq_gz:     '{fs_prefix}/{df}/reads/{preproc}/{df_sample}/profile/{df_samp
 
 sample_dir_wc:    '{fs_prefix}/{df}/reads/{preproc}/{df_sample}'
 count_wc: '{fs_prefix}/{df}/profile/count/{preproc}/{df_sample}/{df_sample}_{strand}.count' 
-
-
-fastqc_data_wc:   '{fs_prefix}/{df}/profile/fastqc/{preproc}/{df_sample}/{df_sample}_{strand}_fastqc/fastqc_data.txt'
-fastqc_zip_wc: '{fs_prefix}/{df}/profile/fastqc/{preproc}/{df_sample}/{df_sample}_{strand}_fastqc.zip'
-
-multiqc_fastqc_wc: '{fs_prefix}/{df}/profile/multiqc/{sample_set}/{strand}/samples.list'
-sample_wc: '{directory}/{sample_name}_{strand}.{extension}'
