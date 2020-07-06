@@ -98,6 +98,10 @@ for entry_point in iter_entry_points('assnake.plugins'):
     module_class = entry_point.load()
     for snakeresult in module_class.results:
         result.add_command(snakeresult.invocation_command)
+    for cmd in module_class.invocation_commands:
+        result.add_command(cmd)
+    for cmd in module_class.initialization_commands:
+        init_group.add_command(cmd)
 
 result.add_command(gather)
 
