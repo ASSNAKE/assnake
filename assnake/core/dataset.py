@@ -124,8 +124,8 @@ class Dataset:
         }
 
 
-
-for entry_point in iter_entry_points('assnake.plugins'):
-    module_class = entry_point.load()
-    for k, v in module_class.dataset_methods.items():
-        setattr(Dataset, k,v)
+# TODO rework this stuff. This should register custom methods from modules in Dataset, like loading metaphlan
+# for entry_point in iter_entry_points('assnake.plugins'):
+#     module_class = entry_point.load()
+#     for k, v in module_class.dataset_methods.items():
+#         setattr(Dataset, k,v)

@@ -15,31 +15,33 @@ class SnakeModule:
     dataset_methods = {}
     vizualisation_methods = {}
 
-    def __init__(self, name, install_dir, snakefiles = [], invocation_commands = [], initialization_commands = [], wc_configs = [], results = [], dataset_methods = {}):
-
+    def __init__(self, name, install_dir, snakefiles = [], invocation_commands = [], initialization_commands = [], wc_configs = [], provided_results = [], dataset_methods = {}):
         self.assnake_config = read_assnake_instance_config()
 
         self.name = name
         self.install_dir = install_dir
 
+        print(self.name)
+
         results_in_module = glob.glob(os.path.join(self.install_dir, '*/result.py'))
         results_in_module = [ '.'.join(m.split('/')[-3:])[0:-3] for m in results_in_module]
-        results_in_module = [ getattr(importlib.import_module(m), 'result') for m in results_in_module ]
 
+        results_in_module = [ getattr(importlib.import_module(m), 'result') for m in results_in_module ]
         # read_default_config()
 
+        self.results = provided_results.copy()
+        self.results += results_in_module
 
-        self.results = results
-        self.results += (results_in_module)
 
+        # TODO Finish this 
         self.module_config = self.read_deployed_config()
-        print(self.module_config)
 
         self.snakefiles = snakefiles
         self.invocation_commands = invocation_commands
         self.initialization_commands = initialization_commands
         self.wc_configs = wc_configs
         self.dataset_methods = dataset_methods
+
 
     def deploy_module(self):
         if self.assnake_config is not None:

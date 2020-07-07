@@ -31,7 +31,7 @@ def show_installed_results():
 
 @click.command(name = 'redeploy')
 @click.option('--module','-m', help='Snake Module to redeploy')
-def show_installed_results(module):
+def redeploy_snake_module(module):
     """
     Redeploys Snake Module into database
     """

@@ -188,18 +188,15 @@ class Result:
         # Discover plugins
         discovered_plugins = SnakeModule.get_all_modules_as_dict()
         for module_name, module_class in discovered_plugins.items():
-            print(module_name)
+            print('module_name', module_name)
             for res in module_class.results:
-
-                # print('\t' + str(res.invocation_command))
-
-                if res.preset_preparation is not None:
-                    print('\t' + res.name)
-                    print('\t' + str(res.preset_preparation))
-                    res.preset_preparation()
+                print('\t' + res.name)
             # config.update({module_name:module_class.install_dir})
             # for wc_conf in module_class.wc_configs:
             #     if wc_conf is not None:
             #         wc_config.update(wc_conf)
 
         return discovered_plugins
+
+    def __repr__(self):
+        return self.name

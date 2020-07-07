@@ -131,13 +131,13 @@ config_group.add_command(config_commands.show_internal_config)
 config_group.add_command(config_commands.show_instance_config)
 
 @cli.group(name = 'module')
-def config_group():
+def module_group():
     """Commands to view and interact with assnake modules installed in current env"""
     pass
 
-config_group.add_command(module_commands.show_installed_results)
-config_group.add_command(module_commands.show_installed_modules)
-config_group.add_command(module_commands.refresh_params)
+module_group.add_command(module_commands.show_installed_results)
+module_group.add_command(module_commands.show_installed_modules)
+module_group.add_command(module_commands.refresh_params)
 
 
 def main():

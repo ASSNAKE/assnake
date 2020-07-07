@@ -34,7 +34,9 @@ def read_assnake_instance_config():
     Reads particular assnake instance config. It is stored inside assnake database as config.yaml (Name subject to change). 
     :return: Returns dict if instance config exists, None otherwise.
     '''
-    print('reading instance config')
+    # TODO optimize number of times this is called
+    # print('reading instance config')
+    
     internal_config = read_internal_config()
     instance_config_loc = internal_config['instance_config_loc']
 

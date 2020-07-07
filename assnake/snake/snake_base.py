@@ -11,6 +11,7 @@ discovered_plugins = {
     for entry_point in iter_entry_points('assnake.plugins')
 }
 
+
 # We need to update wc_config first
 for module_name, module_class in discovered_plugins.items():
     
@@ -29,18 +30,14 @@ for module_name, module_class in discovered_plugins.items():
         if res.wc_config is not None:
             wc_config.update(res.wc_config)
 
-print(config)
 
 # and now include all the stuff
 for module_name, module_class in discovered_plugins.items():
+
     for snakefile in module_class.snakefiles:
         include: os.path.normpath(os.path.join(module_class.install_dir, snakefile))
-        
+
     for res in module_class.results:
         for sn in res.workflows:
             include: os.path.normpath(sn)
-            pass
-
-print('WHATSUP MOTHERFUCKERS')
-
-print(config)
+            print(os.path.normpath(sn))
