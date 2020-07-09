@@ -116,3 +116,4 @@ def plot_reads_count_change(read_table, preprocs, sort, title = 'Reads number', 
     layout = go.Layout( barmode='stack', margin=go.layout.Margin( b=100 ), width=1800, title = title)
     fig = go.Figure(data=traces, layout=layout)
     if plot: plotly.offline.iplot(fig)
+    return fig

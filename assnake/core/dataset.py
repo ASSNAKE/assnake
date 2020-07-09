@@ -56,8 +56,8 @@ class Dataset:
 
         self.sample_sets = preprocessing
         
-        # self.sample_containers = pd.concat(self.sample_sets.values())
-        # self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
+        self.sample_containers = pd.concat(self.sample_sets.values())
+        self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
   
     @staticmethod
     def list_in_db():
@@ -79,10 +79,11 @@ class Dataset:
                     print(exc)
         return dfs
 
-    def plot_reads_loss(self, preprocs = [], sort = 'raw'):
+    def plot_reads_loss(self, preprocs = [], sort = 'raw', plot=True):
         if len(preprocs) == 0: 
             preprocs = list(self.self_reads_info.columns)
-        plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=True)
+        f = plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=plot)
+        if not plot: return f
 
     def delete_ds(dataset):
         """
