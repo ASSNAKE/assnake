@@ -59,6 +59,7 @@ def update_internal_config(update_dict):
 
     return internal_config
 
+# TODO Better check
 def check_if_assnake_is_initialized():
     '''
     Just tries to read assnake instance config, and prints an error if there is no instance config.
@@ -72,11 +73,7 @@ def check_if_assnake_is_initialized():
         exit()
 
 
-
-
-
-## ====RENAME THIS === update_instance_config
-def update_config(update_dict):
+def update_instance_config(update_dict):
     '''
     Updates instance config with provided dictionary
 
@@ -86,9 +83,9 @@ def update_config(update_dict):
     instance_config = read_assnake_instance_config()
     instance_config.update(update_dict)
 
-    internal_config_loc = os.path.join(str(Path.home()), '.config/assnake/internal_config.yaml')
+    internal_config = read_internal_config()
 
-    with open(internal_config_loc, 'w+') as file:
+    with open(internal_config['instance_config_loc'], 'w+') as file:
         _ = yaml.dump(instance_config, file, sort_keys=False)
 
     return instance_config

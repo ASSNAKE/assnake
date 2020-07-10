@@ -21,17 +21,12 @@ class SnakeModule:
         self.name = name
         self.install_dir = install_dir
 
-        print(self.name)
-
         results_in_module = glob.glob(os.path.join(self.install_dir, '*/result.py'))
         results_in_module = [ '.'.join(m.split('/')[-3:])[0:-3] for m in results_in_module]
-
         results_in_module = [ getattr(importlib.import_module(m), 'result') for m in results_in_module ]
-        # read_default_config()
 
         self.results = provided_results.copy()
         self.results += results_in_module
-
 
         # TODO Finish this 
         self.module_config = self.read_deployed_config()

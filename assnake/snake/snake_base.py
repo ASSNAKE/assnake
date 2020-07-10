@@ -40,4 +40,3 @@ for module_name, module_class in discovered_plugins.items():
     for res in module_class.results:
         for sn in res.workflows:
             include: os.path.normpath(sn)
-            print(os.path.normpath(sn))
