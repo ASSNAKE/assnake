@@ -36,6 +36,7 @@ for module_name, module_class in discovered_plugins.items():
 
     for snakefile in module_class.snakefiles:
         include: os.path.normpath(os.path.join(module_class.install_dir, snakefile))
+        print(os.path.normpath(os.path.join(module_class.install_dir, snakefile)))
 
     for res in module_class.results:
         for sn in res.workflows:

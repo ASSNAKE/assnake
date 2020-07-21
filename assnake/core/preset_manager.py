@@ -69,7 +69,7 @@ class PresetManager:
                 help_m = 'Preset to use. Available presets: ' + str([p.split('.')[0] for p in presets])
                 default = presets[0]
             else:
-                help_m = 'No presets in database!'
+                help_m  = 'No presets in database!'
                 default = 'No presets in database!'
 
             return [click.option('--preset',
@@ -79,3 +79,18 @@ class PresetManager:
         
         else: 
             return []
+
+    def find_preset_by_name(self, preset_name):
+        instance_config = read_assnake_instance_config()
+        if instance_config is not None:
+            presets_glob = os.path.join(instance_config['assnake_db'], self.dir_in_database, '*.' + self.preset_file_format)
+            presets = [p.split('/')[-1].replace('.'+self.preset_file_format, '')
+                       for p in glob.glob(presets_glob)]
+            preset_dicts = [ {
+                'preset_name' :p.split('.')[0], 
+                'preset_hash': p.split('.')[1],
+                'full_name': p 
+                } for p in presets ]
+            return next((p for p in preset_dicts if p['preset_name'] == preset_name), None)
+
+

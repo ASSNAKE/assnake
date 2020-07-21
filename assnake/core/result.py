@@ -71,6 +71,14 @@ class Result:
             @click.pass_obj
             def result_invocation(config, **kwargs):
                 # kwargs.update({'params': params})
+                if 'preset' in kwargs.keys():
+                    preset = self.preset_manager.find_preset_by_name(kwargs['preset'])
+                    if preset is not None:
+                        kwargs['preset'] = preset['full_name']
+                    else:
+                        click.secho('NO SUCH PRESET', fg='red')
+                        exit()
+
                 sample_set, sample_set_name = generic_command_individual_samples(
                     config,  **kwargs)
                 config['requests'] += generate_result_list(
@@ -186,18 +194,24 @@ class Result:
 
     @staticmethod
     def get_all_results_as_list():
-        # Discover plugins
+        results = []
         discovered_plugins = SnakeModule.get_all_modules_as_dict()
         for module_name, module_class in discovered_plugins.items():
             print('module_name', module_name)
             for res in module_class.results:
                 print('\t' + res.name)
-            # config.update({module_name:module_class.install_dir})
-            # for wc_conf in module_class.wc_configs:
-            #     if wc_conf is not None:
-            #         wc_config.update(wc_conf)
+                results.append(res)
 
-        return discovered_plugins
+        return results
+    
+    @staticmethod
+    def get_result_by_name(result_name):
+        discovered_plugins = SnakeModule.get_all_modules_as_dict()
+        for module_name, module_class in discovered_plugins.items():
+            for res in module_class.results:
+                if res.name == result_name:
+                    return res
+        return None
 
     def __repr__(self):
         return self.name
