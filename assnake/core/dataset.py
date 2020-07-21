@@ -55,9 +55,9 @@ class Dataset:
 
 
         self.sample_sets = preprocessing
-        
-        self.sample_containers = pd.concat(self.sample_sets.values())
-        self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
+        if len(self.sample_sets.keys()) > 0:
+            self.sample_containers = pd.concat(self.sample_sets.values())
+            self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
   
     @staticmethod
     def list_in_db():

@@ -116,7 +116,7 @@ class Result:
             return result_invocation
 
     @classmethod
-    def from_location(cls, name, result_type, location, input_type,  additional_inputs= [], description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None):
+    def from_location(cls, name, result_type, location, input_type,  additional_inputs= [], description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None, preset_file_format = 'json'):
         '''
         This method is a wrapper for creating an instance of Result class by grabbing the snakefiles and wc_config automatically 
         from user-provided `location`. How can we make grabbing the location automatic? 
@@ -163,7 +163,8 @@ class Result:
             preset_manager = PresetManager(
                 dir_in_database = os.path.join('presets', name),
                 included_presets_dir = os.path.join(location, 'presets'),
-                static_files_dir_name = static_files_dir_name)
+                static_files_dir_name = static_files_dir_name,
+                preset_file_format = preset_file_format)
         else:
             preset_manager = None
 

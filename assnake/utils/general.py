@@ -6,17 +6,6 @@ import json
 import zlib
 from pathlib import Path
 
-def compute_crc32_of_dumped_dict(dict_loc, format = 'json'):
-    '''
-    Computes zlib.crc32() of json file and returns hex string without 0x
-    '''
-    with open(dict_loc) as dict_file:
-        loaded = json.load(dict_file)
-        dict_str = bytes(str(loaded), encoding='ascii')
-        # CRC32 
-        dict_crc32_hex = hex(zlib.crc32(dict_str))[2:]
-        return dict_crc32_hex
-
 def read_yaml(file_location):
     yaml_file = {}
     with open(file_location, 'r') as stream:
@@ -25,6 +14,22 @@ def read_yaml(file_location):
             return yaml_file
         except yaml.YAMLError as exc:
             print(exc)
+
+def compute_crc32_of_dumped_dict(dict_loc, format = 'json'):
+    '''
+    Computes zlib.crc32() of json file and returns hex string without 0x
+    '''
+    with open(dict_loc) as dict_file:
+        if format == 'json':
+            loaded = json.load(dict_file)
+        elif format == 'yaml':
+            loaded = yaml.load(dict_file, Loader=yaml.FullLoader)
+        dict_str = bytes(str(loaded), encoding='ascii')
+        # CRC32 
+        dict_crc32_hex = hex(zlib.crc32(dict_str))[2:]
+        return dict_crc32_hex
+
+
 
 def pathizer(path):
     """
