@@ -88,7 +88,7 @@ class PresetManager:
                        for p in glob.glob(presets_glob)]
             preset_dicts = [ {
                 'preset_name' :p.split('.')[0], 
-                'preset_hash': p.split('.')[1],
+                'preset_hash': p.split('.')[1] if '.' in p else '',
                 'full_name': p 
                 } for p in presets ]
             return next((p for p in preset_dicts if p['preset_name'] == preset_name), None)
