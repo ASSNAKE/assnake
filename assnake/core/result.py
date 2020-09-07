@@ -72,11 +72,11 @@ class Result:
             def result_invocation(config, **kwargs):
                 # kwargs.update({'params': params})
                 if 'preset' in kwargs.keys():
-                    preset = self.preset_manager.find_preset_by_name(kwargs['preset'])
+                    preset, preset_path = self.preset_manager.find_preset_by_name(kwargs['preset'])
                     if preset is not None:
                         kwargs['preset'] = preset['full_name']
                     else:
-                        click.secho('NO SUCH PRESET', fg='red')
+                        click.secho('NO SUCH PRESET AT %s'%preset_path, fg='red')
                         exit()
 
                 sample_set, sample_set_name = generic_command_individual_samples(
