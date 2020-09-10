@@ -38,11 +38,14 @@ class Dataset:
                 print(exc)
 
         reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
+        dataset_type_checker_pattern = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/raw/*_R2.*') # check in raw preprocess folder if dataset is paired-end
+        dataset_type_checker = glob.glob(dataset_type_checker_pattern)
         preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
         preprocessing = {}
 
         self.df =  df_info['df']
         self.fs_prefix =  df_info['fs_prefix']
+        self.dataset_type = 'paired-end' if len(dataset_type_checker) > 0 else 'single-end'
         self.full_path = os.path.join(self.fs_prefix, self.df)
 
         if include_preprocs:
@@ -102,6 +105,7 @@ class Dataset:
         for preproc in preprocs:
             preprocessing_info = preprocessing_info + 'Samples in ' + preproc + ' - ' + str(len(self.sample_sets[preproc])) + '\n'
         return 'Dataset name: ' + self.df + '\n' + \
+            'Dataset type: ' + self.dataset_type + '\n' + \
             'Filesystem prefix: ' + self.fs_prefix +'\n' + \
             'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
 

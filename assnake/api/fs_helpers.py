@@ -49,6 +49,32 @@ def get_samples_from_dir(directory_with_reads, modify_name = None):
             for s in samples
         ]
         
+    if len(samples_list) == 0:
+        ending_variant = {'name': 'single_end', 'strands': {'R1': '', 'R2':'_R2'}}
+        variant_w_ext = ending_variant['strands']['R1'] + ext
+        globbing_path = os.path.join(directory_with_reads, '*' + variant_w_ext)
+        files_mathching_pattern = glob.glob(globbing_path)
+
+        # get sample names
+        samples = [
+            filename.split('/')[-1].replace(variant_w_ext, '') # Take last part of path (basename) and replace _R1/fastq.gz with nothing to get sample name
+            for filename in files_mathching_pattern
+        ]
+        
+        # prepare sample dicts
+        samples_list += [
+            {
+                'name_in_run': s,
+                'modified_name': modify_name(s) if modify_name is not None else s,
+                
+                'ending_variant_id': ending_variant['name'],
+                'ending_variant_R1': ending_variant['strands']['R1'],
+                'ending_variant_R2': ending_variant['strands']['R2'],
+                'directory': directory_with_reads,
+                'extension': ext
+            } 
+            for s in samples
+        ]
 
     return pd.DataFrame(samples_list)
 
@@ -105,17 +131,20 @@ def create_links(import_dir, samples, hard = False, create_dir_if_not_exist = Fa
 
         if rename:
             os.rename(src_r1, dst_r1)
-            os.rename(src_r2, dst_r2)
+            if os.path.exists(src_r2):
+                os.rename(src_r2, dst_r2)
             return
 
         if hard:
             copy2(src_r1, dst_r1)
-            copy2(src_r2, dst_r2)
+            if os.path.exists(src_r2):
+                copy2(src_r2, dst_r2)
             return
 
         try:
             os.symlink(src_r1, dst_r1)
-            os.symlink(src_r2, dst_r2)
+            if os.path.exists(src_r2):
+                os.symlink(src_r2, dst_r2)
         except FileExistsError as e:
             print(e)
             
