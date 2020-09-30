@@ -87,6 +87,13 @@ def load_sample(fs_prefix, df, preproc, df_sample,
                 if report_size:
                     size = os.path.getsize(r1) + os.path.getsize(r2)
                     sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
+        elif os.path.isfile(r1):
+            containers.append(p)
+            if len(p) > len(final_preproc):
+                final_preproc = p
+                if report_size:
+                    size = os.path.getsize(r1) 
+                    sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
     return {'df':df, 
             'df_sample':df_sample, 
             'df_sample':df_sample,  

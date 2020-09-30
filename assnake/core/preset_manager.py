@@ -86,11 +86,11 @@ class PresetManager:
             presets_glob = os.path.join(instance_config['assnake_db'], self.dir_in_database, '*.' + self.preset_file_format)
             presets = [p.split('/')[-1].replace('.'+self.preset_file_format, '')
                        for p in glob.glob(presets_glob)]
+            print(presets_glob)
             preset_dicts = [ {
                 'preset_name' :p.split('.')[0], 
-                'preset_hash': p.split('.')[1],
+                'preset_hash': p.split('.')[1] if '.' in p else '',
                 'full_name': p 
                 } for p in presets ]
-            return next((p for p in preset_dicts if p['preset_name'] == preset_name), None)
-
+            return (next((p for p in preset_dicts if p['preset_name'] == preset_name), None), os.path.dirname(presets_glob))
 

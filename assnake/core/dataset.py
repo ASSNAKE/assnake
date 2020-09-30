@@ -1,6 +1,6 @@
 import os, glob, yaml, time
 import pandas as pd
-from assnake.api.loaders import  load_sample, load_sample_set
+from assnake.api.loaders import  load_sample, load_sample_set, InputError
 
 from assnake.core.config import load_wc_config, read_assnake_instance_config
 from assnake.viz import plot_reads_count_change
@@ -27,7 +27,7 @@ class Dataset:
         df_info = {}
 
         if not os.path.isfile(df_info_loc):
-            raise assnake.api.loaders.InputError('NO DATASET ' + df)
+            raise InputError('NO DATASET ' + df)
 
         with open(df_info_loc, 'r') as stream:
             try:
@@ -38,11 +38,14 @@ class Dataset:
                 print(exc)
 
         reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
+        dataset_type_checker_pattern = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/raw/*_R2.*') # check in raw preprocess folder if dataset is paired-end
+        dataset_type_checker = glob.glob(dataset_type_checker_pattern)
         preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
         preprocessing = {}
 
         self.df =  df_info['df']
         self.fs_prefix =  df_info['fs_prefix']
+        self.dataset_type = 'paired-end' if len(dataset_type_checker) > 0 else 'single-end'
         self.full_path = os.path.join(self.fs_prefix, self.df)
 
         if include_preprocs:
@@ -102,6 +105,7 @@ class Dataset:
         for preproc in preprocs:
             preprocessing_info = preprocessing_info + 'Samples in ' + preproc + ' - ' + str(len(self.sample_sets[preproc])) + '\n'
         return 'Dataset name: ' + self.df + '\n' + \
+            'Dataset type: ' + self.dataset_type + '\n' + \
             'Filesystem prefix: ' + self.fs_prefix +'\n' + \
             'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
 
