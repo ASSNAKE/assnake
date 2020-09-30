@@ -59,8 +59,15 @@ class Result:
             @click.pass_obj
             def result_invocation(config, strand, **kwargs):
                 sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
-                config['requests'] += generate_result_list(sample_set, self.result_wc, strand=strand)
-
+                generated_result_list = generate_result_list(sample_set, self.result_wc, strand=strand)
+                config['requests'] += generated_result_list
+                if 'requests_storage' not in config:
+                    config['requests_storage'] = {}
+                if kwargs['df'] not in config['requests_storage']:
+                    config['requests_storage'][kwargs['df']] = {}
+                if self.name not in config['requests_storage'][kwargs['df']]:
+                    config['requests_storage'][kwargs['df']][self.name] = []
+                config['requests_storage'][kwargs['df']][self.name] += generated_result_list
             return result_invocation
         elif self.input_type == 'illumina_sample':
         
@@ -72,17 +79,25 @@ class Result:
             def result_invocation(config, **kwargs):
                 # kwargs.update({'params': params})
                 if 'preset' in kwargs.keys():
-                    preset, preset_path = self.preset_manager.find_preset_by_name(kwargs['preset'])
+                    preset = self.preset_manager.find_preset_by_name(kwargs['preset'])
                     if preset is not None:
                         kwargs['preset'] = preset['full_name']
                     else:
-                        click.secho('NO SUCH PRESET AT %s'%preset_path, fg='red')
+                        click.secho('NO SUCH PRESET', fg='red')
                         exit()
 
                 sample_set, sample_set_name = generic_command_individual_samples(
                     config,  **kwargs)
-                config['requests'] += generate_result_list(
-                    sample_set, self.result_wc, **kwargs)
+
+                generated_result_list = generate_result_list(sample_set, self.result_wc, **kwargs)
+                config['requests'] += generated_result_list
+                if 'requests_storage' not in config:
+                    config['requests_storage'] = {}
+                if kwargs['df'] not in config['requests_storage']:
+                    config['requests_storage'][kwargs['df']] = {}
+                if self.name not in config['requests_storage'][kwargs['df']]:
+                    config['requests_storage'][kwargs['df']][self.name] = []
+                config['requests_storage'][kwargs['df']][self.name] += generated_result_list
 
             return result_invocation
 
@@ -101,6 +116,13 @@ class Result:
                 res_list = prepare_sample_set_tsv_and_get_results(
                     sample_set_dir_wc, result_wc, df=kwargs['df'], sample_sets=sample_sets, strand=strand, overwrite=False)
                 config['requests'] += res_list
+                if 'requests_storage' not in config:
+                    config['requests_storage'] = {}
+                if kwargs['df'] not in config['requests_storage']:
+                    config['requests_storage'][kwargs['df']] = {}
+                if self.name not in config['requests_storage'][kwargs['df']]:
+                    config['requests_storage'][kwargs['df']][self.name] = []
+                config['requests_storage'][kwargs['df']][self.name] += res_list
 
             return result_invocation
 
@@ -120,6 +142,13 @@ class Result:
                 res_list = prepare_sample_set_tsv_and_get_results(sample_set_dir_wc, result_wc, sample_sets = sample_sets,  **kwargs)
 
                 config['requests'] += res_list
+                if 'requests_storage' not in config:
+                    config['requests_storage'] = {}
+                if kwargs['df'] not in config['requests_storage']:
+                    config['requests_storage'][kwargs['df']] = {}
+                if self.name not in config['requests_storage'][kwargs['df']]:
+                    config['requests_storage'][kwargs['df']][self.name] = []
+                config['requests_storage'][kwargs['df']][self.name] += res_list
 
             return result_invocation
 

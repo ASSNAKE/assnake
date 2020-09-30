@@ -83,7 +83,7 @@ dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
 dataset.add_command(dataset_commands.df_delete)
 dataset.add_command(dataset_commands.rescan_dataset)
-
+dataset.add_command(dataset_commands.df_update_info_wrapper)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group

@@ -1,6 +1,6 @@
 import os, glob, yaml, time
 import pandas as pd
-from assnake.api.loaders import  load_sample, load_sample_set
+from assnake.api.loaders import  load_sample, load_sample_set, InputError
 
 from assnake.core.config import load_wc_config, read_assnake_instance_config
 from assnake.viz import plot_reads_count_change
@@ -27,7 +27,7 @@ class Dataset:
         df_info = {}
 
         if not os.path.isfile(df_info_loc):
-            raise assnake.api.loaders.InputError('NO DATASET ' + df)
+            raise InputError('NO DATASET ' + df)
 
         with open(df_info_loc, 'r') as stream:
             try:

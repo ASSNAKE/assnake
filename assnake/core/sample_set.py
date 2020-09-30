@@ -15,7 +15,7 @@ def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column
 
     meta_loc = os.path.join(df_loaded.full_path, 'df_samples.tsv')
     if os.path.isfile(meta_loc):
-        meta = pd.read_csv(meta_loc, sep = '\t')
+        meta = pd.read_csv(meta_loc, sep = '\t', index_col=0)
         if meta_column is not None:
             if column_value is not None:
                 sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
@@ -29,6 +29,9 @@ def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column
             sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
             sample_sets_dict.update({sample_set_name: sample_set})
     else:
+        if meta_column is not None:
+            click.echo('A metadata column is specified, but there is no metadata file: %s'%meta_loc, fg='red')
+            exit()
         sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
         sample_sets_dict.update({sample_set_name: sample_set})
 
@@ -58,12 +61,16 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     # Now for the meta column stuff
     meta_loc = os.path.join(df_loaded.full_path, 'df_samples.tsv')
     if os.path.isfile(meta_loc):
-        meta = pd.read_csv(meta_loc, sep = '\t')
+        meta = pd.read_csv(meta_loc, sep = '\t', index_col=0)
         if meta_column is not None:
             if column_value is not None:
                 subset_by_col_value = meta.loc[meta[meta_column] == column_value]
                 if len(subset_by_col_value) > 0:
-                    samples_to_add = list(subset_by_col_value['df_sample'])
+                    samples_to_add = list(subset_by_col_value.index.values)
+                    samples_to_add = list(set(df_loaded.sample_containers['df_sample'].values).intersection(set(samples_to_add)))
+                    if len(samples_to_add) == 0:
+                        click.secho('There are 0 samples for %s == %s'%(meta_column, column_value), fg='red')
+                        exit()
 
     if preproc is None:
         # LONGEST
@@ -77,12 +84,19 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     # click.echo(tabulate(sample_set[['df_sample', 'reads', 'preproc']].sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
 
     # construct sample set name for fs
-    if meta_column is None and column_value is None:
-        curr_date = datetime.datetime.now()
-        def_name = '{month}{year}'.format(month=curr_date.strftime("%b"), year=curr_date.strftime("%y"))
-        sample_set_name = def_name
+    curr_date = datetime.datetime.now()
+    def_name = '{date}{month}{year}_{hour}{minute}%s'.format(
+                            date=curr_date.strftime("%d"), 
+                            month=curr_date.strftime("%b"), 
+                            year=curr_date.strftime("%y"),
+                            hour=curr_date.strftime("%H"),
+                            minute=curr_date.strftime("%M"))
+    if meta_column is None and column_value is None:        
+        sample_set_name = def_name%('')
+    elif meta_column is not None and column_value is None:
+        sample_set_name = def_name%('__' + meta_column)
     else:
-        sample_set_name = meta_column + '__' + column_value
+        sample_set_name = def_name%('__' + meta_column + '_' + column_value)
 
     return sample_set, sample_set_name
     
