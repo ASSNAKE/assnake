@@ -94,6 +94,9 @@ def load_sample(fs_prefix, df, preproc, df_sample,
                 if report_size:
                     size = os.path.getsize(r1) 
                     sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
+        else:
+            click.secho('There are no reads in a path: %s'%r1, fg='red')
+            exit()
     return {'df':df, 
             'df_sample':df_sample, 
             'df_sample':df_sample,  
@@ -115,7 +118,6 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
         do_not_add: list of sample names NOT to add
         pattern: sample names must match this glob pattern to be included. 
     '''
-
     if wc_config is None:
         wc_config = load_wc_config()
 

@@ -34,12 +34,12 @@ def df_list():
 	"""List datasets in database"""
 	dfs = assnake.Dataset.list_in_db()
 	if len(list(dfs.keys())) == 0:
-		click.echo('No datasets in your system yet!\nYou can create one by running\n' +
+		click.secho('No datasets in your system yet!\nYou can create one by running\n' +
 				   click.style('  assnake dataset create  ', bg='blue', fg='white', bold=True))
 
 	for df in dfs.values():
 		df_name = df['df']
-		click.echo(click.style('' * 2 + df_name + ' ' * 2, fg='green', bold=True))
+		click.secho(click.style('' * 2 + df_name + ' ' * 2, fg='green', bold=True))
 		# click.echo('  Filesystem prefix: ' + df.get('fs_prefix', ''))
 		click.echo('  Full path: ' + os.path.join(df.get('fs_prefix', ''), df['df']))
 		# click.echo('  Description: ')
@@ -272,7 +272,7 @@ def df_info(config, df, preproc, df_arg):
 	try:
 		df_info_loc = config['config']['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)
 		df = assnake.Dataset(df)
-		click.echo(click.style('='*2 + ' '*3 + df.df + ' '*3 + '=' * 2, fg='green', bold=True))
+		click.secho(click.style('='*2 + ' '*3 + df.df + ' '*3 + '=' * 2, fg='green', bold=True))
 		click.echo(str(df))
 		if preproc is not None:
 			samples = df.sample_sets[preproc]
@@ -294,7 +294,7 @@ def df_info(config, df, preproc, df_arg):
 					click.echo('\t%s'%process_name)
 					click.echo('\t\t- '+'\n\t\t- '.join(process_files))
 		return
-	except assnake.api.loaders.InputError as e:
+	except InputError as e:
 		print(e.message)
 		return
 
@@ -454,9 +454,9 @@ def validate_df_prefix_existence(fs_prefix, allow_not_empty_full_path=True):
 			click.echo('Great! ' + fs_prefix + ' exists, and assnake can write to that folder')
 			return fs_prefix
 		else:
-			click.echo('Oops =( ' + fs_prefix + ' exists, but assnake doesnt have permissions to write there. Aborting.', fg='red')
+			click.secho('Oops =( ' + fs_prefix + ' exists, but assnake doesnt have permissions to write there. Aborting.', fg='red')
 	else:
-		click.echo('Oops =( ' + fs_prefix + ' does not exist. Aborting.', fg='red')
+		click.secho('Oops =( ' + fs_prefix + ' does not exist. Aborting.', fg='red')
 	return None
 
 def validate_full_path_existence(full_df_path, allow_not_empty_full_path=True):
@@ -475,10 +475,10 @@ def validate_full_path_existence(full_df_path, allow_not_empty_full_path=True):
 			click.echo('Great! '+full_df_path + ' exists and it is not empty.')
 			return full_df_path
 		elif not os.access(full_df_path, os.W_OK):
-			click.echo('Oops =( ' + full_df_path + ' exists, but assnake doesnt have permissions to write there. Aborting.', fg='red')
+			click.secho('Oops =( ' + full_df_path + ' exists, but assnake doesnt have permissions to write there. Aborting.', fg='red')
 			return None
 	else:
-		click.echo('Oops =( ' + full_df_path + ' exists, but it is not directory. Aborting.', fg='red')
+		click.secho('Oops =( ' + full_df_path + ' exists, but it is not directory. Aborting.', fg='red')
 	return None
 
 
@@ -498,9 +498,9 @@ def validate_full_path_existence(full_df_path, allow_not_empty_full_path=True):
 
 @click.pass_obj
 def df_update_info_wrapper(config, df_name, data_type, dataset_type, description, prefix, full_path, processes, clean_paths):
-	df_update_info_wrapper(df_name, data_type, dataset_type, description, prefix, full_path, processes, clean_paths)
+	df_update_info(df_name, data_type, dataset_type, description, prefix, full_path, processes, clean_paths)
 
-def df_update_info(config=None, df_name=None, data_type=None, dataset_type=None, description=None, prefix=None, full_path=None, processes=None, clean_paths=False):
+def df_update_info(df_name=None, data_type=None, dataset_type=None, description=None, prefix=None, full_path=None, processes=None, clean_paths=False):
 	if df_name is None:
 		click.secho('Please, specify the dataset name.', fg='red')
 		exit()
@@ -521,9 +521,9 @@ def df_update_info(config=None, df_name=None, data_type=None, dataset_type=None,
 			print(exc)
 
 	was_changed = []
-	for name, new_info in zip(['fs_prefix', 'description', 'data_type', 
+	for name, new_info in zip(['df', 'fs_prefix', 'description', 'data_type', 
 							   'full_path', 'dataset_type', 'processes'], 
-							   [prefix, description, data_type, 
+							   [df_name, prefix, description, data_type, 
 							   full_path, dataset_type, processes]):
 		if new_info is not None:
 			df_info[name] = new_info
@@ -559,7 +559,7 @@ def df_update_info(config=None, df_name=None, data_type=None, dataset_type=None,
 	if (full_path_validation is not None) and (prefix_df_name_validation is not None):
 		with open(df_info_loc, 'w') as info_file:
 			yaml.dump(df_info, info_file, default_flow_style=False)
-		click.secho('Dataset ' + df_name + 'was updated sucessfully!', fg='green')
+		click.secho('Dataset ' + df_name + ' was updated sucessfully!', fg='green')
 	else:
 		click.secho('Sorry, you are trying to setup wrong paths.', fg='red')
 

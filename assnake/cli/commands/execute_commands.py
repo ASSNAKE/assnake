@@ -77,6 +77,7 @@ def gather(config, threads, jobs, drmaa, run, touch):
                 if df_info is not {}:
                     processes = df_info['processes'] if 'processes' in df_info else {}
                     for process_name in config['requests_storage'][df]:
+                        process_name = process_name.replace('-', '_')
                         if process_name not in processes:
                             processes[process_name] = []
                         file_set = [filepath.replace(df_info['full_path']+'/', '') for filepath in config['requests_storage'][df][process_name]
