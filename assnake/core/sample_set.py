@@ -78,9 +78,13 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
     # construct sample set name for fs
     if meta_column is None and column_value is None:
-        curr_date = datetime.datetime.now()
-        def_name = '{month}{year}'.format(month=curr_date.strftime("%b"), year=curr_date.strftime("%y"))
-        sample_set_name = def_name
+        # if only one sample is present in sample set, construct sample set name as `df_sample__{df_sample}`
+        if len(sample_set['df_sample'] == 1):
+            sample_set_name = 'df_sample__' + list(sample_set['df_sample'])[0]
+        else:
+            curr_date = datetime.datetime.now()
+            def_name = '{month}{year}'.format(month=curr_date.strftime("%b"), year=curr_date.strftime("%y"))
+            sample_set_name = def_name
     else:
         sample_set_name = meta_column + '__' + column_value
 
@@ -89,9 +93,9 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
 def generate_result_list(sample_set, wc_str, **kwargs):
     res_list = []
-    # print(kwargs)
-    kwargs.pop('df')
-    kwargs.pop('preproc')
+    print(kwargs)
+    kwargs.pop('df', None)
+    kwargs.pop('preproc', None)
     for s in sample_set.to_dict(orient='records'):
         preprocessing = s['preproc']
 
