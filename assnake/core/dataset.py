@@ -23,28 +23,28 @@ class Dataset:
         wc_config = load_wc_config()
         instance_config = read_assnake_instance_config()
 
-        df_info_loc = instance_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)
-        df_info = {}
+        self.df_info_loc = instance_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)
+        self.df_info = {}
 
-        if not os.path.isfile(df_info_loc):
+        if not os.path.isfile(self.df_info_loc):
             raise InputError('NO DATASET ' + df)
 
-        with open(df_info_loc, 'r') as stream:
+        with open(self.df_info_loc, 'r') as stream:
             try:
                 info = yaml.load(stream, Loader=yaml.FullLoader)
                 if 'df' in info:
-                    df_info =  info
+                    self.df_info =  info
             except yaml.YAMLError as exc:
                 print(exc)
 
-        reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-        dataset_type_checker_pattern = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/raw/*_R2.*') # check in raw preprocess folder if dataset is paired-end
+        reads_dir = os.path.join(self.df_info['fs_prefix'], self.df_info['df'], 'reads/*')
+        dataset_type_checker_pattern = os.path.join(self.df_info['fs_prefix'], self.df_info['df'], 'reads/raw/*_R2.*') # check in raw preprocess folder if dataset is paired-end
         dataset_type_checker = glob.glob(dataset_type_checker_pattern)
         preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
         preprocessing = {}
 
-        self.df =  df_info['df']
-        self.fs_prefix =  df_info['fs_prefix']
+        self.df =  self.df_info['df']
+        self.fs_prefix =  self.df_info['fs_prefix']
         self.dataset_type = 'paired-end' if len(dataset_type_checker) > 0 else 'single-end'
         self.full_path = os.path.join(self.fs_prefix, self.df)
 
@@ -126,6 +126,24 @@ class Dataset:
             'df': self.df,
             'fs_prefix': self.fs_prefix,
             'preprocs': preprocs
+        }
+
+    def get_processinfo(self):
+        all_processes = []
+        all_outputfiles = []
+        processinfo = {}
+        for process, output_files in self.df_info['processes'].items():
+            processinfo.update({process : pd.DataFrame.from_dict(
+                                          {'process':[process]*len(output_files),
+                                           'output_file':output_files}).to_dict(orient='records')})
+            all_processes.extend([process]*len(output_files))
+            all_outputfiles.extend(output_files)
+        processinfo['all'] = pd.DataFrame.from_dict({'process':all_processes, 
+                                            'output_file':all_outputfiles}).to_dict(orient='records')
+        return {
+            'df': self.df,
+            # 'fs_prefix': self.fs_prefix,
+            'processinfo': processinfo
         }
 
 
