@@ -56,7 +56,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     config['requested_dfs'] += [df_loaded.df]
      
     # Now for the meta column stuff
-    meta_loc = os.path.join(df_loaded.full_path, 'df_samples.tsv')
+    meta_loc = os.path.join(df_loaded.full_path, 'meta.tsv')
     if os.path.isfile(meta_loc):
         meta = pd.read_csv(meta_loc, sep = '\t')
         if meta_column is not None:
@@ -79,7 +79,9 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     # construct sample set name for fs
     if meta_column is None and column_value is None:
         # if only one sample is present in sample set, construct sample set name as `df_sample__{df_sample}`
-        if len(sample_set['df_sample'] == 1):
+        print('getting name')
+        print(sample_set['df_sample'])
+        if len(sample_set['df_sample']) == 1:
             sample_set_name = 'df_sample__' + list(sample_set['df_sample'])[0]
         else:
             curr_date = datetime.datetime.now()
@@ -93,12 +95,12 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
 
 def generate_result_list(sample_set, wc_str, **kwargs):
     res_list = []
-    print(kwargs)
     kwargs.pop('df', None)
     kwargs.pop('preproc', None)
     for s in sample_set.to_dict(orient='records'):
         preprocessing = s['preproc']
-
+        # print(preprocessing)
+        # print(wc_str)
         res_list.append(wc_str.format(
             fs_prefix = s['fs_prefix'].rstrip('\/'),    
             df = s['df'],

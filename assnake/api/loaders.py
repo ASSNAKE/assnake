@@ -87,6 +87,7 @@ def load_sample(fs_prefix, df, preproc, df_sample,
                 if report_size:
                     size = os.path.getsize(r1) + os.path.getsize(r2)
                     sample_dict.update({'size': bytes2human(size, symbols='iec'), 'bytes': size})
+        
     return {'df':df, 
             'df_sample':df_sample, 
             'df_sample':df_sample,  
@@ -124,7 +125,8 @@ def load_sample_set(wc_config, fs_prefix, df, preproc, samples_to_add = [], do_n
 
     df_samples = list(set(df_samples) - set(do_not_add))
 
-    if len(samples_to_add) > 0: df_samples = df_samples and samples_to_add
+    if len(samples_to_add) > 0: 
+        df_samples = list(set(df_samples).intersection(set(samples_to_add)))
 
     samples = [load_sample(fs_prefix, df, preproc, df_sample,
                     sample_dir_wc = sample_dir_wc, fastq_gz_file_wc = fastq_gz_file_wc, 
