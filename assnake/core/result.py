@@ -71,7 +71,7 @@ class Result:
             @click.pass_obj
             def result_invocation(config, **kwargs):
                 # kwargs.update({'params': params})
-                if 'preset' in kwargs.keys():
+                if 'preset' in kwargs.keys() and self.preset_manager is not None:
                     preset = self.preset_manager.find_preset_by_name(kwargs['preset'])
                     if preset is not None:
                         kwargs['preset'] = preset['full_name']

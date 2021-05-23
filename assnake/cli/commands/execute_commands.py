@@ -17,9 +17,10 @@ from assnake.api.loaders import update_fs_samples_csv
 @click.option('--drmaa/--no-drmaa', default=False)
 @click.option('--run/--no-run', default=False)
 @click.option('--touch/--no-touch', default=False)
+@click.option('--unlock/--no-unlock', default=False)
 @click.pass_obj
 
-def gather(config, threads, jobs, drmaa, run, touch):
+def gather(config, threads, jobs, drmaa, run, touch, unlock):
     import snakemake # Moved import here because it is slow as fucking fuck
     
     
@@ -43,13 +44,14 @@ def gather(config, threads, jobs, drmaa, run, touch):
         configfiles=[internal_config['instance_config_loc']],
         drmaa_log_dir = config['config']['drmaa_log_dir'],
         use_conda = True,
-        latency_wait = 120,
+        latency_wait = 10,
         conda_prefix = config['config']['conda_dir'],
         drmaa=drmaa_param,
         touch = touch,
+        unlock = unlock,
         cores=jobs, nodes=jobs)
 
-    print(config['requested_results']) 
+    # print(config['requested_results']) 
     
     if run:
         click.echo('Updating Datasets:' + str(config['requested_dfs']))

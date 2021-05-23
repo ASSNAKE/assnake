@@ -80,7 +80,7 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     if meta_column is None and column_value is None:
         # if only one sample is present in sample set, construct sample set name as `df_sample__{df_sample}`
         print('getting name')
-        print(sample_set['df_sample'])
+        # print(sample_set['df_sample'])
         if len(sample_set['df_sample']) == 1:
             sample_set_name = 'df_sample__' + list(sample_set['df_sample'])[0]
         else:
