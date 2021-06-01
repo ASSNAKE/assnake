@@ -79,13 +79,12 @@ def generic_command_individual_samples(config, df, preproc, meta_column, column_
     # construct sample set name for fs
     if meta_column is None and column_value is None:
         # if only one sample is present in sample set, construct sample set name as `df_sample__{df_sample}`
-        print('getting name')
-        # print(sample_set['df_sample'])
+        print(sample_set)
         if len(sample_set['df_sample']) == 1:
             sample_set_name = 'df_sample__' + list(sample_set['df_sample'])[0]
         else:
             curr_date = datetime.datetime.now()
-            def_name = '{month}{year}'.format(month=curr_date.strftime("%b"), year=curr_date.strftime("%y"))
+            def_name = '{day}_{month}_{year}'.format(month=curr_date.strftime("%b"), year=curr_date.year, day = curr_date.day)
             sample_set_name = def_name
     else:
         sample_set_name = meta_column + '__' + column_value

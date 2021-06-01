@@ -18,9 +18,10 @@ from assnake.api.loaders import update_fs_samples_csv
 @click.option('--run/--no-run', default=False)
 @click.option('--touch/--no-touch', default=False)
 @click.option('--unlock/--no-unlock', default=False)
+@click.option('--debug-dag/--no-debug-dag', default=False)
 @click.pass_obj
 
-def gather(config, threads, jobs, drmaa, run, touch, unlock):
+def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag):
     import snakemake # Moved import here because it is slow as fucking fuck
     
     
@@ -35,6 +36,7 @@ def gather(config, threads, jobs, drmaa, run, touch, unlock):
     drmaa_param = None
     if drmaa:
         drmaa_param=' -V -S /bin/bash -pe make {threads}'.format(threads=threads)
+
     status = snakemake.snakemake(os.path.join(curr_dir, '../../snake/snake_base.py'), 
         # config = config['wc_config'],    
         targets=config['requests'], 
@@ -43,12 +45,16 @@ def gather(config, threads, jobs, drmaa, run, touch, unlock):
         # config = load_config_file(),
         configfiles=[internal_config['instance_config_loc']],
         drmaa_log_dir = config['config']['drmaa_log_dir'],
-        use_conda = True,
-        latency_wait = 10,
+
+        conda_frontend='conda',
+        use_conda = True, 
         conda_prefix = config['config']['conda_dir'],
+
+        latency_wait = 10,
         drmaa=drmaa_param,
         touch = touch,
         unlock = unlock,
+        debug_dag = debug_dag, 
         cores=jobs, nodes=jobs)
 
     # print(config['requested_results']) 
