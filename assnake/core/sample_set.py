@@ -19,6 +19,7 @@ def generic_command_dict_of_sample_sets(config, df, preproc, meta_column, column
         if meta_column is not None:
             if column_value is not None:
                 sample_set, sample_set_name = generic_command_individual_samples(config,  df, preproc, meta_column, column_value, samples_to_add, exclude_samples, **kwargs)
+                print(column_value)
                 sample_sets_dict.update({sample_set_name: sample_set})
             else: # treat empty column_value as creating multiple sample_sets for each column_value
                 column_values = list(meta[meta_column].unique())

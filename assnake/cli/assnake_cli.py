@@ -66,7 +66,6 @@ def init_group():
     """
     pass
 
-# init_group.add_command(init_commands.init_start)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
@@ -83,6 +82,7 @@ dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
 dataset.add_command(dataset_commands.df_delete)
 dataset.add_command(dataset_commands.rescan_dataset)
+dataset.add_command(dataset_commands.df_info_test)
 
 
 #---------------------------------------------------------------------------------------

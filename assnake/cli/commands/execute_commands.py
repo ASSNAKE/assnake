@@ -19,9 +19,11 @@ from assnake.api.loaders import update_fs_samples_csv
 @click.option('--touch/--no-touch', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('--debug-dag/--no-debug-dag', default=False)
+@click.option('--lint/--no-lint', default=False)
+@click.option('--print-compilation/--no-print-compilation', default=False)
 @click.pass_obj
 
-def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag):
+def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag, lint, print_compilation):
     import snakemake # Moved import here because it is slow as fucking fuck
     
     
@@ -45,11 +47,15 @@ def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag):
         # config = load_config_file(),
         configfiles=[internal_config['instance_config_loc']],
         drmaa_log_dir = config['config']['drmaa_log_dir'],
+        
+        lint = lint,
+        listrules = print_compilation,
 
         conda_frontend='conda',
-        use_conda = True, 
+        use_conda = True,
+        rerun_triggers = ['mtime'],
         conda_prefix = config['config']['conda_dir'],
-
+        keepgoing = True,
         latency_wait = 10,
         drmaa=drmaa_param,
         touch = touch,

@@ -2,7 +2,7 @@ import click, os, glob, json, zlib
 import pandas as pd
 from assnake.core.config import read_internal_config, read_assnake_instance_config, update_internal_config, fill_and_write_instance_config
 
-from assnake.core.result import Result
+from assnake.new_core.Result import Result
 from assnake.core.snake_module import SnakeModule
 import importlib
 

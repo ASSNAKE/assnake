@@ -8,6 +8,35 @@ from assnake.utils.general import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
 from assnake.api.loaders import update_fs_samples_csv
 from pathlib import Path
+
+from assnake.new_core.Dataset import Dataset
+from assnake.new_core.SampleContainerSet import SampleContainerSet
+
+# ---------------------------------------------------------------------------------------
+#                                   INFO
+# ---------------------------------------------------------------------------------------
+@click.command(name='info-test')
+@click.option('--dataset', '-d', help='Name of the dataset', required=True)
+@click.pass_obj
+def df_info_test(config, dataset):
+    """View info for the specific dataset TEST
+        Usage: assnake dataset info -d [dataset] ...
+
+    """
+    
+    df = Dataset(dataset)
+    click.echo(click.style('='*2 + ' '*3 + df.dataset_name + ' '*3 + '=' * 2, fg='green', bold=True))
+    # click.echo(str(df))
+    # Now create a SampleContainerSet with specific parameters
+    sample_container_set = SampleContainerSet(df, preproc='raw')
+
+    for sample_container in sample_container_set.sample_containers:
+        click.echo(sample_container)
+
+
+    return 0
+
+
 # some util
 def show_av_dict(dfs):
     '''

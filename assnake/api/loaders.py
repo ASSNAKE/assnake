@@ -90,7 +90,6 @@ def load_sample(fs_prefix, df, preproc, df_sample,
         
     return {'df':df, 
             'df_sample':df_sample, 
-            'df_sample':df_sample,  
             'preproc':final_preproc, 
             'fs_prefix': fs_prefix,
             #'preprocs':containers, 

@@ -1,132 +1,130 @@
-import os, glob, yaml, time
+import os
+import glob
+import yaml
 import pandas as pd
-from assnake.api.loaders import  load_sample, load_sample_set
-
+from assnake.api.loaders import load_sample_set
 from assnake.core.config import load_wc_config, read_assnake_instance_config
-from assnake.viz import plot_reads_count_change
-import click
-from pkg_resources import iter_entry_points 
 
 class Dataset:
-
-    df = '' # name on file system
-    fs_prefix = '' # prefix on file_system
-    full_path = ''
-    sample_sets = {} # Dict of sample sets, one for each preprocessing
-
-    sources = None
-    biospecimens = None
-    mg_samples = None
-
+    """
+    A class to manage datasets for metagenomic analysis. It provides functionality
+    to load and handle dataset preprocessing information stored in a file system.
+    
+    Attributes:
+        df (str): Name of the dataset on the file system.
+        fs_prefix (str): Filesystem prefix for the dataset path.
+        full_path (str): Full file system path to the dataset.
+        sample_sets (dict): A dictionary containing sample sets for each preprocessing step.
+    """
 
     def __init__(self, df, include_preprocs=True):
-        wc_config = load_wc_config()
+        """
+        Initializes a Dataset object by loading the dataset's information and preprocessing samples.
+
+        Args:
+            df (str): The name of the dataset to initialize.
+            include_preprocs (bool): Flag to determine whether to load preprocessing samples.
+        """
+        self.df = df
+        self.sample_sets = {}
+        
+        # Load configuration and dataset information
         instance_config = read_assnake_instance_config()
-
-        df_info_loc = instance_config['assnake_db']+'/datasets/{df}/df_info.yaml'.format(df = df)
-        df_info = {}
-
+        df_info_loc = os.path.join(instance_config['assnake_db'], 'datasets', df, 'df_info.yaml')
+        
         if not os.path.isfile(df_info_loc):
-            raise assnake.api.loaders.InputError('NO DATASET ' + df)
-
+            raise FileNotFoundError(f'No dataset information file found for dataset: {df}')
+        
         with open(df_info_loc, 'r') as stream:
-            try:
-                info = yaml.load(stream, Loader=yaml.FullLoader)
-                if 'df' in info:
-                    df_info =  info
-            except yaml.YAMLError as exc:
-                print(exc)
-
-        reads_dir = os.path.join(df_info['fs_prefix'], df_info['df'], 'reads/*')
-        preprocs = [p.split('/')[-1] for p in glob.glob(reads_dir)]
-        preprocessing = {}
-
-        self.df =  df_info['df']
-        self.fs_prefix =  df_info['fs_prefix']
+            df_info = yaml.safe_load(stream)
+        
+        self.fs_prefix = df_info.get('fs_prefix', '')
         self.full_path = os.path.join(self.fs_prefix, self.df)
 
+        # Load sample sets if requested
         if include_preprocs:
-            preprocessing = {}
-            for p in preprocs:
-                samples = load_sample_set(wc_config, self.fs_prefix, self.df, p)
-                if len(samples) > 0:
-                    samples = samples[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
-                    preprocessing.update({p:samples})
+            self._load_sample_sets()
 
+    def _load_sample_sets(self):
+        """
+        Internal method to load sample sets from the dataset's preprocessing folders.
+        """
+        reads_dir = os.path.join(self.full_path, 'reads', '*')
+        preprocs = [os.path.basename(p) for p in glob.glob(reads_dir)]
+        
+        for p in preprocs:
+            sample_set = load_sample_set(load_wc_config(), self.fs_prefix, self.df, p)
+            if len(sample_set) > 0:
+                self.sample_sets[p] = sample_set[['preproc', 'df', 'fs_prefix', 'df_sample', 'reads']]
 
-        self.sample_sets = preprocessing
-        if len(self.sample_sets.keys()) > 0:
-            self.sample_containers = pd.concat(self.sample_sets.values())
-            self.self_reads_info = self.sample_containers.pivot(index='df_sample', columns='preproc', values='reads')
-  
     @staticmethod
     def list_in_db():
         """
-        Returns dict of dictionaries with info about datasets from fs database. Key - df name
-        Mandatory fields: df, prefix
+        Static method to list all datasets available in the ASSNAKE database.
+
+        Returns:
+            dict: A dictionary of datasets with their information.
         """
-        dfs = {}
         instance_config = read_assnake_instance_config()
         df_info_locs = glob.glob(instance_config['assnake_db']+'/datasets/*/df_info.yaml')
+        dfs = {}
         
-        for df_info in df_info_locs:
-            with open(df_info, 'r') as stream:
-                try:
-                    info = yaml.load(stream, Loader=yaml.FullLoader)
-                    if 'df' in info:
-                        dfs.update({info['df']: info})
-                except yaml.YAMLError as exc:
-                    print(exc)
+        for df_info_loc in df_info_locs:
+            with open(df_info_loc, 'r') as stream:
+                info = yaml.safe_load(stream)
+                if 'df' in info:
+                    dfs[info['df']] = info
         return dfs
 
-    def plot_reads_loss(self, preprocs = [], sort = 'raw', plot=True):
-        if len(preprocs) == 0: 
-            preprocs = list(self.self_reads_info.columns)
-        f = plot_reads_count_change(self.self_reads_info[preprocs].copy(), preprocs = preprocs, sort = sort, plot=plot)
-        if not plot: return f
-
+    @staticmethod
     def delete_ds(dataset):
         """
-        Remove assnake dataset from database
+        Static method to remove a dataset from the ASSNAKE database.
+
+        Args:
+            dataset (str): The name of the dataset to remove.
+
+        Returns:
+            tuple: A tuple containing a boolean success flag and an error message if any.
         """
         try:
-            os.remove(
-                '{config}/datasets/{df}/df_info.yaml'.format(config=read_assnake_instance_config()['assnake_db'], df=dataset))
-            return (True,)
+            config_loc = read_assnake_instance_config()['assnake_db']
+            os.remove(f"{config_loc}/datasets/{dataset}/df_info.yaml")
+            return True, None
         except Exception as e:
-            return (False, traceback.format_exc())
+            return False, str(e)
 
     def __str__(self):
-        preprocessing_info = ''
-        preprocs = list(self.sample_sets.keys())
-        for preproc in preprocs:
-            preprocessing_info = preprocessing_info + 'Samples in ' + preproc + ' - ' + str(len(self.sample_sets[preproc])) + '\n'
-        return 'Dataset name: ' + self.df + '\n' + \
-            'Filesystem prefix: ' + self.fs_prefix +'\n' + \
-            'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
+        """
+        String representation of the Dataset object.
+
+        Returns:
+            str: Information about the Dataset object.
+        """
+        preprocessing_info = '\n'.join([f'Samples in {preproc}: {len(self.sample_sets[preproc])}' 
+                                        for preproc in self.sample_sets])
+        return f'Dataset name: {self.df}\nPrefix: {self.fs_prefix}\nFull path: {self.full_path}\n{preprocessing_info}'
 
     def __repr__(self):
-        preprocessing_info = ''
-        preprocs = list(self.sample_sets.keys())
-        for preproc in preprocs:
-            preprocessing_info = preprocessing_info + 'Samples in ' + preproc + ' - ' + str(len(self.sample_sets[preproc])) + '\n'
-        return 'Dataset name: ' + self.df + '\n' + \
-            'Filesystem prefix: ' + self.fs_prefix +'\n' + \
-            'Full path: ' + os.path.join(self.fs_prefix, self.df) + '\n' + preprocessing_info
+        """
+        Technical representation of the Dataset object, similar to the string representation.
+        
+        Returns:
+            str: Information about the Dataset object for debugging.
+        """
+        return self.__str__()
 
     def to_dict(self):
-        preprocs = {}
-        for ss in self.sample_sets:
-            preprocs.update({ss : self.sample_sets[ss].to_dict(orient='records')})
+        """
+        Converts the Dataset object to a dictionary format.
+
+        Returns:
+            dict: A dictionary representation of the Dataset object.
+        """
+        preprocs_dict = {preproc: self.sample_sets[preproc].to_dict(orient='records') 
+                         for preproc in self.sample_sets}
         return {
             'df': self.df,
             'fs_prefix': self.fs_prefix,
-            'preprocs': preprocs
+            'preprocs': preprocs_dict
         }
-
-
-# TODO rework this stuff. This should register custom methods from modules in Dataset, like loading metaphlan
-# for entry_point in iter_entry_points('assnake.plugins'):
-#     module_class = entry_point.load()
-#     for k, v in module_class.dataset_methods.items():
-#         setattr(Dataset, k,v)
