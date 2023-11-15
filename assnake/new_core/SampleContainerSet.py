@@ -1,5 +1,6 @@
 import os, glob
 from datetime import datetime
+import click
 
 import pandas as pd
 from assnake.new_core.Dataset import Dataset
@@ -49,7 +50,9 @@ class SampleContainerSet:
         """
         if os.path.exists(file_path) and not overwrite:
             raise FileExistsError(f"The file '{file_path}' already exists. Use overwrite=True to overwrite it.")
-
+        elif os.path.exists(file_path) and overwrite:
+            click.secho('Overwritten', fg='yellow')
+            
         # Create a DataFrame from the SampleContainer objects
         data = []
         for container in self.sample_containers:

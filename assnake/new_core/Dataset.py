@@ -27,6 +27,7 @@ class Dataset:
 
         self.dataset_name = dataset_name
         self.dataset_directory = df_info.get('fs_prefix', '')
+        self.fs_prefix = df_info.get('fs_prefix', '')
         self.full_path = os.path.join(self.dataset_directory, self.dataset_name)
 
         self.samples = self._load_samples()

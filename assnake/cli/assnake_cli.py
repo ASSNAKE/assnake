@@ -1,5 +1,6 @@
 import sys, os, glob, yaml, shutil
 import click
+from assnake.new_core.Pipeline import Pipeline
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.config_commands as config_commands
@@ -138,6 +139,35 @@ def module_group():
 module_group.add_command(module_commands.show_installed_results)
 module_group.add_command(module_commands.show_installed_modules)
 module_group.add_command(module_commands.refresh_params)
+
+@cli.group(name = 'pipeline')
+def pipeline_group():
+    """Commands to view and interact with assnake modules installed in current env"""
+    pass
+
+@click.command(name='test')
+@click.pass_obj
+def pipeline_testing(config):
+    my_pipeline = Pipeline(
+    name="DADA2 PE Pipeline", 
+    description="From reads to DADA2 seqtab and tax_table in one command!",
+        preprocessing_chain={
+            1: {'result': 'cutadapt', 'default_preset': "RMv3v4primers"},
+            2: {'result': 'dada2-filter-and-trim', 'default_preset': "strict"}
+        },
+        analytical_chain = {
+            1: {'result': 'dada2-learn-errors', 'default_preset': 'def'}
+        }
+    )
+
+    my_pipeline.set_dataset('T')
+
+    targets = my_pipeline.prepare_analytical_chain_targets()
+
+    my_pipeline.execute(config)
+
+pipeline_group.add_command(pipeline_testing)
+
 
 
 def main():

@@ -5,10 +5,7 @@ from assnake.core.config import read_assnake_instance_config
 from assnake.new_core.SampleContainerSet import SampleContainerSet
 from assnake.new_core.PresetManager import PresetManager
 
-# from assnake.core.preset_manager import PresetManager
-
 from assnake.utils.general import read_yaml
-from assnake.core.sample_set import generic_command_individual_samples, generate_result_list, generic_command_dict_of_sample_sets, prepare_sample_set_tsv_and_get_results
 from assnake.core.command_builder import sample_set_construction_options, add_options, custom_help
 
 from pkg_resources import iter_entry_points
@@ -64,6 +61,7 @@ class Result:
         self.name = name
         self.result_type = result_type
         self.result_wc = result_wc
+        self.sample_set_dir_wc = wc_config.get(f'{name}_sample_set_dir_wc', None)
         self.input_type = input_type
         self.additional_inputs = additional_inputs
         self.description = description
@@ -77,7 +75,23 @@ class Result:
         elif callable(invocation_command):
             self.invocation_command = invocation_command()
 
+    def handle_illumina_strand_file(self, config, kwargs):
+        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
+        config['requests'] += self.format_result_wc(sample_container_set, strand=kwargs['strand'])
 
+    def handle_illumina_sample(self, config, kwargs):
+        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
+        config['requests'] += self.format_result_wc(sample_container_set, kwargs['preset'])
+
+    def handle_illumina_strand_file_set(self, config, kwargs):
+        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
+        formatted_target = self.prepare_sample_set_tsv_and_get_target_file(sample_container_set, kwargs['sample_set'], overwrite=kwargs.get('overwrite', False), **kwargs)
+        config['requests'] += [formatted_target]
+
+    def handle_illumina_sample_set(self, config, kwargs):
+        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
+        formatted_target = self.prepare_sample_set_tsv_and_get_target_file(sample_container_set, kwargs['sample_set'], overwrite=kwargs.get('overwrite', False), **kwargs)
+        config['requests'] += [formatted_target]
 
     def generate_cli_command(self):
         # Common setup for all command types
@@ -92,115 +106,98 @@ class Result:
         @add_options(strand_option)
         @click.pass_obj
         def result_invocation(config, **kwargs):
-            # Check if no options are provided and display custom help
-            if not kwargs['df']:
+            if not kwargs.get('df'):
                 custom_help(ctx=click.get_current_context(), param=None, value=True)
-            
-            # Handle preset logic
+
             if 'preset' in kwargs and self.preset_manager is not None:
                 preset = self.preset_manager.find_preset_by_name_and_dataset(kwargs['preset'], kwargs['df'])
-                if preset is not None:
-                    kwargs['preset'] = preset.full_name
-                else:
-                    click.secho('NO SUCH PRESET', fg='red')
-                    exit()
-
-            print('later')
-
-            # Handling different input types
+                kwargs['preset'] = preset.name_wo_ext
+                    
             if self.input_type == 'illumina_strand_file':
-                sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-                config['requests'] += self.format_result_wc(sample_container_set, strand = kwargs['strand'])
-                
-            elif self.input_type == 'illumina_strand_file_set':
-                sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-                sample_set_dir_wc = self.wc_config[self.name + '_sample_set_tsv_wc']
-                sample_set_name = 'test'
-                rkwargs = {key: kwargs[key] for key in ['strand']}
-                config['requests'] += self.prepare_sample_set_tsv_and_get_target_file(sample_set_dir_wc, sample_container_set, sample_set_name, overwrite=False, **rkwargs)
-            
+                self.handle_illumina_strand_file(config, kwargs)
             elif self.input_type == 'illumina_sample':
-                sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-                print(sample_container_set)
-                config['requests'] += self.format_result_wc(sample_container_set, preset.name_wo_ext)
-                print(config['requests'])
-
+                self.handle_illumina_sample(config, kwargs)
+            elif self.input_type == 'illumina_strand_file_set':
+                self.handle_illumina_strand_file_set(config, kwargs)
             elif self.input_type == 'illumina_sample_set':
-                sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-                sample_set_dir_wc = self.wc_config[self.name + '_sample_set_tsv_wc']
-                sample_set_name = 'test'
-                config['requests'] += self.prepare_sample_set_tsv_and_get_target_file(sample_set_dir_wc, sample_container_set, sample_set_name, overwrite=False, **kwargs)
+                self.handle_illumina_sample_set(config, kwargs)
             else:
-                # Handle unsupported input types
                 click.secho(f'Unsupported input type: {self.input_type}', fg='red')
                 exit()
-
             
         return result_invocation
 
-    def format_result_wc(self, sample_container_set: SampleContainerSet, preset: str = 'default', **additional_inputs) -> list:
-        """
-        Formats the wildcard string for result output using SampleContainerSet, preset, and additional input parameters.
-        """
-        formatted_paths = []
-        for container in sample_container_set.sample_containers:
-            # Prepare a dictionary for formatting that includes both preset and additional inputs
-            formatting_dict = {
-                'fs_prefix': container.fs_prefix,
-                'df': container.dataset_name,
-                'preproc': container.preprocessing,
-                'df_sample': container.sample_id,
-                'preset': preset
-            }
-            # Add any additional inputs to the dictionary
-            formatting_dict.update(additional_inputs)
+    def format_wildcard_string(self, container, preset, additional_inputs):
+        # Shared logic for formatting wildcard strings
+        formatting_dict = {
+            'fs_prefix': container.fs_prefix,
+            'df': container.dataset_name,
+            'preproc': container.preprocessing,
+            'df_sample': container.sample_id,
+            'preset': preset
+        }
+        formatting_dict.update(additional_inputs)
+        return self.result_wc.format(**formatting_dict)
 
-            # Use the dictionary to format the result wildcard string
-            formatted_path = self.result_wc.format(**formatting_dict)
-            formatted_paths.append(formatted_path)
-        return formatted_paths
+    def format_result_wc(self, sample_container_set, preset='default', **additional_inputs):
+        print(additional_inputs)
+        return [self.format_wildcard_string(container, preset, additional_inputs) for container in sample_container_set.sample_containers]
+
+    @property
+    def preprocessing_name_in_wc(self):
+        if self.result_type == 'preprocessing':
+            preprocessing_name = self.result_wc.split('/')[3]
+            preprocessing_name = preprocessing_name.replace('{preproc}__', '').replace('_{preset}', '')
+            return preprocessing_name
+        else:
+            return 0
+
     
-    def prepare_sample_set_tsv_and_get_target_file(self, sample_set_dir_wc, sample_container_set, sample_set_name, overwrite=False, **kwargs):
+    def prepare_sample_set_tsv_and_get_target_file(self, sample_container_set, sample_set_name, overwrite=False, **kwargs):
         """
         Prepares sample sets in TSV format and generates a list of results for Snakemake.
 
-        This method iterates through SampleContainerSets, creates necessary directories,
-        writes sample set data to TSV files, and prepares a list of formatted result wildcard strings.
-
         Args:
-            sample_container_sets (dict of SampleContainerSet): Dictionary of SampleContainerSet objects.
+            sample_container_set (SampleContainerSet): The SampleContainerSet to be saved and processed.
+            sample_set_name (str): Name of the sample set.
             overwrite (bool): Flag to indicate whether existing files should be overwritten.
             **kwargs: Additional keyword arguments to be included in the result wildcard strings.
 
         Returns:
             list: A list of formatted result wildcard strings for Snakemake.
         """
-        res_list = []
-
-        sample_set_dir = sample_set_dir_wc.format(fs_prefix=sample_container_set.dataset.fs_prefix,
-                                                df=sample_container_set.dataset.dataset_name,
-                                                sample_set=sample_set_name,
-                                                **kwargs)
+        # Construct the directory path for the sample set
+        sample_set_dir = self.sample_set_dir_wc.format(
+            fs_prefix=sample_container_set.dataset.fs_prefix,
+            df=sample_container_set.dataset.dataset_name,
+            sample_set=sample_set_name,
+            **kwargs
+        )
         sample_set_loc = os.path.join(sample_set_dir, 'sample_set.tsv')
 
+        # Create the directory if it does not exist
         if not os.path.exists(sample_set_dir):
             os.makedirs(sample_set_dir, exist_ok=True)
 
+        # Check if the sample set file exists
         if not os.path.isfile(sample_set_loc) or overwrite:
-            # Write SampleContainerSet to TSV
-            sample_container_set.to_tsv(sample_set_loc, overwrite)
-            if overwrite:
-                click.secho('Overwritten', fg='yellow')
+            if os.path.isfile(sample_set_loc):
+                click.secho('Overwriting...', fg='yellow')
+            sample_container_set.to_tsv(sample_set_loc, overwrite) 
+            
         else:
             click.secho('Sample set with this name already exists!', fg='red')
 
-        # Append formatted result wildcard string to the list
-        res_list.append(self.result_wc.format(fs_prefix=sample_container_set.dataset.fs_prefix,
-                                                df=sample_container_set.dataset.dataset_name,
-                                                sample_set=sample_set_name,
-                                                **kwargs))
+        # Generate and return the list of formatted result wildcard strings
+        formatting_dict = {
+                'fs_prefix': sample_container_set.dataset.fs_prefix,
+                'df': sample_container_set.dataset.dataset_name,
+                'sample_set': sample_set_name
+            }
+        formatting_dict.update(kwargs)
 
-        return res_list
+        return self.result_wc.format(**formatting_dict)
+
 
     @classmethod
     def from_location(cls, name, result_type, location, input_type,  additional_inputs= [], description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None, preset_file_format = 'json'):
@@ -275,6 +272,9 @@ class Result:
         )
 
         return x
+    
+
+    
 
     @staticmethod
     def get_all_results_as_list():
@@ -326,3 +326,10 @@ class Result:
 
     def __repr__(self):
         return self.name
+    
+    def __str__(self) -> str:
+        attributes = vars(self)
+        final = ''
+        for attr_name, attr_value in attributes.items():
+            final += f"{attr_name}: {attr_value}"
+            final += '\n'

@@ -121,6 +121,10 @@ class PresetManager:
                 # Add the copied preset to the collection and return it
                 self.presets.append(copied_preset)
                 return copied_preset
+        
+        if preset is None:
+            click.secho('NO SUCH PRESET', fg='red')
+            exit()
 
         return preset  # Return the found preset or None
 

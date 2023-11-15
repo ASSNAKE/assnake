@@ -39,7 +39,7 @@ for module_name, module_class in discovered_plugins.items():
         print(os.path.normpath(os.path.join(module_class.install_dir, snakefile)))
 
     for res in module_class.results:
-        print(res)
+        # print(res)
 
         for sn in res.workflows:
             include: os.path.normpath(sn)
