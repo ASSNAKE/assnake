@@ -4,95 +4,67 @@ import yaml
 from assnake.utils.general import read_yaml
 import click
 
+import os
+from pathlib import Path
+import yaml
+import click
+
 # Constants for file paths
 INTERNAL_CONFIG_FILE = Path.home() / '.config/assnake/internal_config.yaml'
 CONFIG_TEMPLATE_FILE = Path(__file__).parent / '../snake/config_template.yml'
 
-
 def load_wc_config():
-    """
-    Load the wildcard configuration for snakemake workflows.
-    """
+    """ Load the wildcard configuration for Snakemake workflows. """
     return read_yaml(Path(__file__).parent / '../snake/wc_config.yaml')
 
-
 def read_internal_config():
-    """
-    Read the internal configuration from the user's home directory.
-
-    Returns:
-        A dictionary representing the internal configuration.
-    """
+    """ Read the internal configuration from the user's home directory. """
     if not INTERNAL_CONFIG_FILE.is_file():
-        os.makedirs(INTERNAL_CONFIG_FILE.parent, exist_ok=True)
-        with open(INTERNAL_CONFIG_FILE, 'w') as file:
-            yaml.dump({'instance_config_loc': 'not_set'}, file, sort_keys=False)
-        return {'instance_config_loc': 'not_set'}
-
+        try:
+            os.makedirs(INTERNAL_CONFIG_FILE.parent, exist_ok=True)
+            with open(INTERNAL_CONFIG_FILE, 'w') as file:
+                yaml.dump({'instance_config_loc': 'not_set'}, file, sort_keys=False)
+        except IOError as e:
+            click.secho(f"Error writing internal config: {e}", fg='red')
+            exit(1)
     return read_yaml(INTERNAL_CONFIG_FILE)
 
-
 def read_assnake_instance_config():
-    """
-    Read the instance configuration for the assnake system.
-
-    Returns:
-        A dictionary of the instance configuration if the file exists, None otherwise.
-    """
+    """ Read the instance configuration for the Assnake system. """
     internal_config = read_internal_config()
     instance_config_loc = internal_config.get('instance_config_loc')
-
-    return read_yaml(instance_config_loc) if instance_config_loc and Path(instance_config_loc).is_file() else None
-
+    if instance_config_loc and Path(instance_config_loc).is_file():
+        return read_yaml(instance_config_loc)
+    return None
 
 def update_config(config_loc, config_dict):
-    """
-    Generic function to update a YAML configuration file.
-
-    Args:
-        config_loc: Location of the configuration file.
-        config_dict: Dictionary with configuration to be updated.
-    """
-    with open(config_loc, 'w') as file:
-        yaml.dump(config_dict, file, sort_keys=False)
-
+    """ Update a YAML configuration file. """
+    try:
+        with open(config_loc, 'w') as file:
+            yaml.dump(config_dict, file, sort_keys=False)
+    except IOError as e:
+        click.secho(f"Error updating config: {e}", fg='red')
+        exit(1)
 
 def update_internal_config(update_dict):
-    """
-    Update the internal configuration with the provided dictionary.
-    """
+    """ Update the internal configuration with the provided dictionary. """
     internal_config = read_internal_config()
     internal_config.update(update_dict)
     update_config(INTERNAL_CONFIG_FILE, internal_config)
     return internal_config
 
-
 def check_if_assnake_is_initialized():
-    """
-    Check if the assnake system has been initialized by reading the instance config.
-    If not initialized, prompts the user to initialize.
-    """
+    """ Check if Assnake is initialized by reading the instance config. """
     if read_assnake_instance_config() is None:
         click.secho("Assnake is not initialized. Run `assnake config init` to set up.", fg='red', bold=True)
         exit()
 
-
 def fill_and_write_instance_config(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir, instance_config_loc):
-    """
-    Fill and write the instance configuration based on provided locations.
-
-    Args:
-        assnake_db: Database directory for assnake.
-        fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir: Directories for respective data types.
-        instance_config_loc: Location to save the instance configuration file.
-
-    Returns:
-        The location of the instance configuration file if successful, None otherwise.
-    """
+    """ Fill and write the instance configuration based on provided locations. """
     config_template = read_yaml(CONFIG_TEMPLATE_FILE)
     config_template.update({
         'assnake_db': assnake_db,
-        'assnake_install_dir': Path(__file__).parent.parent,  # updated to use relative path
+        'assnake_install_dir': str(Path(__file__).parent.parent),
         'fna_db_dir': fna_db_dir,
         'bwa_index_dir': bwa_index_dir,
         'conda_dir': conda_dir,

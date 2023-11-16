@@ -1,4 +1,5 @@
 import os
+import sys
 import click
 import glob
 from assnake.core.config import read_assnake_instance_config
@@ -216,6 +217,15 @@ class Result:
 
         :param description: Description of the Result, will also appear as a short help in CLI.
         '''
+
+
+        instance_config = read_assnake_instance_config()
+        if instance_config is None:
+            # Handle the case where instance_config is None
+            click.secho("Instance configuration not found or is invalid.", fg="red")
+            click.secho("Please run 'assnake config init' to configure the instance.", fg="yellow")
+            raise RuntimeError("Assnake instance configuration not found. Please run 'assnake config init' to configure the instance.")
+
         # Find all smk files for Result. This is snakemake workflows.
         workflows = glob.glob(os.path.join(location, 'workflow*.smk'))
         # Find all wc_config files.
@@ -223,7 +233,6 @@ class Result:
         # Find default config files
         default_config = os.path.join(location, 'default_config.yaml')
 
-        instance_config = read_assnake_instance_config()
 
 
         if len(workflows) == 0:  # No workflow files found

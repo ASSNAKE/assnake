@@ -44,16 +44,16 @@ O---o The tools that are presented here
 o---O make taxonomic annotations, functional annotations,
 O---o and work with 16s rRNA data.
 """
-
-
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
+    # Load internal configuration but don't exit if instance configuration is missing
+    internal_config = read_internal_config()
     instance_config = read_assnake_instance_config()
-
     if instance_config is not None:
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
         ctx.obj = {'config': instance_config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
-
+    else:
+        ctx.obj = {'config': None, 'wc_config': None, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  INIT ***  group
@@ -95,16 +95,21 @@ def result():
     check_if_assnake_is_initialized()
 
 
-for entry_point in iter_entry_points('assnake.plugins'):
-    module_class = entry_point.load()
-    for snakeresult in module_class.results:
-        result.add_command(snakeresult.invocation_command)
-    for cmd in module_class.invocation_commands:
-        result.add_command(cmd)
-    for cmd in module_class.initialization_commands:
-        init_group.add_command(cmd)
+from assnake.new_core.exceptions import InstanceConfigNotFound
 
-result.add_command(gather)
+try:
+    for entry_point in iter_entry_points('assnake.plugins'):
+        module_class = entry_point.load()
+        for snakeresult in module_class.results:
+            result.add_command(snakeresult.invocation_command)
+        for cmd in module_class.invocation_commands:
+            result.add_command(cmd)
+        for cmd in module_class.initialization_commands:
+            init_group.add_command(cmd)
+
+    result.add_command(gather)
+except InstanceConfigNotFound as e:
+    click.secho(str(e), fg="red")
 
 
 # @click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
@@ -156,7 +161,7 @@ def pipeline_testing(config):
             2: {'result': 'dada2-filter-and-trim', 'default_preset': "strict"}
         },
         analytical_chain = {
-            1: {'result': 'dada2-learn-errors', 'default_preset': 'def'}
+            1: {'result': 'dada2-learn-errors', 'default_preset': 'def.1ac94255'}
         }
     )
 
