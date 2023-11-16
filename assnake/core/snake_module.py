@@ -4,7 +4,7 @@ from assnake.core.config import read_assnake_instance_config
 import os, glob, importlib
 from assnake.utils.general import read_yaml
 
-from assnake.new_core.exceptions import InstanceConfigNotFound
+from assnake.core.exceptions import InstanceConfigNotFound
 
 
 class SnakeModule:

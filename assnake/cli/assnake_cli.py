@@ -1,6 +1,6 @@
 import sys, os, glob, yaml, shutil
 import click
-from assnake.new_core.Pipeline import Pipeline
+from assnake.core.Pipeline import Pipeline
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.config_commands as config_commands
@@ -10,8 +10,6 @@ from assnake.cli.commands.execute_commands import gather
 from assnake.utils.general import read_yaml
 
 from assnake.core.config import read_assnake_instance_config, read_internal_config, check_if_assnake_is_initialized
-from assnake.core.command_builder import sample_set_construction_options, add_options
-from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
 
 from pkg_resources import iter_entry_points 
 
@@ -81,8 +79,6 @@ dataset.add_command(dataset_commands.df_info)
 dataset.add_command(dataset_commands.df_init)
 dataset.add_command(dataset_commands.df_create)
 dataset.add_command(dataset_commands.df_import_reads)
-dataset.add_command(dataset_commands.df_delete)
-dataset.add_command(dataset_commands.rescan_dataset)
 dataset.add_command(dataset_commands.df_info_test)
 
 
@@ -95,7 +91,7 @@ def result():
     check_if_assnake_is_initialized()
 
 
-from assnake.new_core.exceptions import InstanceConfigNotFound
+from assnake.core.exceptions import InstanceConfigNotFound
 
 try:
     for entry_point in iter_entry_points('assnake.plugins'):
@@ -110,19 +106,6 @@ try:
     result.add_command(gather)
 except InstanceConfigNotFound as e:
     click.secho(str(e), fg="red")
-
-
-# @click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
-# @add_options(sample_set_construction_options)
-# @click.option('--params', help='Parameters to use', default='def', type=click.STRING )
-# @click.option('--message', '-m', multiple=True)
-
-# @click.pass_obj
-# def request_sample_set(config, message, **kwargs):
-#     click.echo('\n'.join(message))
-#     sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
-#     config['sample_sets'].append(sample_set.samples_pd.copy())
-# result.add_command(request_sample_set)
 
 
 

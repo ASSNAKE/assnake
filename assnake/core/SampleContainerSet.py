@@ -3,7 +3,7 @@ from datetime import datetime
 import click
 
 import pandas as pd
-from assnake.new_core.Dataset import Dataset
+from assnake.core.Dataset import Dataset
 
 class SampleContainerSet:
     """

@@ -3,11 +3,11 @@ import sys
 import click
 import glob
 from assnake.core.config import read_assnake_instance_config
-from assnake.new_core.SampleContainerSet import SampleContainerSet
-from assnake.new_core.PresetManager import PresetManager
+from assnake.core.SampleContainerSet import SampleContainerSet
+from assnake.core.PresetManager import PresetManager
 
 from assnake.utils.general import read_yaml
-from assnake.core.command_builder import sample_set_construction_options, add_options, custom_help
+from assnake.cli.command_builder import sample_set_construction_options, add_options, custom_help
 
 from pkg_resources import iter_entry_points
 
@@ -222,8 +222,8 @@ class Result:
         instance_config = read_assnake_instance_config()
         if instance_config is None:
             # Handle the case where instance_config is None
-            click.secho("Instance configuration not found or is invalid.", fg="red")
-            click.secho("Please run 'assnake config init' to configure the instance.", fg="yellow")
+            # click.secho("Instance configuration not found or is invalid.", fg="red")
+            # click.secho("Please run 'assnake config init' to configure the instance.", fg="yellow")
             raise RuntimeError("Assnake instance configuration not found. Please run 'assnake config init' to configure the instance.")
 
         # Find all smk files for Result. This is snakemake workflows.

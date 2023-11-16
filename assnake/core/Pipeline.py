@@ -1,9 +1,9 @@
 import os
 import click
 from assnake.core.config import read_internal_config
-from assnake.new_core.SampleContainerSet import SampleContainerSet
-from assnake.new_core.Result import Result
-from assnake.new_core.Dataset import Dataset
+from assnake.core.SampleContainerSet import SampleContainerSet
+from assnake.core.Result import Result
+from assnake.core.Dataset import Dataset
 
 
 class Pipeline:

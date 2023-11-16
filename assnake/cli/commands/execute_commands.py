@@ -4,7 +4,6 @@
 
 import click, os
 from assnake.core.config import read_internal_config
-from assnake.api.loaders import update_fs_samples_csv
 
 
 #---------------------------------------------------------------------------------------
@@ -67,7 +66,7 @@ def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag, lint, pr
     
     if run:
         click.echo('Updating Datasets:' + str(config['requested_dfs']))
-        for requested_df in set(config['requested_dfs']):
-            update_fs_samples_csv(requested_df)
+        # for requested_df in set(config['requested_dfs']):
+        #     update_fs_samples_csv(requested_df)
 
         print(config['requested_results']) 

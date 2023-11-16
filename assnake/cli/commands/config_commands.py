@@ -1,10 +1,24 @@
 import click
 import os
 from pathlib import Path
+
+from pkg_resources import iter_entry_points
 from assnake.core.config import (
     read_internal_config, read_assnake_instance_config,
     update_internal_config, fill_and_write_instance_config
 )
+
+
+def discover_and_deploy_modules():
+    discovered_modules = []
+
+    for entry_point in iter_entry_points('assnake.plugins'):
+        module_object = entry_point.load()
+        discovered_modules.append(module_object)
+
+    for module_object in discovered_modules:
+        module_object.deploy_module()
+
 
 @click.command(name='init')
 @click.option('--assnake-db', '-d', type=click.Path(),
@@ -50,6 +64,8 @@ def init_config(assnake_db, fna_db_dir, bwa_index_dir, conda_dir, drmaa_log_dir,
 
             if instance_config_loc:
                 update_internal_config({'instance_config_loc': instance_config_loc})
+                # Discover and deploy modules during initialization
+                discover_and_deploy_modules()
                 click.secho('Assnake database initialized at: ' + assnake_db, fg='green')
         else:
             click.secho('Existing Assnake instance found at: ' + assnake_db, fg='yellow')

@@ -4,7 +4,7 @@ from typing import List
 import os, shutil, json, glob, yaml
 import zlib
 
-from assnake.new_core.Dataset import Dataset
+from assnake.core.Dataset import Dataset
 
 class Preset:
     def __init__(self, file_path, dataset_name=None):
@@ -138,7 +138,7 @@ class PresetManager:
             preset = Preset(preset_file)
             if not preset.is_updated():
                 preset.update_filename()
-            preset.copy_to_location(os.path.join(self.dir_in_database, self.result_name))
+            preset.copy_to_location(os.path.join(self.dir_in_database))
 
     def gen_click_option(self):
         self.load_presets()
