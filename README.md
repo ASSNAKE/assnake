@@ -1,95 +1,56 @@
+# Assnake Metagenomic Analysis System
 
-# Assnake Framework
+## Overview
+Assnake is a comprehensive metagenomics analysis tool designed for Illumina sequencing data, focusing on microbiome studies. It combines various bioinformatics tools into an integrated workflow for metagenomic data processing and analysis.
 
-The Assnake Framework is a comprehensive tool designed for metagenomic and microbiome data analysis, primarily focusing on Illumina sequencing data. It offers a range of functionalities for quality control, preprocessing, assembly, binning, and taxonomic and functional annotations.
+## Key Features
+- **Dataset and Sample Management:** Organizes datasets and individual biological samples.
+- **Modular Preprocessing and Analysis:** Customizable preprocessing and analysis steps tailored to specific research needs.
+- **Preset Management:** Ensures consistent and reproducible analyses through preset configurations.
+- **Command Line Interface (CLI):** User-friendly CLI for easy access to functionalities.
 
-## Features
-
-- **Quality Control**: Assess the quality of raw sequencing data.
-- **Data Preprocessing**: Includes trimming, filtering, and other preprocessing steps.
-- **Metagenomic Assembly**: Assemble reads into longer contigs.
-- **Binning**: Group contigs into putative genomes.
-- **Taxonomic Annotation**: Annotate sequences with taxonomic information.
-- **Functional Annotation**: Assign functional roles to sequences.
-- **16S rRNA Analysis**: Specialized tools for 16S rRNA data.
+## System Architecture
+Assnake's architecture is centered around datasets containing unique samples. Each sample can go through several preprocessing stages, captured as `SampleContainers`. Pipelines manage the workflow, applying various `Results` and `Presets` for analysis.
 
 ## Installation
-
-Before installation, ensure you have Python 3.x and Conda installed on your system.
-
-1. **Clone the Repository**: 
-
+1. **Create a Conda Environment:** (Recommended to manage dependencies)
    ```bash
-   git clone https://github.com/your-username/AssnakeFramework.git
-   cd AssnakeFramework
+   conda create -n assnake_env python=3.10
+   conda activate assnake_env
    ```
 
-2. **Set up a Conda Environment** (recommended):
-
+2. **Clone the Repository:**
    ```bash
-   conda create -n assnake-env python=3.8
-   conda activate assnake-env
+   git clone https://github.com/ASSNAKE/assnake.git
    ```
 
-3. **Install Assnake**:
-
+3. **Navigate to the Repository and Install:**
    ```bash
-   python setup.py install
+   cd assnake
+   pip install -e ./
    ```
 
-## Configuration
+4. **Initialize Assnake Configuration:**
+   ```bash
+   assnake config init
+   ```
 
-After installation, configure Assnake to set up the necessary environment and database paths:
+## Quick Start
+- To create and manage datasets: `assnake dataset <command>`
+- To import sequencing data: `assnake dataset import-reads`
+- To execute analysis pipelines: `assnake result <analysis-command>`
 
-```bash
-assnake config init
-```
-
-Follow the prompts to specify paths for databases, conda environments, and other necessary configurations.
-
-## Usage
-
-The Assnake Framework offers a variety of commands and options. Here are some common usages:
-
-- **Initialize a New Dataset**:
-
-  ```bash
-  assnake dataset init --name my_dataset --reads-path /path/to/reads
-  ```
-
-- **Run Quality Control**:
-
-  ```bash
-  assnake result quality-control --dataset my_dataset
-  ```
-
-- **Preprocess Data**:
-
-  ```bash
-  assnake result trimmomatic --dataset my_dataset --preset default
-  ```
-
-- **Assemble Metagenome**:
-
-  ```bash
-  assnake result metagenome-assemble --dataset my_dataset
-  ```
-
-For a complete list of commands and options, run `assnake --help`.
+## Documentation
+Detailed documentation, including usage guidelines and advanced configurations, is available in the `docs` directory. Examples and tutorials are provided for guidance.
 
 ## Contributing
-
-Contributions to the Assnake Framework are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
+Contributions to Assnake are welcome, including documentation improvements, new features, and bug reporting. Please refer to the contributing guidelines for more information.
 
 ## License
+Assnake is open-source software, available under the MIT License. See `LICENSE.txt` for details.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Contributors and community members who have helped develop and maintain this project.
-- External libraries and tools used in the development of Assnake.
+## Support and Contact
+For support or inquiries, please open an issue on the GitHub repository or contact [fedorov.de@gmail.com](mailto:fedorov.de@gmail.com).
 
 ---
-
-For more information, visit our [official documentation](https://link-to-docs) or reach out to the maintainers.
+*Note: This README offers a general overview of the Assnake system. For comprehensive information, refer to the individual documentation files within the repository.*

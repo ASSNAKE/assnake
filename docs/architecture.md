@@ -1,58 +1,68 @@
-# Overview of the Assnake Framework's System Architecture
+## Architecture Overview
 
-The Assnake Framework is a sophisticated system designed for comprehensive analysis of metagenomic and microbiome data, with a focus on Illumina sequencing data. Its architecture is modular, scalable, and user-friendly, catering to both researchers and bioinformatics professionals.
+### Core Concepts and Classes
 
-## Core Components
+1. **Dataset (`Dataset.py`):**
+   - Represents a collection of biological samples.
+   - Acts as a container for multiple samples, each representing a unique biological entity.
 
-### 1. **Command Line Interface (CLI)**
+2. **Sample (`Sample.py`):**
+   - Represents an individual biological sample within a dataset.
+   - Each `Sample` is unique within its `Dataset`.
+   - Contains data specific to a single biological entity and is linked to various SampleContainers.
 
-- **Function**: Serves as the primary user interface for interacting with the framework.
-- **Implementation**: Built using Python's `click` library, offering a range of subcommands and options for various functionalities.
-- **Features**: Dataset management, result request and execution, module interaction, and configuration settings.
+3. **SampleContainer (`SampleContainer.py`):**
+   - Encapsulates the sequencing data for a particular preprocessing step of a `Sample`.
+   - A `Sample` can have multiple `SampleContainer` instances, each representing the sample processed through different pipelines or preprocessing steps.
+   - Holds information such as file paths for read files and metadata about the sample's dataset.
 
-### 2. **Configuration Management**
+4. **Pipeline (`Pipeline.py`):**
+   - Defines a sequence of processing and analytical steps applied to a dataset.
+   - Manages the workflow from raw data to final analysis, applying various preprocessing and analysis steps.
 
-- **Internal and Instance Configurations**: 
-  - **Internal Configuration**: Stores fundamental settings like the instance configuration's location.
-  - **Instance Configuration**: Contains paths for the database, conda environments, and other essential directories.
-- **Tools Used**: Python's `yaml` library for reading and writing configurations, ensuring flexibility and ease of use.
+5. **Result (`Result.py`):**
+   - Specifies a particular computational result or output within a pipeline.
+   - Linked to `Pipeline` steps and generates specific outputs from samples or sample sets.
 
-### 3. **Pipeline Execution and Snakemake Integration**
+6. **PresetManager (`PresetManager.py`):**
+   - Manages preset configurations for different results and pipelines.
+   - Facilitates consistent and reproducible processing steps.
 
-- **Pipeline Class**: Facilitates the definition and execution of analytical pipelines.
-- **Snakemake Integration**: Enables complex workflow management, efficiently handling dependencies and execution across multiple steps.
-- **Data Flow**: Pipelines are constructed dynamically, allowing for the creation of target file paths and integration with Snakemake for execution.
+### Preprocessing in Assnake
+- **Preprocessing Chains:** Integral to the Pipeline, these are sequences of steps for preparing raw data for analysis. For example, a chain might involve raw data going through 'Cutadapt' for primer removal, followed by 'DADA2 Filter and Trim' for quality control.
+- **Example Flow:** raw data -> Cutadapt (rmV3V4primers preset) -> DADA2 Filter and Trim (strict preset). Each step transforms the data, leading to new `SampleContainer` instances reflecting these changes.
 
-### 4. **Result Management**
+### System Interconnections and Workflow
 
-- **Result Class**: Central to defining individual analysis steps, encapsulating the logic for CLI invocation, Snakemake integration, and handling of sample sets and presets.
-- **Preset Management**: Managed by the `PresetManager` class, allowing for the deployment, selection, and management of presets for various analyses.
+```
+Dataset
+  │
+  ├── Sample 1
+  │     │
+  │     ├── SampleContainer (Preprocessing Step 1)
+  │     │
+  │     └── SampleContainer (Preprocessing Step 2)
+  │
+  ├── Sample 2
+  │     │
+  │     ├── SampleContainer (Preprocessing Step 1)
+  │     │
+  │     └── SampleContainer (Preprocessing Step 2)
+  │
+  └── ... (More samples)
+```
 
-### 5. **Dataset and Sample Management**
+- **Workflow Processing:**
+  - A `Dataset` contains multiple `Sample` instances.
+  - Each `Sample` has several `SampleContainer` instances, each representing a different preprocessing stage.
+  - The `Pipeline` manages the overall workflow, processing each `Sample` through various stages.
 
-- **Dataset and Sample Classes**: Handle the representation of biological samples and datasets, aiding in organizing and processing sequencing data.
-- **Sample Container and Container Set Classes**: Manage groups of samples, facilitating operations across multiple samples simultaneously.
+- **Results and Configuration:**
+  - `Result` objects define the outputs for each stage in the `Pipeline`.
+  - The `PresetManager` ensures consistent parameterization for each `Result`.
 
-## Modular Design
+- **CLI and Configuration Management:**
+  - The system is interacted with through a CLI (`assnake_cli.py`), providing access to all functionalities.
+  - Configuration files managed by `config.py` store settings, ensuring consistent behavior and reproducibility.
 
-- **Plugin System**: Enables the addition of new modules and results through a plugin architecture, enhancing the extensibility of the framework.
-- **Module Definition**: Each module, like `assnake-core-preprocessing`, contains specific results, workflows, and configurations, organized in a structured directory.
-
-## Workflow Management
-
-- **Workflow Definition**: Defined using Snakemake rules, specifying input, output, and execution parameters.
-- **Wrapper Scripts**: Parse presets and construct shell scripts for execution, ensuring flexibility and customization for different analysis steps.
-
-## User Interaction and Execution Flow
-
-1. **Initialization**: Users configure the system using the `assnake config init` command, setting up essential paths and environments.
-2. **Dataset Management**: Datasets are created, imported, and managed through the CLI.
-3. **Analysis Request**: Users request specific results or pipelines for their datasets.
-4. **Execution**: The system compiles target paths, constructs pipelines, and executes them using Snakemake, handling dependencies and resource management.
-
-## Error Handling and Logging
-
-- **Robust Error Handling**: Ensures user-friendly error messages and system stability.
-- **Logging**: Maintains logs for tracking and debugging purposes, essential for long-running and complex analyses.
-
-In summary, the Assnake Framework's architecture is designed to be robust, modular, and user-centric, addressing the complexities of metagenomic data analysis with efficiency and scalability.
+This architecture ensures that each Sample in a Dataset is processed through a series of steps, with each step captured as a SampleContainer. The modular design allows for flexibility in data processing and analysis, tailored to specific research needs.
