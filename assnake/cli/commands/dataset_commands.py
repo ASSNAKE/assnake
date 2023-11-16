@@ -1,7 +1,7 @@
 import click, sys, os, glob, yaml, shutil
 import pandas as pd
 from tabulate import tabulate
-from assnake.api import fs_helpers
+from assnake.utils import fs_helpers
 from assnake.utils.general import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
 from pathlib import Path

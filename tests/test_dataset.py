@@ -1,5 +1,5 @@
 import pytest
-from assnake.api.fs_helpers import get_samples_from_dir, create_links
+from assnake.utils.fs_helpers import get_samples_from_dir, create_links
 from tests.util_for_test import random_path, random_file_name
 import random
 import pathlib
