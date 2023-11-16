@@ -9,30 +9,6 @@ from pathlib import Path
 from assnake.core.Dataset import Dataset
 from assnake.core.SampleContainerSet import SampleContainerSet
 
-# ---------------------------------------------------------------------------------------
-#                                   INFO
-# ---------------------------------------------------------------------------------------
-@click.command(name='info-test')
-@click.option('--dataset', '-d', help='Name of the dataset', required=True)
-@click.pass_obj
-def df_info_test(config, dataset):
-    """View info for the specific dataset TEST
-        Usage: assnake dataset info -d [dataset] ...
-
-    """
-    
-    df = Dataset(dataset)
-    click.echo(click.style('='*2 + ' '*3 + df.dataset_name + ' '*3 + '=' * 2, fg='green', bold=True))
-    # click.echo(str(df))
-    # Now create a SampleContainerSet with specific parameters
-    sample_container_set = SampleContainerSet(df, preproc='raw')
-
-    for sample_container in sample_container_set.sample_containers:
-        click.echo(sample_container)
-
-
-    return 0
-
 
 # some util
 def show_av_dict(dfs):
@@ -278,19 +254,21 @@ def df_info(config, df, preproc, df_arg):
     if df is None:
         df = df_arg
     
-    # Trying to load dataset and display information
-    try:
-        df = assnake.Dataset(df)
-        click.echo(click.style('='*2 + ' '*3 + df.df + ' '*3 + '=' * 2, fg='green', bold=True))
-        click.echo(str(df))
-        if preproc is not None:
-            samples = df.sample_sets[preproc]
-            samples = samples.set_index('df_sample')
-            click.echo(tabulate(samples.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
-        return
-    except assnake.api.loaders.InputError as e:
-        print(e.message)
-        return
+    dataset = Dataset(df)
+    # Formatting a dataset name as a header
+    header = f'==  {dataset.dataset_name}  =='
+    styled_header = click.style(header, fg='green', bold=True)
+    click.echo(styled_header)
+
+    # Displaying dataset information
+    click.echo(str(dataset))
+    # Now create a SampleContainerSet with specific parameters
+    sample_container_set = SampleContainerSet(dataset, preproc='raw')
+
+    for sample_container in sample_container_set.sample_containers:
+        click.echo(sample_container)
+
+    return
 
 
 
@@ -339,9 +317,9 @@ def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_se
     # some stuffff to ensure correctness of source and destination (how philosophical)
     if arg_d:
         try:
-            df_info = assnake.Dataset(dataset)
+            df_info = Dataset(dataset)
         except assnake.loaders.InputError as e:
-            dfs = assnake.Dataset.list_in_db()
+            dfs = Dataset.list_in_db()
             click.echo('Can`t reach database with such name', err=True)
             show_av_dict(dfs)
         target = '{}/reads/raw'.format(df_info.full_path)
@@ -368,23 +346,3 @@ def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_se
         click.secho("SUCCESSFULLY IMPORTED READS!", fg='green') 
     else: 
         click.secho('No reads in directory ' + reads_dir, fg='yellow')
-
-
-@click.command(name='rescan')
-@click.option('--dataset', '-d', help='Assnake dataset name', required=False)
-@click.argument('df_arg', required=False)
-@click.pass_obj
-def rescan_dataset(config, dataset, df_arg):
-    """
-    Now it just updates fs_samples.tsv in ./assnkae_db/{dataset}/
-
-    Usage: assnake dataset rescan [dataset] or -d [dataset] ..
-    """
-    if not (bool(dataset is None) ^ bool(df_arg is None)):
-        click.echo('Please, specify dataset either as option or argument')
-        dataset = click.prompt('Type the name in:')
-    if dataset is None:
-        dataset = df_arg
-    success = update_fs_samples_csv(dataset)
-    if success:
-        click.secho('SUCCESSFULLY UPDATED INFORMATION IN DATABASE!', fg='green')

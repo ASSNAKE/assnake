@@ -3,61 +3,55 @@
 The Assnake Framework repository is organized into several directories and files, each serving a specific purpose in the framework's ecosystem. Below is a detailed breakdown of the structure:
 
 ```
-Assnake Framework Repository
-├── LICENSE.txt                       # License information for the project
-├── MANIFEST.in                       # Manifest file for packaging the project
-├── README.md                         # Main README file for the project overview
-├── assnake
-│   ├── __init__.py                   # Initialization file for the assnake package
-│   ├── api
-│   │   ├── __init__.py               # Initialization file for the API subpackage
-│   │   ├── fs_helpers.py             # Helper functions for filesystem operations
-│   │   └── loaders.py                # Functions for loading data and configurations
-│   ├── cli
-│   │   ├── __init__.py               # Initialization file for the CLI subpackage
-│   │   ├── assnake_cli.py            # Main CLI application script
-│   │   └── commands
-│   │       ├── __init__.py           # Initialization file for CLI commands
-│   │       ├── config_commands.py    # CLI commands for configuration management
-│   │       ├── dataset_commands.py   # CLI commands for dataset management
-│   │       ├── execute_commands.py   # CLI commands for executing analyses
-│   │       └── module_commands.py    # CLI commands for module interactions
-│   ├── core
-│   │   ├── __init__.py               # Initialization file for the core subpackage
-│   │   ├── command_builder.py        # Utilities for building CLI commands
-│   │   ├── config.py                 # Configuration management utilities
-│   │   ├── dataset.py                # Class definition for datasets
-│   │   ├── sample_set.py             # Utilities for sample set operations
-│   │   └── snake_module.py           # Class definition for snake modules
-│   ├── new_core
-│   │   ├── Dataset.py                # Class definition for a new dataset structure
-│   │   ├── Pipeline.py               # Class definition for data analysis pipelines
-│   │   ├── PresetManager.py          # Class for managing presets in analyses
-│   │   ├── Result.py                 # Class definition for result types in analyses
-│   │   ├── Sample.py                 # Class definition for biological samples
-│   │   ├── SampleContainerSet.py     # Class for handling sets of sample containers
-│   │   └── __init__.py               # Initialization file for the new core subpackage
-│   ├── snake
-│   │   ├── config_template.yml       # Template for Snakemake configuration
-│   │   ├── snake_base.py             # Base script for Snakemake integration
-│   │   └── wc_config.yaml            # Configuration for wildcard patterns in Snakemake
-│   ├── utils
-│   │   └── general.py                # General utility functions
-├── docs                               # Documentation directory
-│   ├── architecture.md                # Documentation on the system architecture
-│   ├── params_management.md           # Documentation on parameter management
-│   └── thoughts.md                    # Miscellaneous thoughts and notes
-├── fastentrypoints.py                # Python script for fast entry points
-├── old_README.md                      # Older version of the README file
-├── setup.cfg                          # Configuration file for Python package setup
-├── setup.py                           # Python setup script for the package
-└── tests                              # Directory for test scripts and configurations
-    ├── conftest.py                    # Configuration for pytest
-    ├── pytest.ini                     # INI configuration file for pytest
-    ├── small_tests.py                 # Collection of small unit tests
-    ├── test_dataset.py                # Tests related to datasets
-    ├── test_init.py                   # Tests for initialization processes
-    ├── test_snake.py                  # Tests for Snakemake integration
-    └── util_for_test.py               # Utilities for testing
-
+├── LICENSE.txt                  # License information for the project
+├── MANIFEST.in                  # Manifest file for including non-code files in the distribution
+├── README.md                    # Main README file with project overview and instructions
+├── assnake                       # Main package directory
+│   ├── __init__.py              # Initializes the package
+│   ├── cli                      # Command Line Interface directory
+│   │   ├── __init__.py          # Initializes the CLI sub-package
+│   │   ├── assnake_cli.py       # Main CLI script, entry point for commands
+│   │   ├── command_builder.py   # Helper functions to build CLI commands
+│   │   └── commands             # Directory containing various CLI command implementations
+│   │       ├── __init__.py      # Initializes the commands sub-package
+│   │       ├── config_commands.py  # Commands related to configuration management
+│   │       ├── dataset_commands.py # Commands for dataset operations
+│   │       ├── execute_commands.py # Commands for executing pipelines and results
+│   │       └── module_commands.py  # Commands for handling Assnake modules
+│   ├── core                     # Core functionalities of Assnake
+│   │   ├── Dataset.py           # Dataset class definition and related functions
+│   │   ├── Pipeline.py          # Pipeline class for handling analysis workflows
+│   │   ├── PresetManager.py     # Manages presets for various analyses
+│   │   ├── Result.py            # Defines individual analysis steps (results)
+│   │   ├── Sample.py            # Represents biological samples and their data
+│   │   ├── SampleContainerSet.py# Manages groups of samples for analysis
+│   │   ├── __init__.py          # Initializes the core sub-package
+│   │   ├── config.py            # Configuration management functions
+│   │   ├── exceptions.py        # Custom exceptions for error handling
+│   │   └── snake_module.py      # Handles the integration of external modules
+│   ├── snake                    # Snakemake-related files
+│   │   ├── config_template.yml  # Template for instance configuration
+│   │   ├── snake_base.py        # Base snakemake file for defining workflows
+│   │   └── wc_config.yaml       # Configuration for wildcard paths in Snakemake
+│   └── utils                    # Utility functions and helpers
+│       ├── fs_helpers.py        # File system helper functions
+│       └── general.py           # General utility functions
+├── docs                         # Documentation directory
+│   ├── architecture.md          # Documentation on system architecture
+│   ├── params_management.md     # Documentation on parameter management
+│   ├── structure.md             # Documentation on project structure
+│   └── thoughts.md              # Thoughts and notes on development
+├── fastentrypoints.py           # Script for faster CLI entry point loading
+├── old_README.md                # Older version of README
+├── setup.cfg                    # Configuration for package setup
+├── setup.py                     # Script for installing the package
+└── tests                        # Test suite for the package
+    ├── conftest.py              # Configuration for pytest
+    ├── pytest.ini               # INI configuration for pytest
+    ├── small_tests.py           # Small unit tests
+    ├── test_dataset.py          # Tests related to Dataset functionality
+    ├── test_init.py             # Tests for initialization process
+    ├── test_snake.py            # Tests for Snakemake integration
+    └── util_for_test.py         # Utility functions for tests
+    
 ```
