@@ -5,6 +5,7 @@ from assnake.core.Pipeline import Pipeline
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.config_commands as config_commands
 import assnake.cli.commands.module_commands as module_commands
+import assnake.cli.commands.pipeline_commands as pipeline_commands
 from assnake.cli.commands.execute_commands import gather
 
 from assnake.utils.general import read_yaml
@@ -76,8 +77,7 @@ def dataset():
 
 dataset.add_command(dataset_commands.df_list)
 dataset.add_command(dataset_commands.df_info)
-dataset.add_command(dataset_commands.df_init)
-dataset.add_command(dataset_commands.df_create)
+dataset.add_command(dataset_commands.dataset_init)
 dataset.add_command(dataset_commands.df_import_reads)
 
 
@@ -126,34 +126,14 @@ def module_group():
 module_group.add_command(module_commands.show_installed_results)
 module_group.add_command(module_commands.show_installed_modules)
 module_group.add_command(module_commands.refresh_params)
+module_group.add_command(module_commands.create_result)
 
 @cli.group(name = 'pipeline')
 def pipeline_group():
     """Commands to view and interact with assnake modules installed in current env"""
     pass
 
-@click.command(name='test')
-@click.pass_obj
-def pipeline_testing(config):
-    my_pipeline = Pipeline(
-    name="DADA2 PE Pipeline", 
-    description="From reads to DADA2 seqtab and tax_table in one command!",
-        preprocessing_chain={
-            1: {'result': 'cutadapt', 'default_preset': "RMv3v4primers"},
-            2: {'result': 'dada2-filter-and-trim', 'default_preset': "strict"}
-        },
-        analytical_chain = {
-            1: {'result': 'dada2-learn-errors', 'default_preset': 'def.1ac94255'}
-        }
-    )
-
-    my_pipeline.set_dataset('T')
-
-    targets = my_pipeline.prepare_analytical_chain_targets()
-
-    my_pipeline.execute(config)
-
-pipeline_group.add_command(pipeline_testing)
+pipeline_group.add_command(pipeline_commands.pipeline_testing)
 
 
 

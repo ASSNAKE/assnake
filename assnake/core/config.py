@@ -46,6 +46,14 @@ def update_config(config_loc, config_dict):
         click.secho(f"Error updating config: {e}", fg='red')
         exit(1)
 
+def update_instance_config(update_dict):
+    internal_config = read_internal_config()
+
+    instance_config = read_assnake_instance_config()
+    instance_config.update(update_dict)
+    instance_config_loc = internal_config.get('instance_config_loc')
+    update_config(instance_config_loc, instance_config)
+
 def update_internal_config(update_dict):
     """ Update the internal configuration with the provided dictionary. """
     internal_config = read_internal_config()

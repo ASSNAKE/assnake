@@ -1,9 +1,10 @@
+from datetime import datetime
 import os
 import click
 from assnake.core.config import read_internal_config
 from assnake.core.SampleContainerSet import SampleContainerSet
-from assnake.core.Result import Result
 from assnake.core.Dataset import Dataset
+from assnake.core.Result import Result, Step, CompositeResult
 
 
 class Pipeline:
@@ -11,6 +12,8 @@ class Pipeline:
     Represents a pipeline in the Assnake system, capable of handling both preprocessing and 
     analytical steps for a given dataset. Allows dynamic configuration of processing steps 
     with specified results and presets.
+
+    NOT FINISHED CLASS. NEEDS TO BE UPDATED WITH STEP AND CHAIN INTEGRATION
     """
 
     def __init__(self, name, description, preprocessing_chain=None, analytical_chain=None):
@@ -71,6 +74,7 @@ class Pipeline:
         Returns:
             List[str]: A list of target file paths for the analytical chain.
         """
+        
         # Assuming the final preprocessing step's output is the input for the analytical chain
         final_preprocessing_step = self.prepare_final_preprocessing_targets()[-1]
         sample_container_set = SampleContainerSet.create_from_kwargs(self.dataset.dataset_name, 'raw', [], [])
@@ -80,24 +84,44 @@ class Pipeline:
 
         for step_number, step_details in sorted(self.analytical_chain.items()):
             result_name = step_details["result"]
-            preset = step_details["default_preset"]
-
+            
             # Fetch the Result object for the analytical step
             result_obj = Result.get_result_by_name(result_name)
             if result_obj is None:
                 raise ValueError(f"Result not found for analytical step: {result_name}")
+            step_details.pop('result')
 
+            sample_set_name = step_details.get('sample_set_name') if step_details.get('sample_set_name', None) else datetime.now().strftime("%d-%b-%Y")
+
+            input_instance = result_obj.input_class(self.dataset, 'raw', [], [],
+                                            additional_input_options={
+                                                    'sample_set_dir_wc': result_obj.sample_set_dir_wc,
+                                                    'subpath_for_sample_set_tsv': result_obj.sample_set_dir_wc.replace('{fs_prefix}/{df}/', '').replace('/{sample_set}/', ''),
+                                                    'sample_set_name': sample_set_name
+                                                }
+                                            )
+        
             # Generate target paths using the format_result_wc method
-            targets = result_obj.prepare_sample_set_tsv_and_get_target_file(sample_container_set, 'test', preset = preset, strand = 'R1')
-            print(targets)
-            analytical_targets.append(targets)
+            formatting_dict = {}
+            if 'preset' in step_details and result_obj.preset_manager is not None:
+                preset = result_obj.preset_manager.find_preset_by_name_and_dataset(step_details['preset'], self.dataset.dataset_name)
+                formatting_dict['preset'] = preset.name_wo_ext
+
+            if result_obj.result_type in ['illumina_sample_set']:    
+                step_details['sample_set_name'] = sample_set_name
+
+            # Create and return a Step instance
+            step = Step(result=result_obj, input_instance=input_instance, other_specifications=step_details)
+
+            targets = step.prepare_targets()
+            analytical_targets.extend(targets)
             
         self.analytical_targets = analytical_targets
         
         return analytical_targets
 
 
-    def execute(self, config):
+    def execute(self, config, run):
         import snakemake # Moved import here because it is slow as fucking fuck
     
     
@@ -112,10 +136,10 @@ class Pipeline:
 
         config['requests'] += self.analytical_targets
         status = snakemake.snakemake(os.path.join(curr_dir, '../snake/snake_base.py'), 
-            # config = config['wc_config'],    
+            config = config['wc_config'],    
             targets=config['requests'], 
             printshellcmds=True,
-            dryrun=True, 
+            dryrun=not run, 
             # config = load_config_file(),
             configfiles=[internal_config['instance_config_loc']],
             drmaa_log_dir = config['config']['drmaa_log_dir'],
@@ -126,10 +150,10 @@ class Pipeline:
             rerun_triggers = ['mtime'],
             conda_prefix = config['config']['conda_dir'],
             keepgoing = True,
-            latency_wait = 10)
+            latency_wait = 10,
+            cores=100, nodes=100)
 
         # print(config['requested_results']) 
         
         return status
-
 

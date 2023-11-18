@@ -4,6 +4,7 @@ import click
 import glob
 from assnake.core.config import read_assnake_instance_config
 from assnake.core.SampleContainerSet import SampleContainerSet
+from assnake.core.Dataset import Dataset
 from assnake.core.PresetManager import PresetManager
 
 from assnake.utils.general import read_yaml
@@ -12,6 +13,43 @@ from assnake.cli.command_builder import sample_set_construction_options, add_opt
 from pkg_resources import iter_entry_points
 
 from assnake.core.snake_module import SnakeModule
+from assnake.core.Input import Input, IlluminaSampleInput, IlluminaSampleSetInput
+
+from datetime import datetime
+
+
+
+class Step:
+    def __init__(self, result, input_instance, other_specifications):
+        """
+        Initializes a Step instance.
+
+        Args:
+            result (Result): The result object associated with this step.
+            input_instance (Input): The input object providing data for this step.
+            other_specifications
+        """
+        self.result = result
+        self.input_instance = input_instance
+        self.other_specifications = other_specifications
+
+    def prepare_targets(self):
+        """
+        Prepares the target paths for Snakemake based on the result and input.
+
+        Returns:
+            List[str]: A list of target paths for Snakemake.
+        """
+        return self.format_target_paths(self.input_instance, self.other_specifications)
+    
+    def format_target_paths(self, input_instance, formatting_dict):
+        target_paths = []
+        input_dicts = input_instance.get_input_list_for_formatting()
+
+        for input_dict in input_dicts:
+            input_dict.update(formatting_dict)
+            target_paths.append(self.result.result_wc.format(**input_dict))
+        return target_paths
 
 
 class Result:
@@ -35,7 +73,6 @@ class Result:
 
     Methods:
         generate_cli_command: Generates a Click command for the result based on its configuration.
-        format_result_wc: Formats wildcard strings for Snakemake based on sample containers and presets.
         prepare_sample_set_tsv_and_get_target_file: Prepares sample sets in TSV format and generates corresponding Snakemake targets.
         from_location (classmethod): Creates an instance of Result by automatically locating necessary files and configurations.
 
@@ -58,7 +95,7 @@ class Result:
     invocation_command = None
     preset_preparation = None  # Functions that defines how to prepare and store params for this result. On installation, it checks if assnake is configured, and deploys params and necessary static files to the database. If assnake is not configured, this commands will be run during configuration.
 
-    def __init__(self, name, result_type,  workflows, result_wc, input_type, additional_inputs, description = '', invocation_command=None, wc_config=None, preset_preparation=None, preset_manager = None):
+    def __init__(self, name, result_type,  workflows, result_wc, input_type, additional_inputs={}, description = '', invocation_command=None, wc_config=None, preset_preparation=None, preset_manager = None):
         self.name = name
         self.result_type = result_type
         self.result_wc = result_wc
@@ -71,78 +108,102 @@ class Result:
         self.preset_preparation = preset_preparation
         self.preset_manager = preset_manager
 
+        if self.input_type == 'illumina_strand_file':
+            self.input_class = IlluminaSampleSetInput
+        elif self.input_type == 'illumina_sample':
+            self.input_class = IlluminaSampleInput
+        elif self.input_type == 'illumina_strand_file_set':
+            self.input_class = IlluminaSampleSetInput
+        elif self.input_type == 'illumina_sample_set':
+            self.input_class = IlluminaSampleSetInput
+        else:
+            click.secho(f'Unsupported input type: {self.input_type}', fg='red')
+            exit()
+
         if invocation_command == None:
             self.invocation_command = self.generate_cli_command()
         elif callable(invocation_command):
             self.invocation_command = invocation_command()
 
-    def handle_illumina_strand_file(self, config, kwargs):
-        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-        config['requests'] += self.format_result_wc(sample_container_set, strand=kwargs['strand'])
+    def create_step(self, config, kwargs):
+        """
+        Creates a Step instance based on provided command line arguments.
 
-    def handle_illumina_sample(self, config, kwargs):
-        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-        config['requests'] += self.format_result_wc(sample_container_set, kwargs['preset'])
+        Args:
+            config: Configuration object, typically passed from the CLI.
+            kwargs: Command line arguments provided to the CLI command.
 
-    def handle_illumina_strand_file_set(self, config, kwargs):
-        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-        formatted_target = self.prepare_sample_set_tsv_and_get_target_file(sample_container_set, kwargs['sample_set'], overwrite=kwargs.get('overwrite', False), **kwargs)
-        config['requests'] += [formatted_target]
+        Returns:
+            Step: An instance of the Step class.
+        """
+        # Create an Input instance
+        dataset = Dataset(kwargs['df'])
 
-    def handle_illumina_sample_set(self, config, kwargs):
-        sample_container_set = SampleContainerSet.create_from_kwargs(**{key: kwargs[key] for key in ['df', 'preproc', 'samples_to_add', 'exclude_samples']})
-        formatted_target = self.prepare_sample_set_tsv_and_get_target_file(sample_container_set, kwargs['sample_set'], overwrite=kwargs.get('overwrite', False), **kwargs)
-        config['requests'] += [formatted_target]
+        sample_set_name = kwargs.get('sample_set_name') if kwargs.get('sample_set_name', None) else datetime.now().strftime("%d-%b-%Y")
+        input_instance = self.input_class(dataset, kwargs['preproc'], 
+                                          kwargs['samples_to_add'], 
+                                          kwargs['exclude_samples'],
+                                          additional_input_options={
+                                                  'sample_set_dir_wc': self.sample_set_dir_wc,
+                                                  'subpath_for_sample_set_tsv': self.sample_set_dir_wc.replace('{fs_prefix}/{df}/', '').replace('/{sample_set}/', ''),
+                                                  'sample_set_name': sample_set_name
+                                              }
+                                        )
+        
+        formatting_dict = {}
+        # Handle preset selection
+        if 'preset' in kwargs and self.preset_manager is not None:
+            preset = self.preset_manager.find_preset_by_name_and_dataset(kwargs['preset'], kwargs['df'])
+            formatting_dict['preset'] = preset.name_wo_ext
+        if 'strand' in kwargs:
+            formatting_dict['strand'] = kwargs['strand']
+        # if 'sample_set_name' in kwargs:
+        formatting_dict['sample_set_name'] = sample_set_name
+
+        # Create and return a Step instance
+        return Step(result=self, input_instance=input_instance, other_specifications=formatting_dict)
 
     def generate_cli_command(self):
+        """
+        Generates a Click command for the result based on its configuration.
+
+        This method constructs a command-line interface (CLI) command using the Click library,
+        allowing users to interact with the result through a command-line terminal.
+        """
+
         # Common setup for all command types
         preset_options = self.preset_manager.gen_click_option() if self.preset_manager is not None else []
+        additional_input_options = [click.option(f'--{input_name}', help=input_description, type=click.STRING) for input_name, input_description in self.additional_inputs.items()]
         strand_option = [click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)] if self.input_type in ['illumina_strand_file', 'illumina_strand_file_set'] else []
 
         # Unified command decorator
-        @click.command(self.name, short_help=self.description, add_help_option=False)
-        @add_options(sample_set_construction_options)
-        @add_options(preset_options)
-        @add_options(self.additional_inputs)
+        @click.command(name=self.name, short_help=self.description, help=self.description)
+        @add_options(sample_set_construction_options)  # Add common options for constructing a sample set
+        @add_options(preset_options)                   # Add options for selecting presets
+        @add_options(additional_input_options)         # Add any additional input options defined for the result
         @add_options(strand_option)
         @click.pass_obj
         def result_invocation(config, **kwargs):
+            """
+            The actual command that will be invoked from the CLI.
+
+            Args:
+                config: The Assnake configuration object, typically passed automatically by Click.
+                **kwargs: Keyword arguments capturing all the command-line options provided by the user.
+            """
+            # Validate dataset option
             if not kwargs.get('df'):
                 custom_help(ctx=click.get_current_context(), param=None, value=True)
 
-            if 'preset' in kwargs and self.preset_manager is not None:
-                preset = self.preset_manager.find_preset_by_name_and_dataset(kwargs['preset'], kwargs['df'])
-                kwargs['preset'] = preset.name_wo_ext
-                    
-            if self.input_type == 'illumina_strand_file':
-                self.handle_illumina_strand_file(config, kwargs)
-            elif self.input_type == 'illumina_sample':
-                self.handle_illumina_sample(config, kwargs)
-            elif self.input_type == 'illumina_strand_file_set':
-                self.handle_illumina_strand_file_set(config, kwargs)
-            elif self.input_type == 'illumina_sample_set':
-                self.handle_illumina_sample_set(config, kwargs)
-            else:
-                click.secho(f'Unsupported input type: {self.input_type}', fg='red')
-                exit()
-            
+            # Create a Step instance
+            step = self.create_step(config, kwargs)
+            # Prepare targets using the Step instance
+            snakemake_targets = step.prepare_targets()
+            # Add generated targets to the configuration for Snakemake execution
+            config['requests'].extend(snakemake_targets)
+
         return result_invocation
-
-    def format_wildcard_string(self, container, preset, additional_inputs):
-        # Shared logic for formatting wildcard strings
-        formatting_dict = {
-            'fs_prefix': container.fs_prefix,
-            'df': container.dataset_name,
-            'preproc': container.preprocessing,
-            'df_sample': container.sample_id,
-            'preset': preset
-        }
-        formatting_dict.update(additional_inputs)
-        return self.result_wc.format(**formatting_dict)
-
-    def format_result_wc(self, sample_container_set, preset='default', **additional_inputs):
-        print(additional_inputs)
-        return [self.format_wildcard_string(container, preset, additional_inputs) for container in sample_container_set.sample_containers]
+    
 
     @property
     def preprocessing_name_in_wc(self):
@@ -153,55 +214,9 @@ class Result:
         else:
             return 0
 
-    
-    def prepare_sample_set_tsv_and_get_target_file(self, sample_container_set, sample_set_name, overwrite=False, **kwargs):
-        """
-        Prepares sample sets in TSV format and generates a list of results for Snakemake.
-
-        Args:
-            sample_container_set (SampleContainerSet): The SampleContainerSet to be saved and processed.
-            sample_set_name (str): Name of the sample set.
-            overwrite (bool): Flag to indicate whether existing files should be overwritten.
-            **kwargs: Additional keyword arguments to be included in the result wildcard strings.
-
-        Returns:
-            list: A list of formatted result wildcard strings for Snakemake.
-        """
-        # Construct the directory path for the sample set
-        sample_set_dir = self.sample_set_dir_wc.format(
-            fs_prefix=sample_container_set.dataset.fs_prefix,
-            df=sample_container_set.dataset.dataset_name,
-            sample_set=sample_set_name,
-            **kwargs
-        )
-        sample_set_loc = os.path.join(sample_set_dir, 'sample_set.tsv')
-
-        # Create the directory if it does not exist
-        if not os.path.exists(sample_set_dir):
-            os.makedirs(sample_set_dir, exist_ok=True)
-
-        # Check if the sample set file exists
-        if not os.path.isfile(sample_set_loc) or overwrite:
-            if os.path.isfile(sample_set_loc):
-                click.secho('Overwriting...', fg='yellow')
-            sample_container_set.to_tsv(sample_set_loc, overwrite) 
-            
-        else:
-            click.secho('Sample set with this name already exists!', fg='red')
-
-        # Generate and return the list of formatted result wildcard strings
-        formatting_dict = {
-                'fs_prefix': sample_container_set.dataset.fs_prefix,
-                'df': sample_container_set.dataset.dataset_name,
-                'sample_set': sample_set_name
-            }
-        formatting_dict.update(kwargs)
-
-        return self.result_wc.format(**formatting_dict)
-
 
     @classmethod
-    def from_location(cls, name, result_type, location, input_type,  additional_inputs= [], description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None, preset_file_format = 'json'):
+    def from_location(cls, name, result_type, location, input_type,  additional_inputs={}, description = '', with_presets = False, static_files_dir_name = 'static', invocation_command = None, preset_preparation = None, preset_file_format = 'json'):
         '''
         This method is a wrapper for creating an instance of Result class by grabbing the snakefiles and wc_config automatically 
         from user-provided `location`. How can we make grabbing the location automatic? 
@@ -221,9 +236,6 @@ class Result:
 
         instance_config = read_assnake_instance_config()
         if instance_config is None:
-            # Handle the case where instance_config is None
-            # click.secho("Instance configuration not found or is invalid.", fg="red")
-            # click.secho("Please run 'assnake config init' to configure the instance.", fg="yellow")
             raise RuntimeError("Assnake instance configuration not found. Please run 'assnake config init' to configure the instance.")
 
         # Find all smk files for Result. This is snakemake workflows.
@@ -283,7 +295,6 @@ class Result:
         return x
     
 
-    
 
     @staticmethod
     def get_all_results_as_list():
@@ -342,3 +353,7 @@ class Result:
         for attr_name, attr_value in attributes.items():
             final += f"{attr_name}: {attr_value}"
             final += '\n'
+
+
+def CompositeResult(Result):
+    pass
