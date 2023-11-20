@@ -13,10 +13,10 @@ from assnake.cli.command_builder import sample_set_construction_options, add_opt
 from pkg_resources import iter_entry_points
 
 from assnake.core.snake_module import SnakeModule
-from assnake.core.Input import Input, IlluminaSampleInput, IlluminaSampleSetInput
+from assnake.core.Input import FeatureTableInput, IlluminaSampleInput, IlluminaSampleSetInput, FeatureTableSpecificationInput
 
 from datetime import datetime
-
+import re
 
 
 class Step:
@@ -116,6 +116,28 @@ class Result:
             self.input_class = IlluminaSampleSetInput
         elif self.input_type == 'illumina_sample_set':
             self.input_class = IlluminaSampleSetInput
+        elif self.input_type == 'feature_table_specification':
+            # PRELIMINARY ROUGH IMPLEMENTATION
+            self.input_class = FeatureTableSpecificationInput
+            self.ft_meta_dir_wc = wc_config.get(f'{name}_ft_meta_dir_wc', None)
+            self.source_wc_string = wc_config.get(f'{name}_source_wc', None)
+            self.additional_inputs = {
+                'feature-table-name': 'Name to use for the requested feature table',
+                'sample-set': 'Name of the sample set to use. (Hash included)',
+                }
+            self.parsed_presets = self._parse_wc_string_for_presets(self.source_wc_string)
+            self._add_dynamic_cli_options()
+        elif self.input_type == 'feature_table':
+            # PRELIMINARY ROUGH IMPLEMENTATION
+            self.input_class = FeatureTableInput
+            self.ft_meta_dir_wc = wc_config.get(f'{name}_ft_meta_dir_wc', None)
+            self.source_wc_string = wc_config.get(f'{name}_source_wc', None)
+            self.additional_inputs = {
+                'feature-table-name': 'Name to use for the requested feature table',
+                'sample-set': 'Name of the sample set to use. (Hash included)',
+                }
+            self.parsed_presets = self._parse_wc_string_for_presets(self.source_wc_string)
+            self._add_dynamic_cli_options()
         else:
             click.secho(f'Unsupported input type: {self.input_type}', fg='red')
             exit()
@@ -125,7 +147,52 @@ class Result:
         elif callable(invocation_command):
             self.invocation_command = invocation_command()
 
+
+    def _parse_wc_string_for_presets(self, wc_string):
+        # PRELIMINARY ROUGH IMPLEMENTATION
+
+        """
+        Parses the wildcard string to extract preset wildcards.
+
+        Args:
+            wc_string (str): The wildcard string to parse.
+
+        Returns:
+            dict: A dictionary where keys are the names of the presets and the values are None (to be filled later).
+        """
+
+        if wc_string is None:
+            return {}
+        # Regular expression pattern to match preset wildcards
+        # This pattern matches anything that looks like {something_preset}
+        preset_pattern = r'\{([a-zA-Z0-9_]+_preset)\}'
+
+        # Find all matches in the wildcard string
+        preset_matches = re.findall(preset_pattern, wc_string)
+
+        try:
+            preset_matches = re.findall(preset_pattern, wc_string)
+            # Create a dictionary from the matches with None as default values
+            presets = {preset: None for preset in preset_matches}
+
+            return presets
+        except TypeError as e:
+            # Handle the exception here (e.g., print an error message, set a default value, or log the error)
+            print(f"Error while parsing WC string: {e}")
+            return {}
+
+        
+
+    def _add_dynamic_cli_options(self):
+        # PRELIMINARY ROUGH IMPLEMENTATION
+
+        # Dynamically add CLI options for each parsed preset wildcard
+        for preset_name in self.parsed_presets:
+            self.additional_inputs[preset_name] = f'{preset_name} value'
+
     def create_step(self, config, kwargs):
+        # PRELIMINARY ROUGH IMPLEMENTATION
+
         """
         Creates a Step instance based on provided command line arguments.
 
@@ -139,14 +206,22 @@ class Result:
         # Create an Input instance
         dataset = Dataset(kwargs['df'])
 
-        sample_set_name = kwargs.get('sample_set_name') if kwargs.get('sample_set_name', None) else datetime.now().strftime("%d-%b-%Y")
+
+        preset_values = {preset: kwargs.get(preset) for preset in self.parsed_presets}
+
+
+        sample_set_name = kwargs.get('sample_set') if kwargs.get('sample_set', None) else datetime.now().strftime("%d-%b-%Y")
         input_instance = self.input_class(dataset, kwargs['preproc'], 
                                           kwargs['samples_to_add'], 
                                           kwargs['exclude_samples'],
                                           additional_input_options={
                                                   'sample_set_dir_wc': self.sample_set_dir_wc,
                                                   'subpath_for_sample_set_tsv': self.sample_set_dir_wc.replace('{fs_prefix}/{df}/', '').replace('/{sample_set}/', ''),
-                                                  'sample_set_name': sample_set_name
+                                                  'sample_set_name': sample_set_name,
+                                                  'feature_table_name': kwargs.get('feature_table_name', None),
+                                                  'source_wc_string': self.wc_config.get(f'{self.name}_source_wc', None),
+                                                  'ft_meta_dir_wc': self.wc_config.get(f'{self.name}_ft_meta_dir_wc', None),
+                                                  **preset_values
                                               }
                                         )
         

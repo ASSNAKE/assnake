@@ -14,22 +14,34 @@ def pipeline_testing(config, dataset, run):
             2: {'result': 'dada2-filter-and-trim', 'default_preset': "strict"}
         },
         analytical_chain = {
-            1: {'result': 'dada2-derep-infer-merge', 
+            1: {'result':              'dada2-derep-infer-merge', 
+                'sample_set_name': '18-Nov-2023_6e0ab0a3',
                 'learn_errors_preset': 'def.1ac94255',
-                'core_algo_preset': 'def',
-                'merged_preset': 'def'},
-            2: {'result': 'dada2-remove-chimeras', 
+                'core_algo_preset':    'def',
+                'merged_preset':       'def'},
+            2: {'result':              'dada2-remove-chimeras', 
+                'sample_set_name': '18-Nov-2023_6e0ab0a3',
+                
                 'learn_errors_preset': 'def.1ac94255',
-                'core_algo_preset': 'def',
-                'merged_preset': 'def',
-                'nonchim_preset': 'def'},
-            3: {'result': 'dada2-export-asv-table', 
+                'core_algo_preset':    'def',
+                'merged_preset':       'def',
+                'nonchim_preset':      'def'},
+
+
+
+            3: {'result':              'dada2-export-asv-table', 
+                'sample_set_name': '18-Nov-2023_6e0ab0a3',
                 'learn_errors_preset': 'def.1ac94255',
-                'core_algo_preset': 'def',
-                'merged_preset': 'def',
-                'nonchim_preset': 'def'},
-            4: {'result': 'dada2-assign-taxa', 
-                'dada2preset': 'learn_errors_def.1ac94255__core_algo__def__merged__def__nonchim__def'},
+                'core_algo_preset':    'def',
+                'merged_preset':       'def',
+                'nonchim_preset':      'def',
+                'ft_name': 'testft',
+                'hash':    '???'},
+
+
+
+            # 4: {'result':              'dada2-assign-taxa', 
+            #     'dada2preset':         'learn_errors_def.1ac94255__core_algo__def__merged__def__nonchim__def'},
         }
     )
 
