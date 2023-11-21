@@ -4,7 +4,7 @@ import click
 from assnake.core.config import read_internal_config
 from assnake.core.SampleContainerSet import SampleContainerSet
 from assnake.core.Dataset import Dataset
-from assnake.core.Result import Result, Step, CompositeResult
+from assnake.core.Result import Result, Step
 
 
 class Pipeline:

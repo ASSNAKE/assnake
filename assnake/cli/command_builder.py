@@ -26,11 +26,11 @@ def custom_help(ctx, param, value):
 sample_set_construction_options = []
 
 sample_set_construction_options = [
-    click.option('--df','-d', help='Name of the dataset'),
-    click.option('--preproc','-p', help='Preprocessing to use' ),
+    click.option('--dataset','-d', help='Name of the dataset'),
+    click.option('--preprocessing','-p', help='Preprocessing to use' ),
 
-    click.option('--meta-column', '-c', help='Select samples based on metadata column' ),
-    click.option('--column-value','-v', help='Value of metadata column by which select samples' ),
+    # click.option('--meta-column', '-c', help='Select samples based on metadata column' ),
+    # click.option('--column-value','-v', help='Value of metadata column by which select samples' ),
 
     click.option('--samples-to-add','-s', 
                 help='Samples from dataset to process', 
