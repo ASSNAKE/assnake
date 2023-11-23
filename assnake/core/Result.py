@@ -48,7 +48,7 @@ class Step:
 
         for input_dict in input_dicts:
             input_dict.update(formatting_dict)
-            target_paths.append(self.result.result_wc.format(**input_dict))
+            target_paths.append(self.result.result_wc.format(**{**input_dict}).replace('//', '/'))
         return target_paths
 
 
@@ -146,7 +146,6 @@ class Result:
         if self.parsed_presets:
             preset_values = {preset: kwargs.get(preset) for preset in self.parsed_presets}
 
-
         sample_set_name = kwargs.get('sample_set') if kwargs.get('sample_set', None) else datetime.now().strftime("%d-%b-%Y")
 
 
@@ -174,6 +173,7 @@ class Result:
         allowing users to interact with the result through a command-line terminal.
         """
 
+
         if 'parsed_presets' in self.input_config:
             self._add_dynamic_cli_options(self.input_config['parsed_presets'])
         
@@ -188,6 +188,7 @@ class Result:
         @add_options(preset_options)                   # Add options for selecting presets
         @add_options(additional_input_options)         # Add any additional input options defined for the result
         @add_options(strand_option)
+        @click.option('--filter-chain', help='filter chain', type=click.STRING)
         @click.pass_obj
         def result_invocation(config, **kwargs):
             """
@@ -207,6 +208,9 @@ class Result:
             step = self.create_step(config, kwargs)
             # Prepare targets using the Step instance
             snakemake_targets = step.prepare_targets()
+
+            print('snakemake_targets', snakemake_targets)
+
             # Add generated targets to the configuration for Snakemake execution
             config['requests'].extend(snakemake_targets)
 

@@ -43,7 +43,7 @@ def check_dataset_availability(dataset_name, datasets_in_db):
     Check if the dataset name already exists in the database.
     """
     if dataset_name in datasets_in_db:
-        click.secho('Dataset with the name already exists. Aborting.', fg='red')
+        click.secho('Dataset with the name already exists! Aborting.', fg='red')
         raise click.Abort()
 
 def validate_dataset_path(fs_prefix, dataset_name, allow_non_empty=False):
@@ -55,8 +55,10 @@ def validate_dataset_path(fs_prefix, dataset_name, allow_non_empty=False):
         if not os.listdir(full_dataset_path) or allow_non_empty:
             return full_dataset_path
         else:
-            click.secho('Dataset path exists and is not empty. Aborting.', fg='red')
-            raise click.Abort()
+            click.secho('Dataset path exists and is not empty. But we will continue.', fg='red')
+            # raise click.Abort()
+            return full_dataset_path
+
     else:
         os.makedirs(full_dataset_path, exist_ok=True)
         return full_dataset_path
@@ -99,7 +101,7 @@ def dataset_init(config, data_type, dataset_name, first_preprocessing_name):
     fs_prefix = cwd if not dataset_name else os.path.dirname(cwd)
     full_dataset_path = validate_dataset_path(fs_prefix, dataset_name)
     
-    os.makedirs(os.path.join(full_dataset_path, 'reads/raw'))
+    os.makedirs(os.path.join(full_dataset_path, 'reads/raw'), exist_ok=True)
 
     dataset_info = {'df': dataset_name, 'fs_prefix': fs_prefix, 'description': {}, 'data_type': data_type}
     create_symlink_to_dataset(config['config']['assnake_db'], dataset_name, full_dataset_path)
