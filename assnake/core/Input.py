@@ -57,17 +57,19 @@ class IlluminaSampleSetInput(Input):
     """
     Input class for a set of Illumina samples.
     """
-    def __init__(self, dataset, preprocessing, samples_to_add, exclude_samples, additional_input_options=None):
+    def __init__(self, dataset, preprocessing, samples_to_add, exclude_samples, sample_set_name, sample_set_path, additional_input_options=None):
         super().__init__(dataset, preprocessing, samples_to_add, exclude_samples, additional_input_options)
-        self.sample_set_name = additional_input_options.get('sample_set_name')
+        self.sample_set_name = sample_set_name
+        self.sample_set_path = sample_set_path
         
     def create_sample_set_tsv(self):
         """
         Creates a TSV file for the sample set and returns its path.
         """
+        subpath_for_sample_set_tsv =  self.sample_set_path.replace('{fs_prefix}/{df}/', '').replace('/{sample_set}/', '')
         tsv_file_path = os.path.join(
             self.dataset.full_path, 
-            self.additional_input_options['subpath_for_sample_set_tsv'], 
+            subpath_for_sample_set_tsv, 
             self.sample_set_name, 
             "sample_set.tsv")
 
@@ -110,12 +112,6 @@ class FeatureTableSpecificationInput(Input):
         # Initialize an empty metadata dictionary
         metadata = {}
 
-        # Ensure wc_string is a valid string
-        if wc_string and isinstance(wc_string, str):
-            # Extract all wildcards from the source_wc_string
-            wildcards = re.findall(r'\{(\w+)\}', wc_string)
-            metadata = {wc: options.get(wc) for wc in wildcards}
-
         # Check if parsed_presets exists and update metadata if necessary
         if hasattr(self, 'parsed_presets') and self.parsed_presets:
             metadata.update(self.parsed_presets)
@@ -124,11 +120,30 @@ class FeatureTableSpecificationInput(Input):
 
     def _create_metadata(self):
         metadata_filename = "metadata.yaml"
+        metadata_filepath = os.path.join(self.dataset.full_path, 'feature_tables', 
+                                        self.sample_set, self.feature_table_name, 
+                                        metadata_filename)
 
-        metadata_filepath = os.path.join(self.dataset.full_path, 'feature_tables', self.sample_set, self.feature_table_name, metadata_filename)
+        # Create directories if they don't exist
         os.makedirs(os.path.dirname(metadata_filepath), exist_ok=True)
-        with open(metadata_filepath, 'w') as metadata_file:
-            yaml.dump(self.parsed_metadata, metadata_file)
+
+        # Function to read existing metadata file
+        def read_existing_metadata(file_path):
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    return yaml.safe_load(file)
+            return None
+
+        # Compare with existing metadata
+        existing_metadata = read_existing_metadata(metadata_filepath)
+        if existing_metadata != self.parsed_metadata:
+            # Only write if the metadata is different
+            with open(metadata_filepath, 'w') as metadata_file:
+                yaml.dump(self.parsed_metadata, metadata_file)
+        else:
+            # Log or print a message if the metadata is unchanged
+            print("Metadata is unchanged; not overwriting the file.")
+
         return self.parsed_metadata
 
     def _get_feature_table_path(self):
@@ -216,9 +231,7 @@ class PhyloseqInput(Input):
         self.sample_set = additional_input_options['sample_set']
         self.parsed_presets = additional_input_options.get('parsed_presets')
         self.filter_chain = additional_input_options.get('filter_chain')
-        print(self.filter_chain)
 
-        print(self.source_wc_string)
         if self.filter_chain == '' or self.filter_chain is None:
             self.last_step = 0
         else:
@@ -268,7 +281,7 @@ class InputFactory:
             return IlluminaSampleInput(**filtered_kwargs)
 
         elif input_type == 'illumina_strand_file_set' or input_type == 'illumina_sample_set':
-            filtered_kwargs = {k: v for k, v in kwargs.items() if k in expected_args_for_illumina_set}
+            filtered_kwargs = {k: v for k, v in kwargs.items() if k in {'dataset', 'preprocessing', 'samples_to_add', 'exclude_samples', 'additional_input_options', 'sample_set_name', 'sample_set_path'}}
             return IlluminaSampleSetInput(**filtered_kwargs)
 
         if input_type == 'feature_table_specification':

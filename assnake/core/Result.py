@@ -49,6 +49,7 @@ class Step:
         for input_dict in input_dicts:
             input_dict.update(formatting_dict)
             target_paths.append(self.result.result_wc.format(**{**input_dict}).replace('//', '/'))
+            # target_paths.append(self.result.result_wc.format(**{**input_dict}))
         return target_paths
 
 
@@ -149,7 +150,7 @@ class Result:
         sample_set_name = kwargs.get('sample_set') if kwargs.get('sample_set', None) else datetime.now().strftime("%d-%b-%Y")
 
 
-        input_instance = self.input_factory.create_input(self.input_type, **{**kwargs, **self.input_config, 'parsed_presets':preset_values})
+        input_instance = self.input_factory.create_input(self.input_type, **{**kwargs, **self.input_config, 'parsed_presets':preset_values, 'sample_set_path': self.sample_set_dir_wc})
 
         
         formatting_dict = {}
