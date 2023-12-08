@@ -18,11 +18,12 @@ from assnake.core.config import read_internal_config
 @click.option('--touch/--no-touch', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('--debug-dag/--no-debug-dag', default=False)
+@click.option('--dag/--no-dag', default=False)
 @click.option('--lint/--no-lint', default=False)
 @click.option('--print-compilation/--no-print-compilation', default=False)
 @click.pass_obj
 
-def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag, lint, print_compilation):
+def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag, dag, lint, print_compilation):
     import snakemake # Moved import here because it is slow as fucking fuck
     
     
@@ -49,6 +50,7 @@ def gather(config, threads, jobs, drmaa, run, touch, unlock, debug_dag, lint, pr
         
         lint = lint,
         listrules = print_compilation,
+        printdag   = dag, 
 
         conda_frontend='conda',
         use_conda = True,

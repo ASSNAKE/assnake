@@ -84,27 +84,29 @@ dataset.add_command(dataset_commands.df_import_reads)
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group
 #---------------------------------------------------------------------------------------
-@cli.group(chain = True, help = 'Used to request and run results')
+from assnake.core.exceptions import InstanceConfigNotFound
+
+@cli.group(chain=True, help='Used to request and run results')
 def result():
     """Commands to analyze your data"""
     check_if_assnake_is_initialized()
 
-
-from assnake.core.exceptions import InstanceConfigNotFound
-
 try:
     for entry_point in iter_entry_points('assnake.plugins'):
         module_class = entry_point.load()
-        for snakeresult in module_class.results:
-            result.add_command(snakeresult.invocation_command)
-        for cmd in module_class.invocation_commands:
-            result.add_command(cmd)
-        for cmd in module_class.initialization_commands:
-            init_group.add_command(cmd)
+        module_name = entry_point.name  # Assuming this gives the module name
+
+        for command in module_class.results:
+            # Prefix command name with module name
+            # TODO work on naming
+            command_name = f"{module_name.replace('assnake-', '')}-{command.name}".replace('dada2-dada2-', 'dada2-').replace('core-preprocessing', 'qc')
+            result.add_command(command.invocation_command, name=command_name)
 
     result.add_command(gather)
+
 except InstanceConfigNotFound as e:
     click.secho(str(e), fg="red")
+
 
 
 
@@ -133,7 +135,7 @@ def pipeline_group():
     """Commands to view and interact with assnake modules installed in current env"""
     pass
 
-pipeline_group.add_command(pipeline_commands.pipeline_testing)
+pipeline_group.add_command(pipeline_commands.run_pipeline)
 
 
 

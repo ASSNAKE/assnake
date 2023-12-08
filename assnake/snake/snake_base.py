@@ -8,15 +8,18 @@ start = time.time()
 
 def get_previous_step_output(wildcards):
     # Extract the current step number and reconstruct the previous step's output path
-    current_step_num = int(wildcards.step_num)
+    # current_step_num = int(wildcards.step_num)
+    print(wildcards)
     input_target = ''
-    if current_step_num > 1:
-        input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/{wildcards.filter_chain.strip('/')}/phyloseq.rds"
-    else:
-        # Return the initial phyloseq file path for the first step
-        input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/phyloseq.rds"
+    # if current_step_num > 1:
+    #     input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/{wildcards.filter_chain.strip('/')}/phyloseq.rds"
+    # else:
+    #     # Return the initial phyloseq file path for the first step
+    #     input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/phyloseq.rds"
 
-    return(input_target)
+    input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/{wildcards.filter_chain.strip('/')}/phyloseq.rds"
+
+    return(input_target.replace('//', '/'))
 
 
 # Discover plugins

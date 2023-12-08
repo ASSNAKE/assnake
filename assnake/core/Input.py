@@ -235,7 +235,8 @@ class PhyloseqInput(Input):
         if self.filter_chain == '' or self.filter_chain is None:
             self.last_step = 0
         else:
-            self.last_step = int(self.filter_chain.split('/')[-1].split('_')[0].replace('step', ''))
+            self.last_step = 1
+            # self.last_step = int(self.filter_chain.split('/')[-1].split('_')[0].replace('step', ''))
         
 
 
@@ -251,7 +252,7 @@ class PhyloseqInput(Input):
                 ft_name = self.feature_table_name,  
                 sample_set=self.sample_set,
                 filter_chain = self.filter_chain,
-                **step_num_dict,
+                # **step_num_dict,
                 **self.additional_input_options['parsed_presets']
             )
         ]
@@ -347,7 +348,7 @@ class InputFactory:
                 'additional_inputs': {
                     'feature-table-name': 'Name to use for the requested feature table',
                     'sample-set': 'Name of the sample set to use. (Hash included)',
-                    'filter_chain': 'Postprocessing chain'
+                    'filter-chain': 'Postprocessing chain'
                 },
                 'parsed_presets': self._parse_wc_string_for_presets(wc_config.get(f'{name}_source_wc', None))
             }

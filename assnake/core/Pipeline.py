@@ -21,6 +21,22 @@ class Pipeline:
         self.description = description
         self.preprocessing_chain = preprocessing_chain if preprocessing_chain is not None else {}
         self.analytical_chain = analytical_chain if analytical_chain is not None else {}
+        self.steps = []
+
+
+
+    def add_result(self, result_name, **kwargs):
+        result = Result.get_result_by_name(result_name)
+        if result:
+            step = result.create_step(kwargs, kwargs)
+            self.steps.append(step)
+        return self
+
+    def get_snakemake_targets(self):
+        targets = []
+        for step in self.steps:
+            targets.extend(step.prepare_targets())
+        return targets
 
 
     def set_dataset(self, dataset_name):
@@ -67,61 +83,9 @@ class Pipeline:
 
         return targets
     
-    def prepare_analytical_chain_targets(self):
-        """
-        Constructs target paths for the analytical chain based on the defined steps.
-
-        Returns:
-            List[str]: A list of target file paths for the analytical chain.
-        """
-        
-        # Assuming the final preprocessing step's output is the input for the analytical chain
-        final_preprocessing_step = self.prepare_final_preprocessing_targets()[-1]
-        sample_container_set = SampleContainerSet.create_from_kwargs(self.dataset.dataset_name, 'raw', [], [])
-
-        # Initialize an empty list to store all target paths for the analytical chain
-        analytical_targets = []
-
-        for step_number, step_details in sorted(self.analytical_chain.items()):
-            result_name = step_details["result"]
-            
-            # Fetch the Result object for the analytical step
-            result_obj = Result.get_result_by_name(result_name)
-            if result_obj is None:
-                raise ValueError(f"Result not found for analytical step: {result_name}")
-            step_details.pop('result')
-
-            sample_set_name = step_details.get('sample_set_name') if step_details.get('sample_set_name', None) else datetime.now().strftime("%d-%b-%Y")
-
-            input_instance = result_obj.input_class(self.dataset, 'raw', [], [],
-                                            additional_input_options={
-                                                    'sample_set_dir_wc': result_obj.sample_set_dir_wc,
-                                                    'subpath_for_sample_set_tsv': result_obj.sample_set_dir_wc.replace('{fs_prefix}/{df}/', '').replace('/{sample_set}/', ''),
-                                                    'sample_set_name': sample_set_name
-                                                }
-                                            )
-        
-            # Generate target paths using the format_result_wc method
-            formatting_dict = {}
-            if 'preset' in step_details and result_obj.preset_manager is not None:
-                preset = result_obj.preset_manager.find_preset_by_name_and_dataset(step_details['preset'], self.dataset.dataset_name)
-                formatting_dict['preset'] = preset.name_wo_ext
-
-            if result_obj.result_type in ['illumina_sample_set']:    
-                step_details['sample_set_name'] = sample_set_name
-
-            # Create and return a Step instance
-            step = Step(result=result_obj, input_instance=input_instance, other_specifications=step_details)
-
-            targets = step.prepare_targets()
-            analytical_targets.extend(targets)
-            
-        self.analytical_targets = analytical_targets
-        
-        return analytical_targets
 
 
-    def execute(self, config, run):
+    def execute(self, config, snakemake_targets, run):
         import snakemake # Moved import here because it is slow as fucking fuck
     
     
@@ -134,7 +98,7 @@ class Pipeline:
         # click.echo('Current dir: ' + curr_dir)
         # click.echo('Number of jobs torun in parallel: ' + str(jobs))
 
-        config['requests'] += self.analytical_targets
+        config['requests'] += snakemake_targets
         status = snakemake.snakemake(os.path.join(curr_dir, '../snake/snake_base.py'), 
             config = config['wc_config'],    
             targets=config['requests'], 

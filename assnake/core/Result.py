@@ -115,6 +115,8 @@ class Result:
 
         self.parsed_presets = {}
 
+        self.sample_set_construction_options = sample_set_construction_options
+
         # Update the result object with the configurations from the input factory
         for key, value in self.input_config.items():
             setattr(self, key, value)
@@ -183,13 +185,13 @@ class Result:
         additional_input_options = [click.option(f'--{input_name}', help=input_description, type=click.STRING) for input_name, input_description in self.additional_inputs.items()]
         strand_option = [click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)] if self.input_type in ['illumina_strand_file', 'illumina_strand_file_set'] else []
 
+
         # Unified command decorator
         @click.command(name=self.name, short_help=self.description, help=self.description)
-        @add_options(sample_set_construction_options)  # Add common options for constructing a sample set
+        @add_options(self.sample_set_construction_options)  # Add common options for constructing a sample set
         @add_options(preset_options)                   # Add options for selecting presets
         @add_options(additional_input_options)         # Add any additional input options defined for the result
         @add_options(strand_option)
-        @click.option('--filter-chain', help='filter chain', type=click.STRING)
         @click.pass_obj
         def result_invocation(config, **kwargs):
             """

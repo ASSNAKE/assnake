@@ -22,6 +22,29 @@ def custom_help(ctx, param, value):
 
     ctx.exit()
 
+def print_python_help(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+
+    command_name = ctx.command.name
+    excluded_params = ['custom_help', 'show_python', 'samples_to_add', 'exclude_samples', 'preprocessing']
+
+    python_snippet = f"# Python configuration for {command_name}\n"
+    python_snippet += f"{command_name}_params = {{\n"
+
+    for option in ctx.command.params:
+        if isinstance(option, click.Option) and option.name not in excluded_params:
+            param_value = ctx.params.get(option.name, 'your_value_here')
+            # Add a comment only if the default value is used
+            comment = '' if option.name in ctx.params else '  # TODO: Update this parameter'
+            python_snippet += f"    '{option.name}': '{param_value}',{comment}\n"
+
+    python_snippet += "}\n"
+    python_snippet += f"pipeline.add_result('{command_name}', **{command_name}_params)\n"
+
+    click.echo(python_snippet)
+    ctx.exit()
+
 # https://stackoverflow.com/a/40195800
 sample_set_construction_options = []
 
@@ -44,7 +67,14 @@ sample_set_construction_options = [
                 type=click.STRING ),
     click.option('--custom-help', is_flag=True, callback=custom_help, 
               expose_value=False, 
-              help='Show this message and exit.')
+              help='Show this message and exit.'),
+    click.option('--show-python', 
+                 is_flag=True, callback=print_python_help, 
+                 help=("Generate a Python snippet for configuring this command in a Python pipeline. "
+                    "This feature outputs a template showing how to add this command with the specified parameters to a Python script. "
+                    "Useful for automating workflows and transitioning from CLI to script-based analysis. "
+                    "Example: `assnake result pheatmap --dataset COV_RNF_ALL --sample-set all --show-python-config`"))
+
 ]
 
 
