@@ -72,7 +72,7 @@ class Preset:
 
 
 class PresetManager:
-    def __init__(self, dir_in_database, included_presets_dir, static_files_dir_name, preset_file_format, module_name, result_name):
+    def __init__(self, dir_in_database, included_presets_dir, static_files_dir_name, preset_file_format, module_name, result_name, schema_file=None):
         self.dir_in_database = dir_in_database
         self.included_presets_dir = included_presets_dir
         self.static_files_dir_name = static_files_dir_name
@@ -80,6 +80,12 @@ class PresetManager:
         self.module_name = module_name
         self.result_name = result_name
         self.presets = []
+        self.schema = None
+        self.schema_file = schema_file  # New attribute for the schema file
+
+        if self.schema_file and os.path.exists(self.schema_file):
+            with open(self.schema_file, 'r') as file:
+                self.schema = yaml.safe_load(file)
 
     def load_presets(self, dataset_name=None):
         global_presets = self._find_presets_in_directory(self.dir_in_database)
@@ -121,10 +127,6 @@ class PresetManager:
                 # Add the copied preset to the collection and return it
                 self.presets.append(copied_preset)
                 return copied_preset
-        
-        if preset is None:
-            click.secho('NO SUCH PRESET', fg='red')
-            exit()
 
         return preset  # Return the found preset or None
 
@@ -140,21 +142,75 @@ class PresetManager:
                 preset.update_filename()
             preset.copy_to_location(os.path.join(self.dir_in_database))
 
+    def get_default_preset_contents(self):
+        """
+        Generates default preset contents based on the schema.
+        """
+        default_contents = {}
+        if self.schema:
+            for param, details in self.schema.items():
+                default_contents[param] = details.get('default', None)
+        return default_contents
+
+    def save_new_preset(self, preset_name, preset_params):
+        """Saves a new preset with the given parameters."""
+        new_preset_path = os.path.join(self.dir_in_database, f'{preset_name}.yaml')
+        os.makedirs(self.dir_in_database, exist_ok=True)
+        with open(new_preset_path, 'w') as file:
+            yaml.dump(preset_params, file, default_flow_style=False)
+        # Update preset in the manager
+        new_preset = Preset(new_preset_path)
+        self.presets.append(new_preset)
+
     def gen_click_option(self):
         self.load_presets()
 
         if len(self.presets) > 0:
             help_m = f"Preset to use. Available global presets: {[preset.name for preset in self.presets]}"
             help_m += "\n You can view Dataset specific preset by specifying --dataset option and calling help."
-            default = self.presets[0]
+
+            default = self.presets[0].name_wo_ext
         else:
             help_m  = 'No presets in database!'
-            default = 'No presets in database!'
+            from datetime import datetime
+            default = datetime.now().strftime("%Y%m%d%H%M%S")  # Use timestamp as default
+
 
         return [click.option('--preset',
                         help=help_m,
                         required=False,
                         default = default)]
+    
+    def generate_click_options_from_schema(self):
+        """Generates Click options based on the schema."""
+        options = []
+        if self.schema:
+            for param, details in self.schema.items():
+                option_type = self._get_click_type(details['type'])
+                options.append(
+                    click.option(
+                        f'--{param}',
+                        help=f"{details['description']} (default: {details['default']})",
+                        type=option_type,
+                        default=details.get('default', None)
+                    )
+                )
+        return options
+
+    def _get_click_type(self, param_type):
+        """Helper method to get the corresponding Click type for a schema parameter type."""
+        if param_type == 'integer':
+            return click.INT
+        elif param_type == 'float':
+            return click.FLOAT
+        elif param_type == 'boolean':
+            return click.BOOL
+        elif param_type == 'string':
+            return click.STRING
+        elif param_type == 'list':
+            return click.STRING  # Using string for simplicity; handle conversion in the command
+        else:
+            raise ValueError(f"Unsupported parameter type: {param_type}")
     
     def _find_presets_in_directory(self, dir_path):
         preset_files = glob.glob(os.path.join(dir_path, f'*.{self.preset_file_format}'))

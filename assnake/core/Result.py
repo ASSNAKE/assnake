@@ -133,41 +133,66 @@ class Result:
             self.additional_inputs[preset_name] = f'{preset_name} value'
 
     def create_step(self, config, kwargs):
-
         """
         Creates a Step instance based on provided command line arguments.
-
-        Args:
-            config: Configuration object, typically passed from the CLI.
-            kwargs: Command line arguments provided to the CLI command.
-
-        Returns:
-            Step: An instance of the Step class.
         """
+        # Handle preset selection and parameter override
 
-        preset_values = {}
-        if self.parsed_presets:
-            preset_values = {preset: kwargs.get(preset) for preset in self.parsed_presets}
+        formatting_dict = self._handle_preset_and_params(kwargs)
 
-        sample_set_name = kwargs.get('sample_set') if kwargs.get('sample_set', None) else datetime.now().strftime("%d-%b-%Y")
-
-
-        input_instance = self.input_factory.create_input(self.input_type, **{**kwargs, **self.input_config, 'parsed_presets':preset_values, 'sample_set_path': self.sample_set_dir_wc})
-
-        
-        formatting_dict = {}
-        # Handle preset selection
-        if 'preset' in kwargs and self.preset_manager is not None:
-            preset = self.preset_manager.find_preset_by_name_and_dataset(kwargs['preset'], kwargs['dataset'])
-            formatting_dict['preset'] = preset.name_wo_ext
-        if 'strand' in kwargs:
-            formatting_dict['strand'] = kwargs['strand']
-        # if 'sample_set_name' in kwargs:
-        formatting_dict['sample_set_name'] = sample_set_name
+        # Create input instance
+        input_instance = self.input_factory.create_input(self.input_type, **{**kwargs, **self.input_config, 'sample_set_path': self.sample_set_dir_wc})
 
         # Create and return a Step instance
         return Step(result=self, input_instance=input_instance, other_specifications=formatting_dict)
 
+    def _handle_preset_and_params(self, kwargs):
+        """
+        Handles preset file loading and parameter overrides from CLI arguments.
+        """
+        formatting_dict = {}
+
+        # Habdle case when parameters are embeded into wildcard path.
+        # Such wildcards have _preset suffix
+        param_values_from_wc = {}
+        if self.parsed_presets:
+            param_values_from_wc = {param: kwargs.get(param) for param in self.parsed_presets}
+        formatting_dict.update(param_values_from_wc)
+
+        # Try to get preset from kwargs. 
+        # It can only be there if result have with_presets = True
+        preset_name = kwargs.get('preset', None)
+        if self.preset_manager:
+            # Name provided from cli, actually it should always be provided because we have default (timestamp)
+            if preset_name:
+                preset = self.preset_manager.find_preset_by_name_and_dataset(preset_name.split('.')[0], kwargs.get('dataset', None))
+                if preset is not None:
+                    formatting_dict['preset'] = preset.name_wo_ext
+                else:
+                    # IF WE HAVE SCHEMA
+                    if self.preset_manager.schema:
+                        preset_params = self.preset_manager.get_default_preset_contents()
+                        for key, value in kwargs.items():
+                            if key in self.preset_manager.schema.keys() and value is not None:
+                                preset_params[key] = value
+
+                        # Save new preset if parameters were overridden and a name is given
+                        if preset_name and self.preset_manager:
+                            self.preset_manager.save_new_preset(preset_name, preset_params)
+                            preset = self.preset_manager.find_preset_by_name_and_dataset(preset_name, kwargs.get('dataset', None))
+                            formatting_dict['preset'] = preset.name_wo_ext
+
+                        # Include preset parameters in the formatting dictionary
+                        # formatting_dict.update(preset_params)
+
+        # Add any other special handling or additional parameters
+        if 'strand' in kwargs:
+            formatting_dict['strand'] = kwargs['strand']
+        if 'sample_set_name' in kwargs:
+            formatting_dict['sample_set_name'] = kwargs['sample_set_name']
+
+        return formatting_dict
+    
     def generate_cli_command(self):
         """
         Generates a Click command for the result based on its configuration.
@@ -182,6 +207,10 @@ class Result:
         
         # Common setup for all command types
         preset_options = self.preset_manager.gen_click_option() if self.preset_manager is not None else []
+        schema_options = self.preset_manager.generate_click_options_from_schema() if self.preset_manager is not None and self.preset_manager.schema is not None else []
+
+
+
         additional_input_options = [click.option(f'--{input_name}', help=input_description, type=click.STRING) for input_name, input_description in self.additional_inputs.items()]
         strand_option = [click.option('--strand', help='Strand to profile. Default - R1', default='R1', type=click.STRING)] if self.input_type in ['illumina_strand_file', 'illumina_strand_file_set'] else []
 
@@ -189,7 +218,10 @@ class Result:
         # Unified command decorator
         @click.command(name=self.name, short_help=self.description, help=self.description)
         @add_options(self.sample_set_construction_options)  # Add common options for constructing a sample set
+
         @add_options(preset_options)                   # Add options for selecting presets
+        @add_options(schema_options)  # Add options generated from the schema
+
         @add_options(additional_input_options)         # Add any additional input options defined for the result
         @add_options(strand_option)
         @click.pass_obj
@@ -261,7 +293,6 @@ class Result:
         default_config = os.path.join(location, 'default_config.yaml')
 
 
-
         if len(workflows) == 0:  # No workflow files found
             print('===', name)
             print('No workflow files found')
@@ -281,14 +312,18 @@ class Result:
             # print('No default_config file found for result', name)
             default_config = None
 
+
+        schema_file =  os.path.join(location, 'param_schema.yaml')
+
         if with_presets:
             preset_manager = PresetManager(
                 dir_in_database=os.path.join(instance_config['assnake_db'], 'presets', name),
                 included_presets_dir=os.path.join(location, 'presets'),
                 static_files_dir_name=static_files_dir_name,
                 preset_file_format=preset_file_format,
-                module_name='NOT READY NEED TO UPDATE RESULT CREATION IN MODULES',  # Add the module name
-                result_name=name  # Add the result name
+                module_name='NOT READY NEED TO UPDATE RESULT CREATION IN MODULES',
+                result_name=name,
+                schema_file=schema_file if os.path.isfile(schema_file) else None  # Pass the schema file path if it exists
             )
         else:
             preset_manager = None

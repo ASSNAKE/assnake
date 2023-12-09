@@ -36,7 +36,7 @@ def print_python_help(ctx, param, value):
         if isinstance(option, click.Option) and option.name not in excluded_params:
             param_value = ctx.params.get(option.name, 'your_value_here')
             # Add a comment only if the default value is used
-            comment = '' if option.name in ctx.params else '  # TODO: Update this parameter'
+            comment = '' if option.name in ctx.params else ''
             python_snippet += f"    '{option.name}': '{param_value}',{comment}\n"
 
     python_snippet += "}\n"
@@ -70,10 +70,7 @@ sample_set_construction_options = [
               help='Show this message and exit.'),
     click.option('--show-python', 
                  is_flag=True, callback=print_python_help, 
-                 help=("Generate a Python snippet for configuring this command in a Python pipeline. "
-                    "This feature outputs a template showing how to add this command with the specified parameters to a Python script. "
-                    "Useful for automating workflows and transitioning from CLI to script-based analysis. "
-                    "Example: `assnake result pheatmap --dataset COV_RNF_ALL --sample-set all --show-python-config`"))
+                 help=("Generate a Python snippet for configuring this command in a Python pipeline. "))
 
 ]
 
