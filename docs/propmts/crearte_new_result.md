@@ -141,3 +141,122 @@ barplot_facet_source_wc: '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}
 
 
 Great! Now you are ready for integration and testing!
+
+
+Sometimes we want to pass parameters inside yaml file. In that case in addition to result.py, workflow.smk and wc_config.yaml we also need to create param_schema.yaml
+
+Here is and example implementation of deseq2_plot
+
+==> param_schema.yaml <==
+```yaml
+formula:
+  type: string
+  description: The model formula for DESeq2 analysis.
+  default: sex + batch
+
+contrast_condition:
+  type: string
+  description: The condition for the DESeq2 contrast.
+  default: condition
+
+contrast_level1:
+  type: string
+  description: The first level for the DESeq2 contrast.
+  default: treated
+
+contrast_level2:
+  type: string
+  description: The second level for the DESeq2 contrast.
+  default: untreated
+
+alpha:
+  type: float
+  description: Significance level for determining differentially expressed taxa.
+  default: 0.05
+
+minlfc:
+  type: float
+  description: Minimum log fold change to consider a taxon as differentially expressed.
+  default: 1
+```
+
+==> result.py <==
+```python
+import os
+from assnake.core.Result import Result
+
+result = Result.from_location(
+    name='deseq2_plot',
+    description='DESeq2 analysis plot.',
+    result_type='analysis',
+    input_type='phyloseq',
+    with_presets=True,
+    preset_file_format='yaml',
+    location=os.path.dirname(os.path.abspath(__file__)))
+```
+
+==> rscript.R <==
+```R
+save_deseq2_results <- function(ps_filepath, dds_out_file, params_yaml_path, sigtab_out_file, pdf_out_file) {
+    params <- yaml::read_yaml(params_yaml_path)
+    params
+
+    library(phyloseq)
+    library(DESeq2)
+    library(ggplot2)
+    library(ggpubr)
+    library(metasbm)
+
+
+    ps_obj <- readRDS(ps_filepath)
+
+
+    results <- plot_deseq2(
+        ps_obj,
+        formula=params$formula,
+        contrast=c(params$contrast_condition, params$contrast_level1, params$contrast_level2),
+        alpha=params$alpha,
+        minlfc=params$minlfc
+    )
+
+    # Save the results
+    saveRDS(results[[1]], dds_out_file)
+    write.csv(results[[2]], sigtab_out_file, row.names = FALSE)
+    ggsave(pdf_out_file, plot = results[[3]], device = "pdf")
+}
+```
+==> wc_config.yaml <==
+```yaml
+deseq2_plot_wc: '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/deseq2_{preset}_plot.pdf'
+deseq2_plot_source_wc: '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/phyloseq.rds'
+```
+
+==> workflow.smk <==
+```python
+deseq2_script = os.path.join(config['assnake-phyloseq']['install_dir'], 'deseq2_plot/rscript.R')
+
+
+rule deseq2_analysis:
+    input:
+        ps = '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/phyloseq.rds',
+        params_yaml = "{fs_prefix}/{df}/presets/deseq2_plot/{preset}.yaml"
+
+    output:
+        diagdds = '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/deseq2_{preset}_diagdds.rds',
+        sigtab = '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/deseq2_{preset}_sigtab.csv',
+        plot = '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/deseq2_{preset}_plot.pdf',
+        preset = '{fs_prefix}/{df}/feature_tables/{sample_set}/{ft_name}/{filter_chain}/deseq2_plot_{preset}.yaml'
+    wildcard_constraints:
+        df = "[^/]+",
+        ft_name = "[^/]+",
+        sample_set = "[^/]+",
+    params:
+        deseq2_script = deseq2_script
+    shell:
+        """
+        cp {input.params_yaml} {output.preset}; \
+        Rscript -e " \
+        source('{params.deseq2_script}'); \
+        save_deseq2_results('{input.ps}', '{output.diagdds}', '{input.params_yaml}', '{output.sigtab}', '{output.plot}'); "\
+        """
+```
