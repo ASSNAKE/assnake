@@ -172,32 +172,39 @@ def human2bytes(s):
 ## end of http://code.activestate.com/recipes/578019/ }}}
 
 
-## https://gist.github.com/wy193777/0e2a4932e81afc6aa4c8f7a2984f34e2
 def download_from_url(url, dst):
     """
-    @param: url to download file
-    @param: dst place to put the file
+    Download a file from a given URL to a specified destination.
+
+    Args:
+        url (str): The URL of the file to download.
+        dst (str): The local destination path to save the downloaded file.
+
+    Returns:
+        int: The total file size in bytes.
     """
+    # Send a GET request to the URL to get the file size
+    response = requests.head(url)
+    file_size = int(response.headers.get('Content-Length', 0))
 
-    req = urllib.request.Request(url,  method='HEAD')
-    f = urllib.request.urlopen(req)
-
-    file_size = int(f.headers['Content-Length'])
+    # Check if the destination file already exists
     if os.path.exists(dst):
-        first_byte = os.path.getsize(dst)
-    else:
-        first_byte = 0
-    if first_byte >= file_size:
-        return file_size
-    header = {"Range": "bytes=%s-%s" % (first_byte, file_size)}
-    pbar = tqdm(
-        total=file_size, initial=first_byte,
-        unit='B', unit_scale=True, desc=url.split('/')[-1])
-    req = requests.get(url, headers=header, stream=True)
-    with(open(dst, 'ab')) as f:
-        for chunk in req.iter_content(chunk_size=1024):
+        # If the local file size matches the remote file size, return the file size
+        if os.path.getsize(dst) == file_size:
+            return file_size
+
+    # Initialize progress bar
+    pbar = tqdm(total=file_size, unit='B', unit_scale=True, desc=url.split('/')[-1])
+
+    # Send a GET request to download the file in chunks
+    with open(dst, 'ab') as f:
+        response = requests.get(url, stream=True)
+        for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
-                pbar.update(1024)
+                pbar.update(len(chunk))
+
+    # Close the progress bar
     pbar.close()
+
     return file_size

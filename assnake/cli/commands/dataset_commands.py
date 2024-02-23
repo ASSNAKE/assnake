@@ -1,27 +1,18 @@
 import click, sys, os, glob, yaml, shutil
 import pandas as pd
-import assnake.api.loaders
-import assnake.core.sample_set
 from tabulate import tabulate
-from assnake.api import fs_helpers
+from assnake.utils import fs_helpers
 from assnake.utils.general import pathizer, dict_norm_print, download_from_url
 from zipfile import ZipFile
-from assnake.api.loaders import update_fs_samples_csv
 from pathlib import Path
-# some util
-def show_av_dict(dfs):
-    '''
-    print out available datasets from dict of db's
-    '''
-    avail_dfs = ''
-    for i, item in enumerate(dfs.keys()):
-        avail_dfs += '{}. {} \t'.format(i + 1, item)
 
-    if avail_dfs == '':
-        avail_dfs = 'NA'
-    click.echo('Available: ' + avail_dfs)
-    exit(2)
+from assnake.core.Dataset import Dataset
+from assnake.core.SampleContainerSet import SampleContainerSet
+from yaml import dump
 
+import os
+from pathlib import Path
+from shutil import copy2
 
 # ---------------------------------------------------------------------------------------
 #                                     LIST
@@ -29,7 +20,7 @@ def show_av_dict(dfs):
 @click.command(name='list')
 def df_list():
     """List datasets in database"""
-    dfs = assnake.Dataset.list_in_db()
+    dfs = Dataset.list_in_db()
     if len(list(dfs.keys())) == 0:
         click.echo('No datasets in your system yet!\nYou can create one by running\n' +
                    click.style('  assnake dataset create  ', bg='blue', fg='white', bold=True))
@@ -44,200 +35,79 @@ def df_list():
         click.echo('')
 
 
-# ---------------------------------------------------------------------------------------
-#                                   CREATE
-# ---------------------------------------------------------------------------------------
 
-def check_df_name_avialability(df):
-    
-    dfs_in_db = assnake.Dataset.list_in_db()
-    if df in dfs_in_db:
-        click.secho('Dataset with such name already exists!. Aborting.')
-        exit()
-    return df
 
-def validate_df_prefix(df, fs_prefix, create_prefix = False, allow_not_empty_full_path = False):
+
+def check_dataset_availability(dataset_name, datasets_in_db):
     """
-    Ensures that can write to full_df_path and it is empty
+    Check if the dataset name already exists in the database.
     """
-    df = check_df_name_avialability(df)
-    if df is None:
-        exit()
+    if dataset_name in datasets_in_db:
+        click.secho('Dataset with the name already exists! Aborting.', fg='red')
+        raise click.Abort()
 
-    if not os.path.isabs(fs_prefix):
-        click.secho('fs_prefix is not absolute!') 
-        exit()
-    full_df_path = os.path.join(fs_prefix, df)
-
-    if os.path.isdir(full_df_path):
-        if not os.listdir(full_df_path) and os.access(full_df_path, os.W_OK):
-            click.echo('Great! ' + full_df_path + ' exists, is empty and assnake can write to that folder, initializing dataset here')
-            return full_df_path
-        elif os.listdir(full_df_path):
-            if allow_not_empty_full_path:
-                click.echo(full_df_path + ' exists, but it is not empty. allow_not_empty_full_path is true, existance logic will be handled downstream.')
-                return full_df_path
-            else:
-                click.echo('Oops =( ' + full_df_path + ' exists, but it is not empty. Aborting.')
-                return None
-        elif not os.access(full_df_path, os.W_OK):
-            click.echo('Oops =( ' + full_df_path + ' exists, but assnake doesnt have permissions to write there. Aborting.')
-            return None
-    else:
-        click.echo('Oops =( ' + full_df_path + ' exists, but it is not directory. Aborting.')
-
-        
-    if os.path.isdir(fs_prefix):
-        if os.access(fs_prefix, os.W_OK):
-            click.echo('Great! ' + fs_prefix + ' exists, and assnake can write to that folder, initializing dataset in:')
-            click.echo(full_df_path + '  (Will be created)')
-            return full_df_path
-    else:
-        if not create_prefix:
-            click.echo('Oops =( ' + fs_prefix + ' doesnt exist, and create_prefix is set to False. Aborting.')
+def validate_dataset_path(fs_prefix, dataset_name, allow_non_empty=False):
+    """
+    Validate and construct the full path for the dataset.
+    """
+    full_dataset_path = os.path.join(fs_prefix, dataset_name)
+    if os.path.isdir(full_dataset_path):
+        if not os.listdir(full_dataset_path) or allow_non_empty:
+            return full_dataset_path
         else:
-            click.echo('Great! ' + fs_prefix + ' will be created, and dataset will be initialized in:')
-            click.echo(full_df_path + '  (Will be created)')
-            return full_df_path
+            click.secho('Dataset path exists and is not empty. But we will continue.', fg='red')
+            # raise click.Abort()
+            return full_dataset_path
 
-    return None
+    else:
+        os.makedirs(full_dataset_path, exist_ok=True)
+        return full_dataset_path
 
-def check_absolute_path(path, path_name):
-    path = path.rstrip('\/')
-    if not os.path.isabs(path):
-        click.secho(path_name + ' is not absolute!') 
-        exit()
-    return path
-
-@click.command(name='create')
-
-@click.option('--df-name', '-d', help='Name of the dataset', required = False)
-
-@click.option('--data-storage-folder', '-f', 
-    help='Folder where you want to store your data. \
-        Directory with provided df-name will be created inside this folder. MUST exist, may be not empty.\
-        Resulting {storage-folder}/{df-name} directory MUST be empty, may not exist. \
-        For regestiring existing datasets inside new Assnake instance use assnake dataset register', required=False)
-
-@click.option('--full-path-to-df', '-p', 
-    help='Full path to dataset folder. \
-    Last part of the path (basename) will be used as df-name. MUST be empty, may not exist. \
-    For regestiring existing datasets inside new Assnake instance use assnake dataset register', required=False)
-
-
-@click.option('--first-preprocessing-name', 
-    help='Name of your first preprocessing. raw by default. You want to set it to sra, for exaple if yoo are planning to download from NCBI. Purely cosmetic effect.', required=False, default = 'raw')
-
-@click.option('--description', '-D', nargs=2, multiple=True, required=False, type=click.Tuple([str, str]),
-              help='Add some description in this way ` assnake dataset create ... -D property_1 value_1 ... -D property_n value_n`')
-
-@click.option('--quietly', '-q', is_flag=True, help='Doing it quietly. No questions.')
-@click.option('--test-data', '-t', is_flag=True, help='Download test data from Humann2 tutorial')
-@click.pass_obj
-def df_create(config, df_name, data_storage_folder, full_path_to_df,first_preprocessing_name, description, quietly, test_data):
-    """Register your dataset inside ASSNAKE!\n
-        You can use it in interactive mode.
-        Usage: assnake dataset create [dataset] or -d [dataset] ..
-
+def create_symlink_to_dataset(assnake_db, dataset_name, full_dataset_path):
     """
-    
-    if ((df_name is None) or (data_storage_folder is None)):
-        if full_path_to_df is None:
-            click.echo('You must specify df_name AND data_storage_folder, OR full_path_to_df')
-            exit()
-        
-        else: # full_path_to_df road
-            # click.echo('df-name or data-storage-folder not set, using full_path_to_df')
-            click.echo('Using full_path_to_df')
-            full_path_to_df = check_absolute_path(full_path_to_df, 'full_path_to_df')
-            df = os.path.basename(full_path_to_df)
-            fs_prefix = os.path.dirname(full_path_to_df)
-            full_df_path = validate_df_prefix(df, fs_prefix, True)
+    Create a symbolic link in the Assnake database pointing to the dataset.
+    """
+    symlink_path = os.path.join(assnake_db, 'datasets', dataset_name)
+    if not os.path.islink(symlink_path):
+        os.symlink(full_dataset_path, symlink_path, target_is_directory=True)
 
-    # df_name AND data_storage_folder road
-    elif (df_name is not None) and (data_storage_folder is not None):
-        if full_path_to_df is not None:
-            click.echo('df-name AND data-storage-folder are set, ignoring full_path_to_df')
-
-        click.secho('Using df_name AND data_storage_folder')
-        data_storage_folder = check_absolute_path(data_storage_folder, 'data_storage_folder')
-        df = df_name # TODO VALIDATE
-        fs_prefix = data_storage_folder
-        full_df_path = validate_df_prefix(df, fs_prefix, True)
-
-    os.makedirs(full_df_path, exist_ok=True)
-    os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
-    df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}}
-
-    assnake_db = config['config']['assnake_db']
-    os.makedirs(os.path.join(assnake_db, 'datasets'), exist_ok=True)
-    df_path_in_assnake = os.path.join(assnake_db, 'datasets', df)
-    os.symlink(full_df_path, df_path_in_assnake, target_is_directory = True)
-
-    with open(os.path.join(df_path_in_assnake, 'df_info.yaml'), 'w') as info_file:
-        yaml.dump(df_info, info_file, default_flow_style=False)
-    click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
-
-
-    if test_data:
-        download_from_url('http://kronos.pharmacology.dal.ca/public_files/tutorial_datasets/mgs_tutorial_Oct2017.zip', 
-                                os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017.zip'))
-        
-        with ZipFile(os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017.zip'), 'r') as zipObj:
-            
-            zipObj.extractall(os.path.join(fs_prefix, df,'./'))
-        shutil.rmtree(os.path.join(fs_prefix, df, 'reads'), ignore_errors=True)
-        os.makedirs(os.path.join(fs_prefix, df, 'reads'), exist_ok=True)
-        shutil.move (os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017/raw_data'), os.path.join(fs_prefix, df, 'reads/raw'))
-        # TODO cleanup
-        shutil.rmtree(os.path.join(fs_prefix, df,'mgs_tutorial_Oct2017'), ignore_errors=True)
+def create_dataset_info_file(dataset_path, dataset_info):
+    """
+    Create and write the dataset information file.
+    """
+    with open(os.path.join(dataset_path, 'df_info.yaml'), 'w') as info_file:
+        dump(dataset_info, info_file, default_flow_style=False)
 
 # ---------------------------------------------------------------------------------------
 #                                   INIT
 # ---------------------------------------------------------------------------------------
 
-@click.command(name='init', help = 'Register dataset in Assnake based on the folder from where you called the command. (Working directory)')
-@click.option('--data-type', '-t', 
-            help='Type of NGS data. Illumina Metagenomic WGS and 16s are supported.', 
-            required = False,
-            type=click.Choice(['METAGENOMIC_16s', 'METAGENOMIC_WGS', 'VIROME', 'RNA_SEQ'], case_sensitive=False))
-@click.option('--df-name', '-d', help='Name of the dataset. If provided, folder with this name will be created in current dir.', required = False)
-@click.option('--first-preprocessing-name', 
-    help='Name of your first preprocessing. raw by default. You want to set it to sra, for exaple if yoo are planning to download from NCBI. Purely cosmetic effect.', required=False, default = 'raw')
-
+@click.command(name='init')
+@click.option('--data-type', '-t', type=click.Choice(['METAGENOMIC_16s', 'METAGENOMIC_WGS', 'VIROME', 'RNA_SEQ'], case_sensitive=False))
+@click.option('--dataset-name', '-d', required=False)
+@click.option('--first-preprocessing-name', default='raw')
 @click.pass_obj
-def df_init(config, data_type, df_name, first_preprocessing_name):
+def dataset_init(config, data_type, dataset_name, first_preprocessing_name):
+    """
+    Initialize a dataset within the Assnake framework.
+    """
     cwd = os.getcwd()
+    datasets_in_db = Dataset.list_in_db()
 
-    if df_name is None:
-        df = os.path.basename(cwd)
-        fs_prefix = os.path.dirname(cwd)
-        full_df_path = validate_df_prefix(df, fs_prefix, True, True)
-    else:
-        df = df_name
-        fs_prefix = cwd
-        full_df_path = validate_df_prefix(df, fs_prefix, True, True)
+    if not dataset_name:
+        dataset_name = os.path.basename(cwd)
+    check_dataset_availability(dataset_name, datasets_in_db)
 
-    full_path_empty = True
-    if os.path.isdir(full_df_path) and not os.listdir(full_df_path):
-        click.echo(full_df_path + ' not empty!')
-        click.echo('Trying to import as existing Assnake dataset (Not properly implemented)')
-        full_path_empty = False
- 
+    fs_prefix = cwd if not dataset_name else os.path.dirname(cwd)
+    full_dataset_path = validate_dataset_path(fs_prefix, dataset_name)
+    
+    os.makedirs(os.path.join(full_dataset_path, 'reads/raw'), exist_ok=True)
 
-    # os.makedirs(os.path.join(full_df_path, 'reads', first_preprocessing_name), exist_ok=True)
-    df_info = {'df': df, 'fs_prefix': fs_prefix, 'description': {}, 'data_type': data_type}
+    dataset_info = {'df': dataset_name, 'fs_prefix': fs_prefix, 'description': {}, 'data_type': data_type}
+    create_symlink_to_dataset(config['config']['assnake_db'], dataset_name, full_dataset_path)
+    create_dataset_info_file(full_dataset_path, dataset_info)
 
-    assnake_db = config['config']['assnake_db']
-    os.makedirs(os.path.join(assnake_db, 'datasets'), exist_ok=True)
-    df_path_in_assnake = os.path.join(assnake_db, 'datasets', df)
-    os.symlink(full_df_path, df_path_in_assnake, target_is_directory = True)
-
-    df_info_loc = os.path.join(df_path_in_assnake, 'df_info.yaml')
-    if not os.path.isfile(df_info_loc):
-        with open(df_info_loc, 'w') as info_file:
-            yaml.dump(df_info, info_file, default_flow_style=False)
-    click.secho('Saved dataset ' + df + ' sucessfully!', fg='green')
+    click.secho(f"Dataset '{dataset_name}' initialized successfully.", fg='green')
 
 # ---------------------------------------------------------------------------------------
 #                                   INFO
@@ -259,153 +129,89 @@ def df_info(config, df, preproc, df_arg):
     if df is None:
         df = df_arg
     
-    # Trying to load dataset and display information
-    try:
-        df = assnake.Dataset(df)
-        click.echo(click.style('='*2 + ' '*3 + df.df + ' '*3 + '=' * 2, fg='green', bold=True))
-        click.echo(str(df))
-        if preproc is not None:
-            samples = df.sample_sets[preproc]
-            samples = samples.set_index('df_sample')
-            click.echo(tabulate(samples.sort_values('reads'), headers='keys', tablefmt='fancy_grid'))
-        return
-    except assnake.api.loaders.InputError as e:
-        print(e.message)
-        return
+    dataset = Dataset(df)
+    # Formatting a dataset name as a header
+    header = f'==  {dataset.dataset_name}  =='
+    styled_header = click.style(header, fg='green', bold=True)
+    click.echo(styled_header)
+
+    # Displaying dataset information
+    click.echo(str(dataset))
+    # Now create a SampleContainerSet with specific parameters
+    sample_container_set = SampleContainerSet(dataset, preproc='raw')
+
+    for sample_container in sample_container_set.sample_containers:
+        click.echo(sample_container)
+
+    return
 
 
-# ---------------------------------------------------------------------------------------
-#                                   DELETE
-# ---------------------------------------------------------------------------------------
-@click.command(name='delete')
-@click.option('--df', '-d',
-              help='Name of dataset to delete.', type=click.STRING )
-@click.option('--hard', help='If is set, hard removing will be used instead of modifying config file', is_flag=True)
-@click.argument('df_arg', required=False)
-@click.pass_obj
-def df_delete(config, df, hard, df_arg):
-    """
-    Delete datasets
-    Usage: assnake dataset delete [dataset] or -d [dataset] ...
-    """
-    click.echo('NOT IMPLEMENTED')
-    # if not (bool(df is None) ^ bool(df_arg is None)):
-    #     click.echo('Please, specify dataset either as option or argument')
-    #     df = click.prompt('Type the name in:')
-    # if df is None:
-    #     df = df_arg
-    # dfs = assnake.Dataset.list_in_db()
-    # try:
-    #     df_info = dfs[df]
-    # except KeyError as e:
-    #     click.echo('Can`t reach database with such name')
-    #     show_av_dict(dfs)
-
-    # respond = fs_helpers.delete_ds(df)
-    # if respond[0]:
-    #     click.secho('Successfully deleted', fg='bright_white', bg='green')
-    # else:
-    #     click.secho('ERROR', bg='red')
-    #     click.echo('For details see traceback below')
-    #     click.echo(respond[1])
-
-    # if hard and click.confirm(
-    #     'Are you sure to delete this nice and probably huge datasets, which you may redownload for eternity -- use modifying config instead?',
-    #     abort=True):
-    #     shutil.rmtree(os.path.join(df_info.get('fs_prefix', ''), df))
 
 # ---------------------------------------------------------------------------------------
 #                                   IMPORT-READS
 # ---------------------------------------------------------------------------------------
-# DONE decide if we need either d and t or proceed both arguments as one and automatically choose path or not
-@click.command(name='import-reads')
-@click.option('--reads-dir', '-r', prompt='Location of folder with read files',
-              help='Location of folder with read files', type=click.Path())
-@click.option('--dataset', '-d', help='Assnake dataset name. If -t is not specified', required=False)
-@click.option('--rename-method', help='How to rename samples', type=click.Choice(['replace-', 'removeSending'], case_sensitive=False), required=False)
-@click.option('--target', '-t', help='Location of the target directory. If -d is not specified.', required=False,
-              type=click.Path())
-@click.option('--sample_set', '-s', help='Comma-divided list of samples of interest', required=False)
-@click.option('--sample_list', '-l', help='Location of file with line by line samples of interest', required=False,
-              type=click.Path())
-@click.option('--copy', help='If is set, hard copying will be used instead of symbolic links ', is_flag=True)
-@click.pass_obj
-def df_import_reads(config, reads_dir, dataset, rename_method, target, sample_set, sample_list, copy):
+
+
+
+
+def get_target_directory(dataset_name, target, config):
     """
-    Import reads from directory to assnake dataset. Currently local text files are supported. The --target argument
-    point to location (relative or absolute) of assnake dataset in your file system. Please, pay attention,
-    that -t and -d  arguments are excclusive for each over -- specify only one of them -- as well as -s and -l.
-    With -s `sample_1,sample_2,...,sample_n` notation is implied (no whitespaces between sample names)
+    Determine the target directory for importing reads.
     """
-
-    reads_dir = str(Path(reads_dir).resolve())
-    # stuff about presence of arguments
-    arg_d = not bool(dataset is None)
-    arg_t = not bool(target is None)
-    arg_s = not bool(sample_set is None)
-    arg_l = not bool(sample_list is None)
-
-    # check if samples arguments are ok
-    if arg_l & arg_s:
-        click.secho('Collision tends to be observed. Please, specify either list of samples in prompt or in file',
-                    err=True)
-        exit(1)
-
-    # check if destination args are ok
-    if not (arg_d ^ arg_t):
-        click.secho('Please, specify either database (-d) or absolute path (-t)', err=True)
-        exit(1)
-
-    # some stuffff to ensure correctness of source and destination (how philosophical)
-    if arg_d:
+    if dataset_name:
         try:
-            df_info = assnake.Dataset(dataset)
-        except assnake.loaders.InputError as e:
-            dfs = assnake.Dataset.list_in_db()
-            click.echo('Can`t reach database with such name', err=True)
-            show_av_dict(dfs)
-        target = '{}/reads/raw'.format(df_info.full_path)
+            dataset_info = Dataset(dataset_name)
+            return os.path.join(dataset_info.full_path, 'reads', 'raw')
+        except :
+            available_datasets = Dataset.list_in_db()
+            click.secho(f"Cannot find dataset: {dataset_name}", fg='red')
+            # Show available datasets
+            for i, ds in enumerate(available_datasets.keys(), 1):
+                click.echo(f'{i}. {ds}')
+            raise click.Abort()
     else:
-        # Whaaat
-        target = pathizer(target)
+        target = str(Path(target).resolve())
         if not os.path.exists(target):
-            click.secho("Provided sample-list file couldn't be detected", err=True)
-            exit(2)
+            click.secho("Target directory does not exist: " + target, fg='red')
+            raise click.Abort()
+        return target
 
-    target = '{}/reads/raw'.format(df_info.full_path)
-    os.makedirs(target, exist_ok=True)
-
+def modify_sample_name(name, rename_method):
+    """
+    Modify the sample name based on the chosen rename method.
+    """
     if rename_method == 'removeSending':
-        modify_name=lambda arg: '_'.join(arg.replace('-', '_').split('_')[0:-1])
-    else:
-        modify_name=lambda arg: arg.replace('-', '_')
+        return '_'.join(name.replace('-', '_').split('_')[:-1])
+    else:  # Default to 'replace-'
+        return name.replace('-', '_')
 
-    samples_in_run = fs_helpers.get_samples_from_dir(reads_dir, modify_name)
-    if len(samples_in_run) > 0:
-        samples_in_run['df_sample'] = samples_in_run['modified_name']
-        fs_helpers.create_links(target,  samples_in_run, hard=copy)
-
-        update_fs_samples_csv(df_info.df)
-        click.secho("SUCCESSFULLY IMPORTED READS!", fg='green') 
-    else: 
-        click.secho('No reads in directory ' + reads_dir, fg='yellow')
-
-
-@click.command(name='rescan')
-@click.option('--dataset', '-d', help='Assnake dataset name', required=False)
-@click.argument('df_arg', required=False)
+@click.command(name='import-reads')
+@click.option('--reads-dir', '-r', prompt='Location of folder with read files', type=click.Path(exists=True), help='Directory containing read files')
+@click.option('--dataset', '-d', help='Name of the Assnake dataset', required=False)
+@click.option('--rename-method', help='Method to rename samples', type=click.Choice(['replace-', 'removeSending'], case_sensitive=False), default='replace-')
+@click.option('--target', '-t', help='Target directory for imported reads', type=click.Path(), required=False)
+@click.option('--copy', is_flag=True, help='Use hard copying instead of symbolic links')
 @click.pass_obj
-def rescan_dataset(config, dataset, df_arg):
+def df_import_reads(config, reads_dir, dataset, rename_method, target, copy):
     """
-    Now it just updates fs_samples.tsv in ./assnkae_db/{dataset}/
+    Import reads into an Assnake dataset.
+    """
+    # Validate and get target directory
+    target_dir = get_target_directory(dataset, target, config) if dataset or target else None
+    if not target_dir:
+        click.secho("Target directory is not specified. Aborting.", fg='red')
+        raise click.Abort()
 
-    Usage: assnake dataset rescan [dataset] or -d [dataset] ..
-    """
-    if not (bool(dataset is None) ^ bool(df_arg is None)):
-        click.echo('Please, specify dataset either as option or argument')
-        dataset = click.prompt('Type the name in:')
-    if dataset is None:
-        dataset = df_arg
-    success = update_fs_samples_csv(dataset)
-    if success:
-        click.secho('SUCCESSFULLY UPDATED INFORMATION IN DATABASE!', fg='green')
+    # Ensure target directory exists
+    os.makedirs(target_dir, exist_ok=True)
+
+    # Modify sample names and import reads
+    modify_name = lambda name: modify_sample_name(name, rename_method)
+    samples_in_run = fs_helpers.get_samples_from_dir(reads_dir, modify_name)
+    if samples_in_run.empty:
+        click.secho('No reads found in the specified directory.', fg='yellow')
+        return
+
+    samples_in_run['df_sample'] = samples_in_run['modified_name']
+    fs_helpers.create_links(target_dir, samples_in_run, hard=copy)
+    click.secho("Reads imported successfully.", fg='green')

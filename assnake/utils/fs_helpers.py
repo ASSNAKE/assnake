@@ -10,7 +10,16 @@ import traceback
 import parse
 import pandas as pd
 
-
+def check_and_delete_empty_directory(directory):
+    if os.path.exists(directory) and os.path.isdir(directory):
+        if not os.listdir(directory):
+            # Directory exists and is empty, so delete it
+            os.rmdir(directory)
+            print(f"Deleted empty directory: {directory}")
+        else:
+            print(f"Directory is not empty: {directory}")
+    else:
+        print(f"Directory does not exist: {directory}")
 
 def get_samples_from_dir(directory_with_reads, modify_name = None):
     samples_list = []  # to write samples in

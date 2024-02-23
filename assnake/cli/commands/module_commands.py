@@ -2,7 +2,7 @@ import click, os, glob, json, zlib
 import pandas as pd
 from assnake.core.config import read_internal_config, read_assnake_instance_config, update_internal_config, fill_and_write_instance_config
 
-from assnake.core.result import Result
+from assnake.core.Result import Result
 from assnake.core.snake_module import SnakeModule
 import importlib
 
@@ -102,3 +102,58 @@ def refresh_params():
                             click.secho('It is STRONGLY advised to give your presets a prject specific unique name.', fg='yellow')  
 
 
+
+def create_result_directory(result_name):
+    """
+    Creates a directory for the new result.
+    """
+    os.makedirs(result_name, exist_ok=True)
+    return os.path.abspath(result_name)
+
+def create_file_with_content(directory, filename, content):
+    """
+    Creates a file with the specified content.
+    """
+    with open(os.path.join(directory, filename), 'w') as file:
+        file.write(content)
+
+@click.command()
+@click.option('--result-name', help='Name of your result. Will be used across system.')
+@click.option('--description',  help='Brief description of the result')
+@click.option('--result-type', default='preprocessing', help='Type of the result (e.g., preprocessing, analysis)')
+@click.option('--input-type', default='illumina_sample', help='Input type for the result')
+@click.option('--preset-file_format', default='yaml', help='Format of the preset file (yaml, json, etc.)')
+def create_result(result_name, description, result_type, input_type, preset_file_format):
+    """
+    CLI command to create a new Result with a pre-populated template directory.
+    """
+    result_dir = create_result_directory(result_name)
+
+    # Create result.py
+    result_py_content = f'''
+import os
+from assnake.core.Result import Result
+
+result = Result.from_location(name='{result_name}',
+                              description='{description}',
+                              result_type='{result_type}',
+                              input_type='{input_type}',
+                              with_presets=True,
+                              preset_file_format='{preset_file_format}',
+                              location=os.path.dirname(os.path.abspath(__file__)))
+'''
+    create_file_with_content(result_dir, 'result.py', result_py_content)
+
+    # Create workflow.smk
+    workflow_smk_content = '''# Add Snakemake workflow logic here'''
+    create_file_with_content(result_dir, 'workflow.smk', workflow_smk_content)
+
+    # Create wc_config.yaml
+    wc_config_yaml_content = '''# Add wildcard configuration here'''
+    create_file_with_content(result_dir, 'wc_config.yaml', wc_config_yaml_content)
+
+    # Create wrapper.py
+    wrapper_py_content = '''# Add wrapper logic here'''
+    create_file_with_content(result_dir, 'wrapper.py', wrapper_py_content)
+
+    click.echo(f'Result template created successfully at: {result_dir}')

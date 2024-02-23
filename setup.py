@@ -30,20 +30,19 @@ class PostInstallCommand(install):
         install.run(self)
 
 setup(name='assnake', 
-    version='0.9.0.1',
+    version='0.9.0.2',
     include_package_data=True,
     license='MIT',         
     description = 'System for metagenomics data analysis',   
     author = 'Dmitry Fedorov',                  
     author_email = 'fedorov.de@gmail.com',      
     url = 'https://github.com/ASSNAKE/assnake',   
-    download_url = 'https://github.com/ASSNAKE/assnake/archive/v0.8.8.tar.gz',    # I explain this later on
+    # download_url = 'https://github.com/ASSNAKE/assnake/archive/v0.8.8.tar.gz',    # I explain this later on
     keywords = ['ILLUMINA', 'NGS', 'METAGENOMIC', 'DATA'], 
     packages=find_packages(),
     install_requires=[
-        'numpy', 'Click', 'pyyaml>=', 'pandas', 
-        'tabulate', 'snakemake', 'drmaa', 
-        'parse', 'pycallgraph', 'tqdm', 'scipy', 'plotly', 'matplotlib'
+        'numpy', 'Click', 'pyyaml', 'pandas', 
+        'tabulate', 'snakemake', 'tqdm', 'scipy', 'matplotlib', 'plotly', 'parse'
     ],
     entry_points='''
         [console_scripts]
@@ -55,7 +54,7 @@ setup(name='assnake',
         'Intended Audience :: Science/Research',      # Define that your audience are developers
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'License :: OSI Approved :: MIT License',   # Again, pick a license
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.10',
         ],
     cmdclass={
         'develop': PostDevelopCommand,

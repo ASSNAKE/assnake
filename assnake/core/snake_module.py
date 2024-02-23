@@ -1,7 +1,11 @@
+import click
 from pkg_resources import iter_entry_points 
 from assnake.core.config import read_assnake_instance_config
 import os, glob, importlib
 from assnake.utils.general import read_yaml
+
+from assnake.core.exceptions import InstanceConfigNotFound
+
 
 class SnakeModule:
     name = ''
@@ -17,6 +21,11 @@ class SnakeModule:
 
     def __init__(self, name, install_dir, snakefiles = [], invocation_commands = [], initialization_commands = [], wc_configs = [], provided_results = [], dataset_methods = {}):
         self.assnake_config = read_assnake_instance_config()
+
+        if self.assnake_config is None:
+            raise InstanceConfigNotFound("Instance configuration not found or is invalid.\nPlease run 'assnake config init' to configure the instance.")
+
+            
 
         self.name = name
         self.install_dir = install_dir

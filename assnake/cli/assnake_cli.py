@@ -1,16 +1,16 @@
 import sys, os, glob, yaml, shutil
 import click
+from assnake.core.Pipeline import Pipeline
 
 import assnake.cli.commands.dataset_commands as dataset_commands # snakemake makes it slow
 import assnake.cli.commands.config_commands as config_commands
 import assnake.cli.commands.module_commands as module_commands
+import assnake.cli.commands.pipeline_commands as pipeline_commands
 from assnake.cli.commands.execute_commands import gather
 
 from assnake.utils.general import read_yaml
 
 from assnake.core.config import read_assnake_instance_config, read_internal_config, check_if_assnake_is_initialized
-from assnake.core.command_builder import sample_set_construction_options, add_options
-from assnake.core.sample_set import generic_command_individual_samples, generate_result_list
 
 from pkg_resources import iter_entry_points 
 
@@ -43,16 +43,16 @@ O---o The tools that are presented here
 o---O make taxonomic annotations, functional annotations,
 O---o and work with 16s rRNA data.
 """
-
-
     dir_of_this_file = os.path.dirname(os.path.abspath(__file__))
 
+    # Load internal configuration but don't exit if instance configuration is missing
+    internal_config = read_internal_config()
     instance_config = read_assnake_instance_config()
-
     if instance_config is not None:
         wc_config = read_yaml(os.path.join(dir_of_this_file, '../snake/wc_config.yaml'))
         ctx.obj = {'config': instance_config, 'wc_config': wc_config, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
-
+    else:
+        ctx.obj = {'config': None, 'wc_config': None, 'requested_dfs': [], 'requests': [], 'sample_sets': [], 'requested_results': []}
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  INIT ***  group
@@ -66,7 +66,6 @@ def init_group():
     """
     pass
 
-# init_group.add_command(init_commands.init_start)
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  DATASET ***  group
@@ -78,45 +77,36 @@ def dataset():
 
 dataset.add_command(dataset_commands.df_list)
 dataset.add_command(dataset_commands.df_info)
-dataset.add_command(dataset_commands.df_init)
-dataset.add_command(dataset_commands.df_create)
+dataset.add_command(dataset_commands.dataset_init)
 dataset.add_command(dataset_commands.df_import_reads)
-dataset.add_command(dataset_commands.df_delete)
-dataset.add_command(dataset_commands.rescan_dataset)
 
 
 #---------------------------------------------------------------------------------------
 #                                  assnake  RESULT ***  group
 #---------------------------------------------------------------------------------------
-@cli.group(chain = True, help = 'Used to request and run results')
+from assnake.core.exceptions import InstanceConfigNotFound
+
+@cli.group(chain=True, help='Used to request and run results')
 def result():
     """Commands to analyze your data"""
     check_if_assnake_is_initialized()
 
+try:
+    for entry_point in iter_entry_points('assnake.plugins'):
+        module_class = entry_point.load()
+        module_name = entry_point.name  # Assuming this gives the module name
 
-for entry_point in iter_entry_points('assnake.plugins'):
-    module_class = entry_point.load()
-    for snakeresult in module_class.results:
-        result.add_command(snakeresult.invocation_command)
-    for cmd in module_class.invocation_commands:
-        result.add_command(cmd)
-    for cmd in module_class.initialization_commands:
-        init_group.add_command(cmd)
+        for command in module_class.results:
+            # Prefix command name with module name
+            # TODO work on naming
+            command_name = f"{module_name.replace('assnake-', '')}-{command.name}".replace('dada2-dada2-', 'dada2-').replace('core-preprocessing', 'qc')
+            result.add_command(command.invocation_command, name=command_name)
 
-result.add_command(gather)
+    result.add_command(gather)
 
+except InstanceConfigNotFound as e:
+    click.secho(str(e), fg="red")
 
-# @click.command('sample-set', short_help='Filter and trim your reads with dada2 trimmer')
-# @add_options(sample_set_construction_options)
-# @click.option('--params', help='Parameters to use', default='def', type=click.STRING )
-# @click.option('--message', '-m', multiple=True)
-
-# @click.pass_obj
-# def request_sample_set(config, message, **kwargs):
-#     click.echo('\n'.join(message))
-#     sample_set, sample_set_name = generic_command_individual_samples(config,  **kwargs)
-#     config['sample_sets'].append(sample_set.samples_pd.copy())
-# result.add_command(request_sample_set)
 
 
 
@@ -138,6 +128,15 @@ def module_group():
 module_group.add_command(module_commands.show_installed_results)
 module_group.add_command(module_commands.show_installed_modules)
 module_group.add_command(module_commands.refresh_params)
+module_group.add_command(module_commands.create_result)
+
+@cli.group(name = 'pipeline')
+def pipeline_group():
+    """Commands to view and interact with assnake modules installed in current env"""
+    pass
+
+pipeline_group.add_command(pipeline_commands.run_pipeline)
+
 
 
 def main():

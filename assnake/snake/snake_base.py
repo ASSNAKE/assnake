@@ -5,6 +5,23 @@ wc_config = load_wc_config()
 
 start = time.time()
 
+
+def get_previous_step_output(wildcards):
+    # Extract the current step number and reconstruct the previous step's output path
+    # current_step_num = int(wildcards.step_num)
+    print(wildcards)
+    input_target = ''
+    # if current_step_num > 1:
+    #     input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/{wildcards.filter_chain.strip('/')}/phyloseq.rds"
+    # else:
+    #     # Return the initial phyloseq file path for the first step
+    #     input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/phyloseq.rds"
+
+    input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/{wildcards.filter_chain.strip('/')}/phyloseq.rds"
+    
+    return(input_target.replace('//', '/'))
+
+
 # Discover plugins
 discovered_plugins = {
     entry_point.name: entry_point.load()
@@ -39,5 +56,7 @@ for module_name, module_class in discovered_plugins.items():
         print(os.path.normpath(os.path.join(module_class.install_dir, snakefile)))
 
     for res in module_class.results:
+        # print(res)
+
         for sn in res.workflows:
             include: os.path.normpath(sn)
