@@ -18,7 +18,7 @@ def get_previous_step_output(wildcards):
     #     input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/phyloseq.rds"
 
     input_target =  f"{wildcards.fs_prefix}/{wildcards.df}/feature_tables/{wildcards.sample_set}/{wildcards.ft_name}/{wildcards.filter_chain.strip('/')}/phyloseq.rds"
-
+    
     return(input_target.replace('//', '/'))
 
 

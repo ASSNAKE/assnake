@@ -88,9 +88,7 @@ class Pipeline:
     def execute(self, config, snakemake_targets, run):
         import snakemake # Moved import here because it is slow as fucking fuck
     
-    
         internal_config = read_internal_config()
-        # print(config['requests'])
 
         click.secho('-----===RUN SNAKEMAKE===-----', bg='green', fg='black')
 

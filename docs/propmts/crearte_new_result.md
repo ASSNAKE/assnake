@@ -16,7 +16,6 @@
 We have this chunk of code for plotting bar charts:
 
 ```R
-
 p <- ps_all_cov %>%
   comp_barplot(
     tax_level = "Genus", 
@@ -87,7 +86,6 @@ Then we create workflow.smk file:
 `./barplot_facet/workflow.smk`
 
 ```python
-
 plot_bar_facet_v0_script = os.path.join(config['assnake-phyloseq']['install_dir'], 'barplot_facet/rscript.R')
 
 rule plot_bar_facet_v0:
