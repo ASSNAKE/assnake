@@ -16,21 +16,25 @@ Assnake's architecture is centered around datasets containing unique samples. Ea
 1. **Create a Conda Environment:** (Recommended to manage dependencies)
    ```bash
    conda create -n assnake_env python=3.10
+   ```
+
+2. **Activate your new Conda Environment:** (Recommended to manage dependencies)
+   ```bash
    conda activate assnake_env
    ```
 
-2. **Clone the Repository:**
+3. **Clone the Repository:**
    ```bash
    git clone https://github.com/ASSNAKE/assnake.git
    ```
 
-3. **Navigate to the Repository and Install:**
+4. **Navigate to the Repository and Install:**
    ```bash
    cd assnake
    pip install -e ./
    ```
 
-4. **Initialize Assnake Configuration:**
+5. **Initialize Assnake Configuration:**
    ```bash
    assnake config init
    ```
