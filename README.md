@@ -1,7 +1,7 @@
 # Assnake Metagenomic Analysis System
 
 ## Overview
-Assnake is a comprehensive metagenomics analysis tool designed for Illumina sequencing data, focusing on microbiome studies. It combines various bioinformatics tools into an integrated workflow for metagenomic data processing and analysis.
+Assnake is a comprehensive metagenomics analysis tool designed for short read sequencing data, focusing on microbiome studies. It combines various bioinformatics tools into an integrated workflow for metagenomic data processing and analysis.
 
 ## Key Features
 - **Dataset and Sample Management:** Organizes datasets and individual biological samples.
@@ -34,6 +34,9 @@ Assnake's architecture is centered around datasets containing unique samples. Ea
    ```bash
    assnake config init
    ```
+
+   It will ask you to specify the folder for assnake database. This can grow quite large (10Gb +) due to the conda envs that will be installed into this folder, so choose wisely, contact your system administrator if you are unsure about the directory choice. 
+
 
 ## Quick Start
 - To create and manage datasets: `assnake dataset <command>`
