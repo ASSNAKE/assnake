@@ -18,7 +18,7 @@ Assnake's architecture is centered around datasets containing unique samples. Ea
    conda create -n assnake_env python=3.10
    ```
 
-2. **Activate your new Conda Environment:** (Recommended to manage dependencies)
+2. **Activate your new Conda Environment:**
    ```bash
    conda activate assnake_env
    ```
