@@ -8,8 +8,8 @@ Inside the folder, run `assnake dataset init` to register the folder as the data
 
 ## Add test data
 
-This guide is designed to start from the constructed feature table. Obtain the files from the developer on Telegram. Then inside the Dataset folder create new directory that will hold the feature table. For example, `mkdir -p all_samples/dada2_noPool`
-In wildcard terms that would be `{sample_set}/{ft_name}`. Put the `phyloseq.rds` and `metadata.yaml` into this folder.
+This guide is designed to start from the constructed feature table. Obtain the files from the developer on Telegram. Then inside the Dataset folder create new directory that will hold the feature table. For example, `mkdir -p feature_tables/all_samples/dada2_noPool`
+In wildcard terms that would be `feature_tables/{sample_set}/{ft_name}`. Put the `phyloseq.rds` and `metadata.yaml` into this folder.
 
 ## Install the packages that are designed for downstream analysis 
 
